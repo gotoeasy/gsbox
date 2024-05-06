@@ -1,7 +1,7 @@
 # gsbox
 
 一个关于 3d gaussian splatting 的小工具盒。<br>
-`.ply`和`.splat`之间的转换有js版本也有python版本，都太重了，故由此一举。<br>
+`.ply`和`.splat`之间的转换有nodejs版本也有python版本，都太重了，故由此一举。<br>
 <br>
 <p align="center">
 写一写，加深理解<br>
