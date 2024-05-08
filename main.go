@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gsbox/cmn"
 	"gsbox/gsplat"
+	"time"
 )
 
 const VER = "v1.0.0"
@@ -11,15 +12,18 @@ const VER = "v1.0.0"
 func main() {
 
 	args := cmn.ParseArgs()
+	startTime := time.Now()
 	if args.Command == "ply2splat" {
 		// ply2splat
 		datas := gsplat.ReadPly(args.Input)
 		gsplat.Sort(datas)
 		gsplat.WriteSplat(args.Output, datas)
+		fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 	} else if args.Command == "splat2ply" {
 		// splat2ply
 		datas := gsplat.ReadSplat(args.Input)
 		gsplat.WritePly(args.Output, datas)
+		fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 	} else if args.Command == "info" {
 		// info
 		header, err := gsplat.ReadPlyHeader(args.Input)

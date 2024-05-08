@@ -201,3 +201,19 @@ func IsExistFile(file string) bool {
 	}
 	return !s.IsDir()
 }
+
+// 获取时间信息
+func GetTimeInfo(milliseconds int64) string {
+	seconds := milliseconds / 1000
+	minutes := seconds / 60
+
+	if minutes > 0 {
+		seconds %= 60
+		return fmt.Sprintf("%dM %dS", minutes, seconds)
+	} else if seconds > 0 {
+		ms := milliseconds % 1000
+		return fmt.Sprintf("%dS %dMS", seconds, ms)
+	}
+
+	return fmt.Sprintf("%dMS", milliseconds)
+}
