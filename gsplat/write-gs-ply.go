@@ -24,6 +24,10 @@ func WritePly(plyFile string, datas []*SplatData) {
 }
 
 func genPlyDataBin(splatData *SplatData) []byte {
+
+	rw, rx, ry, rz := (float64(splatData.RotationW)-128)/128, (float64(splatData.RotationX)-128)/128, (float64(splatData.RotationY)-128)/128, (float64(splatData.RotationZ)-128)/128
+	sqrt := math.Sqrt(rw*rw + rx*rx + ry*ry + rz*rz)
+
 	bts := []byte{}
 	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                              // x
 	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                              // y
@@ -37,10 +41,15 @@ func genPlyDataBin(splatData *SplatData) []byte {
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)              // scale_0
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)              // scale_1
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleZ)))...)              // scale_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128)/128)...)           // rot_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128)/128)...)           // rot_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128)/128)...)           // rot_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128)/128)...)           // rot_3
+	bts = append(bts, cmn.ToFloat32Bytes(rw/sqrt)...)                                          // rot_0
+	bts = append(bts, cmn.ToFloat32Bytes(rx/sqrt)...)                                          // rot_1
+	bts = append(bts, cmn.ToFloat32Bytes(ry/sqrt)...)                                          // rot_2
+	bts = append(bts, cmn.ToFloat32Bytes(rz/sqrt)...)                                          // rot_3
+	// bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128)/128)...)           // rot_0
+	// bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128)/128)...)           // rot_1
+	// bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128)/128)...)           // rot_2
+	// bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128)/128)...)           // rot_3
+
 	return bts
 }
 
