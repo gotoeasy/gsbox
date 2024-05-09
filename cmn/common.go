@@ -206,14 +206,27 @@ func IsExistFile(file string) bool {
 func GetTimeInfo(milliseconds int64) string {
 	seconds := milliseconds / 1000
 	minutes := seconds / 60
+	sMinutes := "minute"
+	sSeconds := "second"
+	sMilliseconds := "millisecond"
+
+	if minutes > 1 {
+		sMinutes += "s"
+	}
+	if seconds > 1 {
+		sSeconds += "s"
+	}
+	if milliseconds > 1 {
+		sMilliseconds += "s"
+	}
 
 	if minutes > 0 {
 		seconds %= 60
-		return fmt.Sprintf("%dM %dS", minutes, seconds)
+		return fmt.Sprintf("%d %s %d %s", minutes, sMinutes, seconds, sSeconds)
 	} else if seconds > 0 {
 		ms := milliseconds % 1000
-		return fmt.Sprintf("%dS %dMS", seconds, ms)
+		return fmt.Sprintf("%d %s %d %s", seconds, sSeconds, ms, sMilliseconds)
 	}
 
-	return fmt.Sprintf("%dMS", milliseconds)
+	return fmt.Sprintf("%d %s", milliseconds, sMilliseconds)
 }
