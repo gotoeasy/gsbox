@@ -31,7 +31,7 @@ gsbox ply2splat from.ply to.splat
 gsbox splat2ply from.splat to.ply
 
 # 查看ply的文件头信息
-gsbox info from.ply
+gsbox info file.ply
 ```
 
 ## 更新履历

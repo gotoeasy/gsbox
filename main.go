@@ -37,6 +37,7 @@ func main() {
 		fmt.Println("gsbox ply2splat from.ply to.splat")
 		fmt.Println("gsbox splat2ply from.splat to.ply")
 		fmt.Println("gsbox info file.ply")
+		fmt.Println("")
 	}
 
 }
