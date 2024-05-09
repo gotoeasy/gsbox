@@ -45,10 +45,13 @@ func ReadPly(plyFile string) []*SplatData {
 		data.ColorG = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_1", dataBytes)) * 255)
 		data.ColorB = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_2", dataBytes)) * 255)
 		data.ColorA = cmn.ClipUint8((1 / (1 + math.Exp(-readValue(header, "opacity", dataBytes)))) * 255)
-		data.RotationW = cmn.ClipUint8(readValue(header, "rot_0", dataBytes)*128 + 128)
-		data.RotationX = cmn.ClipUint8(readValue(header, "rot_1", dataBytes)*128 + 128)
-		data.RotationY = cmn.ClipUint8(readValue(header, "rot_2", dataBytes)*128 + 128)
-		data.RotationZ = cmn.ClipUint8(readValue(header, "rot_3", dataBytes)*128 + 128)
+
+		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
+		qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+		data.RotationW = cmn.ClipUint8((r0/qlen)*128 + 128)
+		data.RotationX = cmn.ClipUint8((r1/qlen)*128 + 128)
+		data.RotationY = cmn.ClipUint8((r2/qlen)*128 + 128)
+		data.RotationZ = cmn.ClipUint8((r3/qlen)*128 + 128)
 
 		datas[i] = data
 	}
