@@ -26,14 +26,14 @@ func WritePly(plyFile string, datas []*SplatData) {
 func genPlyDataBin(splatData *SplatData) []byte {
 
 	bts := []byte{}
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                              // x
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                              // y
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                              // z
-	bts = append(bts, make([]byte, 3*4)...)                                                    // nx, ny, nz
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255-0.5)/SH_C0)...)        // f_dc_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255-0.5)/SH_C0)...)        // f_dc_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...)        // f_dc_2
-	bts = append(bts, make([]byte, 45*4)...)                                                   // f_rest_0 ~ f_rest_44
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...) // x
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...) // y
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...) // z
+	// bts = append(bts, make([]byte, 3*4)...)                                             // nx, ny, nz
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255-0.5)/SH_C0)...) // f_dc_0
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255-0.5)/SH_C0)...) // f_dc_1
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...) // f_dc_2
+	// bts = append(bts, make([]byte, 45*4)...)                                                   // f_rest_0 ~ f_rest_44
 	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1/(float64(splatData.ColorA)/255))-1))...) // opacity
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)              // scale_0
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)              // scale_1
@@ -51,19 +51,19 @@ func genPlyHeader(count int) string {
 	lines = append(lines, "ply")
 	lines = append(lines, "format binary_little_endian 1.0")
 	lines = append(lines, "element vertex "+cmn.IntToString(count))
-	// lines = append(lines, "comment generate by gsconverter")
+	lines = append(lines, "comment generate by gsbox v1.1.0")
 	lines = append(lines, "property float x")
 	lines = append(lines, "property float y")
 	lines = append(lines, "property float z")
-	lines = append(lines, "property float nx")
-	lines = append(lines, "property float ny")
-	lines = append(lines, "property float nz")
+	// lines = append(lines, "property float nx")
+	// lines = append(lines, "property float ny")
+	// lines = append(lines, "property float nz")
 	lines = append(lines, "property float f_dc_0")
 	lines = append(lines, "property float f_dc_1")
 	lines = append(lines, "property float f_dc_2")
-	for i := 0; i <= 44; i++ {
-		lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
-	}
+	// for i := 0; i <= 44; i++ {
+	// 	lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
+	// }
 	lines = append(lines, "property float opacity")
 	lines = append(lines, "property float scale_0")
 	lines = append(lines, "property float scale_1")

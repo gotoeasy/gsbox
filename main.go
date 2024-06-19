@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const VER = "v1.0.0"
+const VER = "v1.1.0"
 
 func main() {
 
