@@ -26,9 +26,9 @@ func main() {
 		fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 	} else if args.Command == "info" {
 		// info
-		header, err := gsplat.ReadPlyHeader(args.Input)
+		header, err := gsplat.ReadPlyHeaderString(args.Input, 1024)
 		cmn.ExitOnError(err)
-		fmt.Print(header.ToString())
+		fmt.Print(header)
 	} else {
 		// usage
 		fmt.Println("gsbox", VER)

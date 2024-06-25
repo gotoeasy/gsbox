@@ -19,6 +19,29 @@ type PlyHeader struct {
 	mapType      map[string]string
 }
 
+func ReadPlyHeaderString(plyFile string, readLen int) (string, error) {
+	file, err := os.Open(plyFile)
+	cmn.ExitOnError(err)
+	defer file.Close()
+
+	bs := make([]byte, readLen)
+	_, err = file.Read(bs)
+	if err != nil {
+		return "", err
+	}
+
+	str := cmn.BytesToString(bs)
+	if !cmn.Contains(str, "end_header\n") {
+		if readLen > 1024*10 {
+			return "", errors.New("ply header not found")
+		}
+		return ReadPlyHeaderString(plyFile, readLen+1024)
+	}
+
+	header := cmn.Split(str, "end_header\n")[0] + "end_header\n"
+	return header, nil
+}
+
 func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 	bs := make([]byte, readLen)
 	_, err := file.Read(bs)
