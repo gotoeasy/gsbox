@@ -1,3 +1,3 @@
 module gsbox
 
-go 1.21.1
+go 1.23.1

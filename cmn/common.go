@@ -9,43 +9,43 @@ import (
 	"strings"
 )
 
-type CliArgs struct {
-	Command string
-	Input   string
-	Output  string
-}
+// type CliArgs struct {
+// 	Command string
+// 	Input   string
+// 	Output  string
+// }
 
-func ParseArgs() *CliArgs {
-	// -----------------------------------------
-	// gsbox ply2splat from.ply to.splat
-	// gsbox splat2ply from.splat to.ply
-	// gsbox info from.ply
-	// -----------------------------------------
-	var args = &CliArgs{}
-	length := len(os.Args)
-	if length == 3 || length == 4 {
-		if EqualsIngoreCase(os.Args[1], "info") {
-			if length == 3 {
-				args.Command = "info"
-				args.Input = os.Args[2]
-			}
-		} else if EqualsIngoreCase(os.Args[1], "ply2splat") {
-			if length == 4 {
-				args.Command = "ply2splat"
-				args.Input = os.Args[2]
-				args.Output = os.Args[3]
-			}
-		} else if EqualsIngoreCase(os.Args[1], "splat2ply") {
-			if length == 4 {
-				args.Command = "splat2ply"
-				args.Input = os.Args[2]
-				args.Output = os.Args[3]
-			}
-		}
-	}
+// func ParseArgs() *CliArgs {
+// 	// -----------------------------------------
+// 	// gsbox ply2splat from.ply to.splat
+// 	// gsbox splat2ply from.splat to.ply
+// 	// gsbox info from.ply
+// 	// -----------------------------------------
+// 	var args = &CliArgs{}
+// 	length := len(os.Args)
+// 	if length == 3 || length == 4 {
+// 		if EqualsIngoreCase(os.Args[1], "info") {
+// 			if length == 3 {
+// 				args.Command = "info"
+// 				args.Input = os.Args[2]
+// 			}
+// 		} else if EqualsIngoreCase(os.Args[1], "ply2splat") {
+// 			if length == 4 {
+// 				args.Command = "ply2splat"
+// 				args.Input = os.Args[2]
+// 				args.Output = os.Args[3]
+// 			}
+// 		} else if EqualsIngoreCase(os.Args[1], "splat2ply") {
+// 			if length == 4 {
+// 				args.Command = "splat2ply"
+// 				args.Input = os.Args[2]
+// 				args.Output = os.Args[3]
+// 			}
+// 		}
+// 	}
 
-	return args
-}
+// 	return args
+// }
 
 // 字符串切割
 func Split(str string, sep string) []string {

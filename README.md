@@ -17,27 +17,21 @@
 <p>
 
 ## 功能
-- [x] 把3dgs的ply转成splat
-- [x] 把splat转成3dgs的ply
+- [x] 文件格式的装换，支持3dgs的ply、splat
 - [x] 查看ply的文件头信息
-- [ ] TODO
+
 
 ## 命令示例
 ```shell
 # 把3dgs的ply转成splat
-gsbox ply2splat from.ply to.splat
+gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
 
 # 把splat转成3dgs的ply
-gsbox splat2ply from.splat to.ply
+gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply
+
+# 也支持简化写法，按后缀名自动识别格式
+gsbox -i /path/to/input.ply -o /path/to/output.splat
 
 # 查看ply的文件头信息
 gsbox info file.ply
 ```
-
-## 更新履历
-
-### 版本`v1.0.0`
-
-- [x] 把3dgs的ply转成splat
-- [x] 把splat转成3dgs的ply
-- [x] 查看ply的文件头信息
