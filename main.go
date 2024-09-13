@@ -34,9 +34,9 @@ func main() {
 			fmt.Println("gsbox", VER)
 			fmt.Println("")
 			fmt.Println("Usage")
-			fmt.Println("gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat [-h header]")
-			fmt.Println("gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply [-h header]")
-			fmt.Println("gsbox -i /path/to/input.ply -o /path/to/output.splat [-h header]")
+			fmt.Println("gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
+			fmt.Println("gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply")
+			fmt.Println("gsbox -i /path/to/input.ply -o /path/to/output.splat")
 			fmt.Println("gsbox info /path/to/file.ply")
 			fmt.Println("")
 		} else {
