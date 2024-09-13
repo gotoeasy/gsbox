@@ -55,9 +55,7 @@ func main() {
 				}
 			}
 		}
-
 	}
-
 }
 
 func ply2splat(args *cmn.OsArgs) {
