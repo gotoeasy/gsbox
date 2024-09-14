@@ -50,3 +50,6 @@ gsbox -i /path/to/input.ply -o /path/to/output.splat
 # 查看ply的文件头信息
 gsbox info file.ply
 ```
+
+## 更新履历
+https://github.com/gotoeasy/gsbox/releases
