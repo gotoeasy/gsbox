@@ -69,7 +69,7 @@ func ply2splat(args *cmn.OsArgs) {
 func splat2ply(args *cmn.OsArgs) {
 	startTime := time.Now()
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"), args.GetArgIgnorecase("-h", "--header", "-ih", "--input-header"))
-	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas)
+	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.HasCmdIgnorecase("simple-ply"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func splat2splat(args *cmn.OsArgs) {
@@ -89,6 +89,6 @@ func ply2ply(args *cmn.OsArgs) {
 	startTime := time.Now()
 	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas)
+	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.HasCmdIgnorecase("simple-ply"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
