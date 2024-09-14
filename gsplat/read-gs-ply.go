@@ -3,6 +3,7 @@ package gsplat
 import (
 	"bytes"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"gsbox/cmn"
 	"math"
@@ -19,7 +20,7 @@ func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 	return getPlyHeader(file, 2048)
 }
 
-func ReadPly(plyFile string) []*SplatData {
+func ReadPly(plyFile string, plyTypes ...string) []*SplatData {
 
 	file, err := os.Open(plyFile)
 	cmn.ExitOnError(err)
@@ -27,6 +28,12 @@ func ReadPly(plyFile string) []*SplatData {
 
 	header, err := getPlyHeader(file, 2048)
 	cmn.ExitOnError(err)
+
+	if len(plyTypes) > 0 && cmn.EqualsIngoreCase(plyTypes[0], "ply-3dgs") {
+		if !header.IsOfficialPly() {
+			cmn.ExitOnError(errors.New("unsupported ply file: " + plyFile))
+		}
+	}
 
 	datas := make([]*SplatData, header.VertexCount)
 	for i := 0; i < header.VertexCount; i++ {

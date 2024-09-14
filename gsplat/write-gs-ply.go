@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-func WritePly(plyFile string, datas []*SplatData, simplePly bool) {
+func WritePly(plyFile string, datas []*SplatData, comment string, simplePly bool) {
 	file, err := os.Create(plyFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
-	_, err = writer.WriteString(genPlyHeader(len(datas)))
+	_, err = writer.WriteString(genPlyHeader(len(datas), comment, simplePly))
 	cmn.ExitOnError(err)
 	for i := 0; i < len(datas); i++ {
 		_, err = writer.Write(genPlyDataBin(datas[i], simplePly))
@@ -50,24 +50,32 @@ func genPlyDataBin(splatData *SplatData, simplePly bool) []byte {
 	return bts
 }
 
-func genPlyHeader(count int) string {
+func genPlyHeader(count int, comment string, simplePly bool) string {
 	lines := []string{}
 	lines = append(lines, "ply")
 	lines = append(lines, "format binary_little_endian 1.0")
 	lines = append(lines, "element vertex "+cmn.IntToString(count))
-	lines = append(lines, "comment generate by gsbox v1.1.0")
+	if comment != "" {
+		comment = cmn.ReplaceAll(comment, "\r", "\\r")
+		comment = cmn.ReplaceAll(comment, "\n", "\\n")
+		lines = append(lines, "comment "+comment)
+	}
 	lines = append(lines, "property float x")
 	lines = append(lines, "property float y")
 	lines = append(lines, "property float z")
-	// lines = append(lines, "property float nx")
-	// lines = append(lines, "property float ny")
-	// lines = append(lines, "property float nz")
+	if !simplePly {
+		lines = append(lines, "property float nx")
+		lines = append(lines, "property float ny")
+		lines = append(lines, "property float nz")
+	}
 	lines = append(lines, "property float f_dc_0")
 	lines = append(lines, "property float f_dc_1")
 	lines = append(lines, "property float f_dc_2")
-	// for i := 0; i <= 44; i++ {
-	// 	lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
-	// }
+	if !simplePly {
+		for i := 0; i <= 44; i++ {
+			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
+		}
+	}
 	lines = append(lines, "property float opacity")
 	lines = append(lines, "property float scale_0")
 	lines = append(lines, "property float scale_1")

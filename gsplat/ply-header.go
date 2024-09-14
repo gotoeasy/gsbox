@@ -9,6 +9,7 @@ import (
 )
 
 type PlyHeader struct {
+	Declare      string
 	Format       string
 	Comment      string
 	VertexCount  int
@@ -62,12 +63,15 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 
 	header := cmn.Split(str, "end_header\n")[0] + "end_header\n"
 	lines := cmn.Split(strings.TrimRight(header, "\n"), "\n")
-	vertexCount := 0
+	vertexCount := -1
+	declare := ""
 	format := ""
 	comment := ""
 	offset := 0
 	for i := 0; i < len(lines); i++ {
-		if cmn.Startwiths(lines[i], "property ") {
+		if i == 0 {
+			declare = lines[i]
+		} else if cmn.Startwiths(lines[i], "property ") {
 			ary := cmn.Split(lines[i], " ")
 			mapOffset[ary[2]] = offset
 			mapType[ary[2]] = ary[1]
@@ -83,6 +87,7 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 
 	plyHeader := &PlyHeader{
 		text:         header,
+		Declare:      declare,
 		Format:       format,
 		Comment:      comment,
 		VertexCount:  vertexCount,
@@ -134,4 +139,15 @@ func (p *PlyHeader) GetFormat() string {
 
 func (p *PlyHeader) ToString() string {
 	return p.text
+}
+
+// 是否3dgs官方格式ply
+func (p *PlyHeader) IsOfficialPly() bool {
+	return p.Declare == "ply" &&
+		p.Format == "binary_little_endian 1.0" &&
+		p.VertexCount > 0 &&
+		p.mapType["x"] != "" && p.mapType["y"] != "" && p.mapType["z"] != "" &&
+		p.mapType["f_dc_0"] != "" && p.mapType["f_dc_1"] != "" && p.mapType["f_dc_2"] != "" &&
+		p.mapType["opacity"] != "" && p.mapType["scale_0"] != "" && p.mapType["scale_1"] != "" && p.mapType["scale_2"] != "" &&
+		p.mapType["rot_0"] != "" && p.mapType["rot_1"] != "" && p.mapType["rot_2"] != "" && p.mapType["rot_3"] != ""
 }

@@ -23,6 +23,21 @@
 
 ## 命令示例
 ```shell
+Usage:
+  gsbox [options]
+
+Options:
+  ply2splat                ply转splat，可省略根据输入输出文件名自动识别
+  splat2ply                splat转ply，可省略根据输入输出文件名自动识别
+  simple-ply               简单模式，写ply时不输出未使用字段
+  info <plyfile>           显示ply文件头信息
+  -i, --input <file>       指定输入文件（注意目录分隔符写法，window平台使用反斜杠的话建议用\\）
+  -o, --output <file>      指定输出文件（注意目录分隔符写法，window平台使用反斜杠的话建议用\\）
+  -c, --comment <text>     在ply文件头中要写入的注释（有空格等特殊字符时注意引号引起来）
+  -h, --help               显示帮助信息
+  -v, --version            显示版本信息
+
+
 # 把3dgs的ply转成splat
 gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
 

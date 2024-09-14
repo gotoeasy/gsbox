@@ -2,50 +2,18 @@ package cmn
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"math"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
 
-// type CliArgs struct {
-// 	Command string
-// 	Input   string
-// 	Output  string
-// }
-
-// func ParseArgs() *CliArgs {
-// 	// -----------------------------------------
-// 	// gsbox ply2splat from.ply to.splat
-// 	// gsbox splat2ply from.splat to.ply
-// 	// gsbox info from.ply
-// 	// -----------------------------------------
-// 	var args = &CliArgs{}
-// 	length := len(os.Args)
-// 	if length == 3 || length == 4 {
-// 		if EqualsIngoreCase(os.Args[1], "info") {
-// 			if length == 3 {
-// 				args.Command = "info"
-// 				args.Input = os.Args[2]
-// 			}
-// 		} else if EqualsIngoreCase(os.Args[1], "ply2splat") {
-// 			if length == 4 {
-// 				args.Command = "ply2splat"
-// 				args.Input = os.Args[2]
-// 				args.Output = os.Args[3]
-// 			}
-// 		} else if EqualsIngoreCase(os.Args[1], "splat2ply") {
-// 			if length == 4 {
-// 				args.Command = "splat2ply"
-// 				args.Input = os.Args[2]
-// 				args.Output = os.Args[3]
-// 			}
-// 		}
-// 	}
-
-// 	return args
-// }
+func Trim(str string) string {
+	return strings.TrimSpace(str)
+}
 
 // 字符串切割
 func Split(str string, sep string) []string {
@@ -192,6 +160,12 @@ func ToFloat32Bytes(f float64) []byte {
 
 // 判断文件是否存在
 func IsExistFile(file string) bool {
+	defer func() {
+		if err := recover(); err != nil {
+			ExitOnError(errors.New("invalid file path: " + file))
+		}
+	}()
+
 	s, err := os.Stat(file)
 	if err == nil {
 		return !s.IsDir()
@@ -200,6 +174,16 @@ func IsExistFile(file string) bool {
 		return false
 	}
 	return !s.IsDir()
+}
+
+// 返回目录，同filepath.Dir(path)
+func Dir(file string) string {
+	return filepath.Dir(file)
+}
+
+// 创建多级目录（存在时不报错）
+func MkdirAll(dir string) error {
+	return os.MkdirAll(dir, os.ModePerm)
 }
 
 // 获取时间信息
