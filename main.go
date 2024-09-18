@@ -15,7 +15,7 @@ func main() {
 	args := cmn.ParseArgs("-v", "--version", "-h", "--help")
 	if args.HasCmd("-v", "--version") {
 		version()
-	} else if args.HasCmd("-h", "--help") {
+	} else if args.HasCmd("-help", "--help") {
 		usage()
 	} else if args.HasCmd("ply2splat") {
 		ply2splat(args)
@@ -139,6 +139,7 @@ func splat2splat(args *cmn.OsArgs) {
 		oh = h
 	}
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"), ih)
+	gsplat.Sort(datas)
 	gsplat.WriteSplat(args.GetArgIgnorecase("-o", "--output"), datas, oh)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -147,7 +148,6 @@ func ply2ply(args *cmn.OsArgs) {
 	checkInputFileExists(args)
 	createOutputDir(args)
 	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
-	gsplat.Sort(datas)
 	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
