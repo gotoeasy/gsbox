@@ -8,14 +8,14 @@ import (
 	"time"
 )
 
-const VER = "v2.1.0"
+const VER = "v2.1.1"
 
 func main() {
 
-	args := cmn.ParseArgs("-v", "--version", "-h", "--help")
-	if args.HasCmd("-v", "--version") {
+	args := cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
+	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
-	} else if args.HasCmd("-help", "--help") {
+	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
 		usage()
 	} else if args.HasCmd("ply2splat") {
 		ply2splat(args)
@@ -54,11 +54,13 @@ func main() {
 
 func version() {
 	fmt.Println("")
-	fmt.Println("gsbox", VER, "https://github.com/gotoeasy/gsbox")
+	fmt.Println("gsbox", VER)
+	fmt.Println("homepage", "https://github.com/gotoeasy/gsbox")
 }
 func usage() {
 	fmt.Println("")
-	fmt.Println("gsbox", VER, "https://github.com/gotoeasy/gsbox")
+	fmt.Println("gsbox", VER)
+	fmt.Println("homepage", "https://github.com/gotoeasy/gsbox")
 	fmt.Println("")
 	fmt.Println("")
 	fmt.Println("Usage:")
@@ -78,6 +80,7 @@ func usage() {
 	fmt.Println("Examples:")
 	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
 	fmt.Println("  gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply")
+	fmt.Println("  gsbox -i /path/to/input.ply -o /path/to/output.splat")
 	fmt.Println("  gsbox -i /path/to/input.splat -o /path/to/output.ply")
 	fmt.Println("  gsbox -i /path/to/input.splat -o /path/to/output.ply simple-ply")
 	fmt.Println("  gsbox -i /path/to/input.splat -o /path/to/output.ply -c \"your comment\"")
