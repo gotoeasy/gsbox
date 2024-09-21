@@ -7,27 +7,22 @@ import (
 	"os"
 )
 
-func ReadSplat(splatFile string, headers ...string) []*SplatData {
+func ReadSplat(splatFile string) []*SplatData {
 
 	file, err := os.Open(splatFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
-	var headerSize int64 = 0
-	if len(headers) > 0 && hasHeader(file, headers[0]) {
-		headerSize = int64(len((headers[0])))
-	}
-
 	fileInfo, err := file.Stat()
 	cmn.ExitOnError(err)
 	fileSize := fileInfo.Size()
-	count := (fileSize - headerSize) / SPLAT_DATA_SIZE
+	count := fileSize / SPLAT_DATA_SIZE
 
 	var i int64 = 0
 	datas := make([]*SplatData, count)
 	for ; i < count; i++ {
 		splatBytes := make([]byte, SPLAT_DATA_SIZE)
-		_, err = file.ReadAt(splatBytes, headerSize+i*SPLAT_DATA_SIZE)
+		_, err = file.ReadAt(splatBytes, i*SPLAT_DATA_SIZE)
 		cmn.ExitOnError(err)
 
 		splatData := &SplatData{}
@@ -49,17 +44,4 @@ func ReadSplat(splatFile string, headers ...string) []*SplatData {
 	}
 
 	return datas
-}
-
-func hasHeader(file *os.File, header string) bool {
-	if header == "" {
-		return false
-	}
-
-	bs := make([]byte, 1024)
-	_, err := file.Read(bs)
-	cmn.ExitOnError(err)
-
-	str := cmn.BytesToString(bs)
-	return cmn.Startwiths(str, header)
 }
