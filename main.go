@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-const VER = "v2.1.1"
+const VER = "v2.2.0"
 
 func main() {
 
@@ -17,14 +17,14 @@ func main() {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
 		usage()
-	} else if args.HasCmd("ply2splat") {
+	} else if args.HasCmd("p2s", "ply2splat") {
 		ply2splat(args)
-	} else if args.HasCmd("splat2ply") {
-		splat2ply(args)
-	} else if args.HasCmd("splat2splat") {
-		splat2splat(args)
-	} else if args.HasCmd("ply2ply") {
+	} else if args.HasCmd("p2p", "ply2ply") {
 		ply2ply(args)
+	} else if args.HasCmd("s2p", "splat2ply") {
+		splat2ply(args)
+	} else if args.HasCmd("s2s", "splat2splat") {
+		splat2splat(args)
 	} else if args.HasCmd("info") {
 		plyInfo(args)
 	} else {
@@ -33,6 +33,8 @@ func main() {
 		if (!cmn.Endwiths(input, ".ply", true) && !cmn.Endwiths(input, ".splat", true)) ||
 			(!cmn.Endwiths(output, ".ply", true) && !cmn.Endwiths(output, ".splat", true)) {
 			usage()
+		} else if input == output {
+			cmn.ExitOnError(errors.New("the input and output files cannot be the same"))
 		} else {
 			// 按后缀名识别格式判断装换
 			if cmn.Endwiths(input, ".ply", true) {
@@ -74,8 +76,8 @@ func usage() {
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
 	fmt.Println("  -c, --comment <text>     output ply with comment")
-	fmt.Println("  -h, --help               display help information")
 	fmt.Println("  -v, --version            display version information")
+	fmt.Println("  -h, --help               display help information")
 	fmt.Println("")
 	fmt.Println("Examples:")
 	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
