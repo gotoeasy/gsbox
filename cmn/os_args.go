@@ -2,6 +2,7 @@ package cmn
 
 import (
 	"os"
+	"runtime"
 )
 
 // 命令行解析结果
@@ -55,9 +56,12 @@ func ParseArgs(customCmds ...string) *OsArgs {
 			}
 		} else {
 			// 上一个参数是参数，则当前参数是参数值
-			val := ReplaceAll(arg, "\\r", "\r")
-			val = ReplaceAll(val, "\\n", "\n")
-			val = ReplaceAll(val, "\\t", "\t")
+			val := arg
+			if runtime.GOOS != "windows" {
+				val = ReplaceAll(val, "\\r", "\r")
+				val = ReplaceAll(val, "\\n", "\n")
+				val = ReplaceAll(val, "\\t", "\t")
+			}
 			args.mapParam[args.mapIndexValue[index-1]] = val
 			args.mapParam["\n"+ToLower(args.mapIndexValue[index-1])] = val
 		}
