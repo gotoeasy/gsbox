@@ -6,7 +6,7 @@
 <p align="center">
 写一写，加深理解<br>
 弄一弄，争取实用<br>
-搞搞搞，越来越好
+搞搞搞，越做越好
 <p>
 
 <br>
@@ -51,5 +51,5 @@ gsbox -i /path/to/input.ply -o /path/to/output.splat
 gsbox info file.ply
 ```
 
-## 更新履历
+## 更新履历、二进制执行文件下载
 https://github.com/gotoeasy/gsbox/releases
