@@ -51,5 +51,15 @@ gsbox -i /path/to/input.ply -o /path/to/output.splat
 gsbox info file.ply
 ```
 
+## 试用版（Trial-2025-v2.0.0）
+```shell
+# The trial version supports conversion to the .bin format,
+# which reduces the file size by 37.5% compared to the .splat format.
+gsbox p2b -i /path/to/input.ply -o /path/to/output.bin
+gsbox s2b -i /path/to/input.splat -o /path/to/output.bin
+```
+The `.bin` format can be opened with this 3DGS viewer: https://github.com/reall3d-com/Reall3dViewer
+
+
 ## 更新履历、二进制执行文件下载
 https://github.com/gotoeasy/gsbox/releases
