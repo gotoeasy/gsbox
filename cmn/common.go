@@ -103,6 +103,48 @@ func Float32ToBytes(f float32) []byte {
 	return b
 }
 
+// float32 转 3字节长度的[]byte
+func EncodeFloat32ToBytes3(f float32) []byte {
+	fixed32 := int32(math.Round(float64(f) * 4096))
+
+	// 将固定点数拆分为3字节
+	return []byte{
+		byte(fixed32 & 0xFF),         // 最低字节
+		byte((fixed32 >> 8) & 0xFF),  // 中间字节
+		byte((fixed32 >> 16) & 0xFF), // 最高字节
+	}
+}
+
+// 3字节长度的[]byte 转 float32
+func DecodeBytes3ToFloat32(bytes []byte) float32 {
+	fixed32 := int32(bytes[0]) | int32(bytes[1])<<8 | int32(bytes[2])<<16
+	if fixed32&0x800000 != 0 {
+		fixed32 |= int32(-1) << 24 // 如果符号位为1，将高8位填充为1
+	}
+	return float32(fixed32) / 4096 // 将固定点数转换回浮点数
+}
+
+// float32 编码成 byte
+func EncodeFloat32ToByte(f float32) byte {
+	if f <= 0 {
+		return 0
+	}
+	encoded := math.Round((math.Log(float64(f)) + 10.0) * 16.0) // 编码公式
+	// 确保结果在0-255范围内
+	if encoded < 0 {
+		return 0
+	} else if encoded > 255 {
+		return 255
+	}
+	return byte(encoded)
+
+}
+
+// byte 解码成 float32
+func DecodeByteToFloat32(encodedByte byte) float32 {
+	return float32(math.Exp(float64(encodedByte)/16.0 - 10.0)) // 解码公式
+}
+
 // 限制范围
 func Clip(f float64, min float64, max float64) float64 {
 	if f < min {
