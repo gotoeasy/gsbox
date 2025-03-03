@@ -17,8 +17,16 @@
 <p>
 
 ## 功能
-- [x] 文件格式的装换，支持3dgs的ply、splat
+- [x] 文件格式的装换，支持`3DGS`的`.ply`、`.splat`、`.sp20`格式
 - [x] 查看ply的文件头信息
+
+## 关于`.sp20`格式的说明
+- [x] 字段顺序同`.splat`
+- [x] 坐标固定编码为各 24 bits，编码算法参考`.spz`
+- [x] 缩放参数固定编码为各 8 bits，编码算法参考`.spz`
+- [x] `.sp20`格式每个高斯点固定长 20 bytes，`.splat`则为 32 bytes，有效减少 37.5% 大小。
+- [x] 注意：采用`.sp20`格式时肉眼基本识别不出渲染差异，适合绝大多数以减少文件大小为目的的使用场景，但并不是用来替代`.splat`，因为`.sp20`是有损编码方式，因此，也并不建议把`.sp20`转换回`.splat`或`.ply`
+- [x] `.sp20`格式可以使用这个渲染器查看 https://github.com/reall3d-com/Reall3dViewer
 
 
 ## 命令示例
@@ -27,38 +35,43 @@ Usage:
   gsbox [options]
 
 Options:
-  ply2splat                ply转splat，可省略根据输入输出文件名自动识别
-  splat2ply                splat转ply，可省略根据输入输出文件名自动识别
-  simple-ply               简单模式，写ply时不输出未使用字段
-  info <plyfile>           显示ply文件头信息
-  -i, --input <file>       指定输入文件（注意目录分隔符写法，window平台使用反斜杠的话建议用\\）
-  -o, --output <file>      指定输出文件（注意目录分隔符写法，window平台使用反斜杠的话建议用\\）
-  -c, --comment <text>     在ply文件头中要写入的注释（有空格等特殊字符时注意引号引起来）
-  -h, --help               显示帮助信息
-  -v, --version            显示版本信息
+  p2s, ply2splat           convert ply to splat
+  p2s20, ply2splat20       convert ply to splat20
+  s2p, splat2ply           convert splat to ply
+  s2s20, splat2splat20     convert splat to splat20
+  simple-ply               simple mode to write ply
+  info <plyfile>           display the ply header
+  -i, --input <file>       specify the input file
+  -o, --output <file>      specify the output file
+  -c, --comment <text>     output ply with comment
+  -v, --version            display version information
+  -h, --help               display help information
+
+Examples:
+  gsbox p2s -i /path/to/input.ply -o /path/to/output.splat
+  gsbox p2s20 -i /path/to/input.ply -o /path/to/output.sp20
+  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply
+  gsbox s2s20 -i /path/to/input.splat -o /path/to/output.sp20
+  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply simple-ply
+  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply -c "your comment"
+  gsbox info -i /path/to/file.ply
 
 
 # 把3dgs的ply转成splat
 gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
 
+# 把3dgs的ply转成splat20
+gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
+
 # 把splat转成3dgs的ply
 gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply
 
-# 也支持简化写法，按后缀名自动识别格式
-gsbox -i /path/to/input.ply -o /path/to/output.splat
+# 把splat转成3dgs的ply
+gsbox splat2splat20 -i /path/to/input.splat -o /path/to/output.sp20
 
 # 查看ply的文件头信息
 gsbox info file.ply
 ```
-
-## 试用版（Trial-2025-v2.0.0）
-```shell
-# The trial version supports conversion to the .bin format,
-# which reduces the file size by 37.5% compared to the .splat format.
-gsbox p2b -i /path/to/input.ply -o /path/to/output.bin
-gsbox s2b -i /path/to/input.splat -o /path/to/output.bin
-```
-The `.bin` format can be opened with this 3DGS viewer: https://github.com/reall3d-com/Reall3dViewer
 
 
 ## 更新履历、二进制执行文件下载
