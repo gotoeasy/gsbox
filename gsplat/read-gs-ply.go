@@ -55,10 +55,10 @@ func ReadPly(plyFile string, plyTypes ...string) []*SplatData {
 
 		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
 		qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-		data.RotationW = cmn.ClipUint8((r0/qlen)*128 + 128)
-		data.RotationX = cmn.ClipUint8((r1/qlen)*128 + 128)
-		data.RotationY = cmn.ClipUint8((r2/qlen)*128 + 128)
-		data.RotationZ = cmn.ClipUint8((r3/qlen)*128 + 128)
+		data.RotationX = cmn.ClipUint8((r0/qlen)*128 + 128)
+		data.RotationY = cmn.ClipUint8((r1/qlen)*128 + 128)
+		data.RotationZ = cmn.ClipUint8((r2/qlen)*128 + 128)
+		data.RotationW = cmn.ClipUint8((r3/qlen)*128 + 128)
 
 		datas[i] = data
 	}

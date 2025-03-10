@@ -42,10 +42,10 @@ func genPlyDataBin(splatData *SplatData, simplePly bool) []byte {
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)              // scale_0
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)              // scale_1
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleZ)))...)              // scale_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128)/128)...)           // rot_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128)/128)...)           // rot_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128)/128)...)           // rot_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128)/128)...)           // rot_3
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128)/128)...)           // rot_0
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128)/128)...)           // rot_1
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128)/128)...)           // rot_2
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128)/128)...)           // rot_3
 
 	return bts
 }

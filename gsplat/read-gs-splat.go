@@ -36,10 +36,10 @@ func ReadSplat(splatFile string) []*SplatData {
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[25:26]), binary.LittleEndian, &splatData.ColorG))
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[26:27]), binary.LittleEndian, &splatData.ColorB))
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[27:28]), binary.LittleEndian, &splatData.ColorA))
-		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[28:29]), binary.LittleEndian, &splatData.RotationW))
-		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[29:30]), binary.LittleEndian, &splatData.RotationX))
-		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[30:31]), binary.LittleEndian, &splatData.RotationY))
-		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[31:32]), binary.LittleEndian, &splatData.RotationZ))
+		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[28:29]), binary.LittleEndian, &splatData.RotationX))
+		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[29:30]), binary.LittleEndian, &splatData.RotationY))
+		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[30:31]), binary.LittleEndian, &splatData.RotationZ))
+		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[31:32]), binary.LittleEndian, &splatData.RotationW))
 		datas[i] = splatData
 	}
 
