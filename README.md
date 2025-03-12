@@ -21,13 +21,26 @@
 - [x] 查看`.ply`的文件头信息
 
 ## 关于`.sp20`格式的说明
-- 字段顺序同`.splat`
-- 坐标固定编码为各 24 bits，编码算法参考`.spz`
-- 缩放参数固定编码为各 8 bits，编码算法参考`.spz`
-- `.sp20`格式每个高斯点固定长 20 bytes，`.splat`则为 32 bytes，有效减少 37.5% 大小。为了能够更方便的进行渐进加载，未采用`.spz`的排列压缩方式进一步减少大小
+- `.sp20`格式每个高斯点固定长 20 bytes，参考`.spz`编码方式简化而成，`.splat`为 32 bytes，有效减少 37.5% 大小。为了能够更方便的进行渐进加载，未采用`.spz`的排列压缩方式进一步减少大小
 - 注意：采用`.sp20`格式时肉眼基本识别不出渲染差异，适合绝大多数以减少文件大小为目的的使用场景，但并不是用来替代`.splat`，因为`.sp20`是有损编码方式，因此，也并不建议把`.sp20`转换回`.splat`或`.ply`
 - `.sp20`格式可以使用这个渲染器查看 https://github.com/reall3d-com/Reall3dViewer
 
+| field | note |
+|----------|------|
+| position x | 24-bit fixed point signed integer |
+| position y | 24-bit fixed point signed integer |
+| position z | 24-bit fixed point signed integer |
+| scale x    | 8-bit log-encoded integer |
+| scale y    | 8-bit log-encoded integer |
+| scale z    | 8-bit log-encoded integer |
+| color r    | unsigned 8-bit integer |
+| color g    | unsigned 8-bit integer |
+| color b    | unsigned 8-bit integer |
+| color a    | unsigned 8-bit integer |
+| rotation x | 8-bit signed integer |
+| rotation y | 8-bit signed integer |
+| rotation z | 8-bit signed integer |
+| rotation w | 8-bit signed integer |
 
 ## 命令示例
 ```shell
