@@ -33,16 +33,3 @@ func (s *SplatData) ToBytes() []byte {
 	bytes = append(bytes, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
 	return bytes
 }
-
-func (s *SplatData) ToBytesSplat20() []byte {
-	bytes := make([]byte, 0)
-	bytes = append(bytes, cmn.EncodeFloat32ToBytes3(s.PositionX)...)
-	bytes = append(bytes, cmn.EncodeFloat32ToBytes3(s.PositionY)...)
-	bytes = append(bytes, cmn.EncodeFloat32ToBytes3(s.PositionZ)...)
-	bytes = append(bytes, cmn.EncodeFloat32ToByte(s.ScaleX))
-	bytes = append(bytes, cmn.EncodeFloat32ToByte(s.ScaleY))
-	bytes = append(bytes, cmn.EncodeFloat32ToByte(s.ScaleZ))
-	bytes = append(bytes, s.ColorR, s.ColorG, s.ColorB, s.ColorA)
-	bytes = append(bytes, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
-	return bytes
-}

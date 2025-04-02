@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"gsbox/cmn"
 	"gsbox/gsplat"
+	"os"
 	"time"
 )
 
-const VER = "v2.4.0"
+const VER = "v3.0.0"
 
 func main() {
 
@@ -19,16 +20,16 @@ func main() {
 		usage()
 	} else if args.HasCmd("p2s", "ply2splat") {
 		ply2splat(args)
-	} else if args.HasCmd("p2s20", "ply2splat20") {
-		ply2splat20(args)
-	} else if args.HasCmd("p2p", "ply2ply") {
-		ply2ply(args)
+	} else if args.HasCmd("p2x", "ply2spx") {
+		ply2spx(args)
 	} else if args.HasCmd("s2p", "splat2ply") {
 		splat2ply(args)
-	} else if args.HasCmd("s2s20", "splat2splat20") {
-		splat2splat20(args)
-	} else if args.HasCmd("s2s", "splat2splat") {
-		splat2splat(args)
+	} else if args.HasCmd("s2x", "splat2spx") {
+		splat2spx(args)
+	} else if args.HasCmd("x2p", "spx2ply") {
+		spx2ply(args)
+	} else if args.HasCmd("x2s", "spx2splat") {
+		spx2splat(args)
 	} else if args.HasCmd("info") {
 		plyInfo(args)
 	} else {
@@ -52,25 +53,25 @@ func usage() {
 	fmt.Println("")
 	fmt.Println("Options:")
 	fmt.Println("  p2s, ply2splat           convert ply to splat")
-	fmt.Println("  p2s20, ply2splat20       convert ply to splat20")
+	fmt.Println("  p2x, ply2spx             convert ply to spx")
 	fmt.Println("  s2p, splat2ply           convert splat to ply")
-	fmt.Println("  s2s20, splat2splat20     convert splat to splat20")
+	fmt.Println("  s2x, splat2spx           convert splat to spx")
+	fmt.Println("  x2p, spx2ply             convert spx to ply")
+	fmt.Println("  x2s, spx2splat           convert spx to splat")
 	fmt.Println("  simple-ply               simple mode to write ply")
-	fmt.Println("  info <plyfile>           display the ply header")
+	fmt.Println("  info <file>              display the model file information")
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
-	fmt.Println("  -c, --comment <text>     output ply with comment")
+	fmt.Println("  -c, --comment <text>     output ply/spx with the comment")
 	fmt.Println("  -v, --version            display version information")
 	fmt.Println("  -h, --help               display help information")
 	fmt.Println("")
 	fmt.Println("Examples:")
-	fmt.Println("  gsbox p2s -i /path/to/input.ply -o /path/to/output.splat")
-	fmt.Println("  gsbox p2s20 -i /path/to/input.ply -o /path/to/output.sp20")
-	fmt.Println("  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply")
-	fmt.Println("  gsbox s2s20 -i /path/to/input.splat -o /path/to/output.sp20")
-	fmt.Println("  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply simple-ply")
+	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
+	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\"")
+	fmt.Println("  gsbox x2p -i /path/to/input.spx -o /path/to/output.ply simple-ply")
 	fmt.Println("  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply -c \"your comment\"")
-	fmt.Println("  gsbox info -i /path/to/file.ply")
+	fmt.Println("  gsbox info -i /path/to/file.spx")
 	fmt.Println("")
 }
 func plyInfo(args *cmn.OsArgs) {
@@ -86,16 +87,34 @@ func plyInfo(args *cmn.OsArgs) {
 	if input == "" {
 		cmn.ExitOnError(errors.New("please specify the input ply file"))
 	}
-
-	if !cmn.Endwiths(input, ".ply", true) {
-		cmn.ExitOnError(errors.New("the input file must be ply format"))
-	}
 	if !cmn.IsExistFile(input) {
 		cmn.ExitOnError(errors.New("file not found: " + input))
 	}
-	header, err := gsplat.ReadPlyHeaderString(input, 1024)
-	cmn.ExitOnError(err)
-	fmt.Print(header)
+
+	isPly := cmn.Endwiths(input, ".ply", true)
+	isSpx := cmn.Endwiths(input, ".spx", true)
+	isSplat := cmn.Endwiths(input, ".splat", true)
+
+	if isPly {
+		header, err := gsplat.ReadPlyHeaderString(input, 1024)
+		cmn.ExitOnError(err)
+		fmt.Print(header)
+	} else if isSpx {
+		header := gsplat.ParseSpxHeader(input)
+		fmt.Println(header.ToStringSpx())
+	} else if isSplat {
+		fileInfo, err := os.Stat(input)
+		cmn.ExitOnError(err)
+		fileSize := fileInfo.Size()
+		if (fileSize)%32 > 0 {
+			cmn.ExitOnError(errors.New("invalid splat format"))
+		} else {
+			fmt.Println("SplatCount :", fileSize/20)
+		}
+	} else {
+		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx) format"))
+	}
+
 }
 func ply2splat(args *cmn.OsArgs) {
 	startTime := time.Now()
@@ -107,13 +126,13 @@ func ply2splat(args *cmn.OsArgs) {
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ply2splat20(args *cmn.OsArgs) {
+func ply2spx(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
 	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
 	gsplat.Sort(datas)
-	gsplat.WriteSplat20(args.GetArgIgnorecase("-o", "--output"), datas)
+	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -125,32 +144,32 @@ func splat2ply(args *cmn.OsArgs) {
 	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
-func splat2splat20(args *cmn.OsArgs) {
+func splat2spx(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	gsplat.WriteSplat20(args.GetArgIgnorecase("-o", "--output"), datas)
+	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
-func splat2splat(args *cmn.OsArgs) {
+
+func spx2ply(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-
-	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"))
+	datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
+	gsplat.Sort(datas)
+	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
+	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+func spx2splat(args *cmn.OsArgs) {
+	startTime := time.Now()
+	checkInputFileExists(args)
+	createOutputDir(args)
+	datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(args.GetArgIgnorecase("-o", "--output"), datas)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
-}
-func ply2ply(args *cmn.OsArgs) {
-	startTime := time.Now()
-	checkInputFileExists(args)
-	createOutputDir(args)
-	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
-	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 

@@ -1,6 +1,7 @@
 package cmn
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func Trim(str string) string {
@@ -255,4 +257,71 @@ func GetTimeInfo(milliseconds int64) string {
 	}
 
 	return fmt.Sprintf("%d %s", milliseconds, sMilliseconds)
+}
+
+/** 删除非ASCII字符，不可见字符替换为空格 */
+func RemoveNonASCII(s string) (bool, string) {
+	var result string
+	remove := false
+	for _, r := range s {
+		if r <= 127 {
+			if r == '\t' || r == '\n' || r == '\r' || r == '\f' || r == '\v' {
+				result += " "
+			} else {
+				result += string(r)
+			}
+		} else {
+			remove = true
+		}
+	}
+	return remove, result
+}
+
+func GetSystemDateYYYYMMDD() uint32 {
+	now := time.Now()
+	year := now.Year()
+	month := int(now.Month())
+	day := now.Day()
+
+	date := uint32(year*10000 + month*100 + day) // 组合成 yyyymmdd 格式
+	return date
+}
+
+func BytesToInt32(bs []byte) int32 {
+	return int32(binary.LittleEndian.Uint32(bs))
+}
+
+func BytesToFloat32(bs []byte) float32 {
+	return math.Float32frombits(binary.LittleEndian.Uint32(bs))
+}
+
+func BytesToUint32(bs []byte) uint32 {
+	return binary.LittleEndian.Uint32(bs)
+}
+
+func Int32ToBytes(intNum int32) []byte {
+	bytebuf := bytes.NewBuffer([]byte{})
+	binary.Write(bytebuf, binary.LittleEndian, intNum)
+	return bytebuf.Bytes()
+}
+
+func StringToBytes(s string) []byte {
+	return []byte(s)
+}
+
+func Uint32ToBytes(intNum uint32) []byte {
+	bytebuf := bytes.NewBuffer([]byte{})
+	binary.Write(bytebuf, binary.LittleEndian, intNum)
+	return bytebuf.Bytes()
+}
+
+/*
+*【注意】要用于专有校验时，应修改初始值或添加自定义的前缀后缀参与计算，且不公开
+ */
+func HashBytes(bts []byte) uint32 {
+	var rs uint32 = 53653
+	for i := 0; i < len(bts); i++ {
+		rs = (rs * 33) ^ uint32(bts[i])
+	}
+	return rs
 }
