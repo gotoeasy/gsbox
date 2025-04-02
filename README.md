@@ -17,30 +17,13 @@
 <p>
 
 ## 功能
-- [x] 文件格式的装换，支持`3DGS`的`.ply`、`.splat`、`.sp20`格式
-- [x] 查看`.ply`的文件头信息
+- [x] 文件格式的装换，支持`3DGS`的`.ply`、`.splat`、`.spx`格式
+- [x] 查看`.ply`、`.spx`的文件头信息或`.splat`的高斯点数量
 
-## 关于`.sp20`格式的说明
-- `.sp20`格式每个高斯点固定长 20 bytes，参考`.spz`编码方式简化而成，`.splat`为 32 bytes，有效减少 37.5% 大小。为了能够更方便的进行渐进加载，未采用`.spz`的排列压缩方式进一步减少大小
-- 注意：采用`.sp20`格式时肉眼基本识别不出渲染差异，适合绝大多数以减少文件大小为目的的使用场景，但并不是用来替代`.splat`，因为`.sp20`是有损编码方式，因此，也并不建议把`.sp20`转换回`.splat`或`.ply`
-- `.sp20`格式可以使用这个渲染器查看 https://github.com/reall3d-com/Reall3dViewer
-
-| field | note |
-|----------|------|
-| position x | 24-bit fixed point signed integer |
-| position y | 24-bit fixed point signed integer |
-| position z | 24-bit fixed point signed integer |
-| scale x    | 8-bit log-encoded integer |
-| scale y    | 8-bit log-encoded integer |
-| scale z    | 8-bit log-encoded integer |
-| color r    | unsigned 8-bit integer |
-| color g    | unsigned 8-bit integer |
-| color b    | unsigned 8-bit integer |
-| color a    | unsigned 8-bit integer |
-| rotation x | 8-bit signed integer |
-| rotation y | 8-bit signed integer |
-| rotation z | 8-bit signed integer |
-| rotation w | 8-bit signed integer |
+## 关于`.spx`格式的说明
+- `.spx`格式灵活可扩充且支持专有数据保护，其开放格式综合参考了`.splat`和`.spz`的编码方式，再增加分块压缩处理支持渐进加载，压缩后的`.spx`不足`.splat`的一半大小。`gsbox`支持这些格式间的相互转换，模型文件的下载和应用已基本无负担
+- `.spx`格式说明 https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
+- `.spx`格式模型的渲染查看 https://github.com/reall3d-com/Reall3dViewer
 
 ## 命令示例
 ```shell
@@ -49,41 +32,32 @@ Usage:
 
 Options:
   p2s, ply2splat           convert ply to splat
-  p2s20, ply2splat20       convert ply to splat20
+  p2x, ply2spx             convert ply to spx
   s2p, splat2ply           convert splat to ply
-  s2s20, splat2splat20     convert splat to splat20
+  s2x, splat2spx           convert splat to spx
+  x2p, spx2ply             convert spx to ply
+  x2s, spx2splat           convert spx to splat
   simple-ply               simple mode to write ply
-  info <plyfile>           display the ply header
+  info <file>              display the model file information
   -i, --input <file>       specify the input file
   -o, --output <file>      specify the output file
-  -c, --comment <text>     output ply with comment
+  -c, --comment <text>     output ply/spx with the comment
   -v, --version            display version information
   -h, --help               display help information
 
 Examples:
-  gsbox p2s -i /path/to/input.ply -o /path/to/output.splat
-  gsbox p2s20 -i /path/to/input.ply -o /path/to/output.sp20
-  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply
-  gsbox s2s20 -i /path/to/input.splat -o /path/to/output.sp20
-  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply simple-ply
+  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
+  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment"
+  gsbox x2p -i /path/to/input.spx -o /path/to/output.ply simple-ply
   gsbox s2p -i /path/to/input.splat -o /path/to/output.ply -c "your comment"
-  gsbox info -i /path/to/file.ply
+  gsbox info -i /path/to/file.spx
 
 
-# 把3dgs的ply转成splat
-gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
+# 把3dgs的ply转成spx并添加自定义说明
+gsbox ply2spx -i /path/to/input.ply -o /path/to/output.spx -c "your comment here"
 
-# 把3dgs的ply转成splat20
-gsbox ply2splat20 -i /path/to/input.ply -o /path/to/output.sp20
-
-# 把splat转成3dgs的ply
-gsbox splat2ply -i /path/to/input.splat -o /path/to/output.ply
-
-# 把splat转成3dgs的ply
-gsbox splat2splat20 -i /path/to/input.splat -o /path/to/output.sp20
-
-# 查看ply的文件头信息
-gsbox info file.ply
+# 查看spx的文件头信息
+gsbox info -i /path/to/file.spx
 ```
 
 
