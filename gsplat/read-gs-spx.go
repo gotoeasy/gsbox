@@ -1,6 +1,7 @@
 package gsplat
 
 import (
+	"errors"
 	"fmt"
 	"gsbox/cmn"
 	"math"
@@ -95,6 +96,9 @@ func ReadSpx(spxFile string) []*SplatData {
 			}
 
 			i += i32BlockSplatCount
+		} else {
+			// 存在无法识别读取的专有格式数据
+			cmn.ExitOnError(errors.New("unreadable proprietary data exists"))
 		}
 
 	}
