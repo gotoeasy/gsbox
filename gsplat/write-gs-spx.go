@@ -56,7 +56,7 @@ func genSpx1Header(datas []*SplatData, comment string) *SpxHeader {
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {
-		header.Comment = "create by gsbox"
+		header.Comment = "created by gsbox"
 	}
 
 	if len(datas) > 0 {

@@ -3,15 +3,20 @@ package cmn
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 )
+
+const lastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json?v=" + VER
 
 func Trim(str string) string {
 	return strings.TrimSpace(str)
@@ -324,4 +329,33 @@ func HashBytes(bts []byte) uint32 {
 		rs = (rs * 33) ^ uint32(bts[i])
 	}
 	return rs
+}
+
+func CheckLastest() {
+	req, err := http.NewRequest("GET", lastestVerUrl, nil)
+	if err != nil {
+		return
+	}
+	req.Header.Set("Content-Type", "application/json")
+	client := http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	defer res.Body.Close()
+	bts, err := io.ReadAll(res.Body)
+	if err != nil {
+		return
+	}
+	var data struct {
+		Ver string `json:"ver"`
+	}
+	err = json.Unmarshal(bts, &data)
+	if err != nil {
+		return
+	}
+
+	if data.Ver != VER {
+		fmt.Println("\nThe latest version (" + data.Ver + ") is now available.")
+	}
 }

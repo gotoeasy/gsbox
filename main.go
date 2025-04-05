@@ -9,10 +9,7 @@ import (
 	"time"
 )
 
-const VER = "v3.0.0"
-
 func main() {
-
 	args := cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
@@ -35,16 +32,17 @@ func main() {
 	} else {
 		usage()
 	}
+	cmn.CheckLastest()
 }
 
 func version() {
 	fmt.Println("")
-	fmt.Println("gsbox", VER)
+	fmt.Println("gsbox", cmn.VER)
 	fmt.Println("homepage", "https://github.com/gotoeasy/gsbox")
 }
 func usage() {
 	fmt.Println("")
-	fmt.Println("gsbox", VER)
+	fmt.Println("gsbox", cmn.VER)
 	fmt.Println("homepage", "https://github.com/gotoeasy/gsbox")
 	fmt.Println("")
 	fmt.Println("")
