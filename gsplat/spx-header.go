@@ -41,12 +41,12 @@ type SpxHeader struct {
 	CreaterId uint32
 	/** Exclusive format identifier, 0 represents official open format, can be customized, must be specified */
 	ExclusiveId uint32
+	/** spherical harmonics degree(1/2/3, others mean 0) */
+	ShDegree int32
 	/** Reserved fields */
 	Reserve1 float32
 	/** Reserved fields */
 	Reserve2 float32
-	/** Reserved fields */
-	Reserve3 float32
 	/** Comments (only supports ASCII characters) */
 	Comment string
 	/** Hash */
@@ -75,9 +75,9 @@ func (h *SpxHeader) ToSpx1Bytes() []byte {
 	bts = append(bts, cmn.Uint32ToBytes(h.CreateDate)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.CreaterId)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.ExclusiveId)...)
+	bts = append(bts, cmn.Int32ToBytes(h.ShDegree)...)
 	bts = append(bts, cmn.Float32ToBytes(h.Reserve1)...)
 	bts = append(bts, cmn.Float32ToBytes(h.Reserve2)...)
-	bts = append(bts, cmn.Float32ToBytes(h.Reserve3)...)
 	bts = append(bts, cmn.StringToBytes(cmn.Left(cmn.Trim(h.Comment)+strings.Repeat(" ", 60), 60))...) // 右边补足空格取60个accsii字符
 	bts = append(bts, cmn.Uint32ToBytes(cmn.HashBytes(bts[0:124]))...)
 	return bts
@@ -118,11 +118,14 @@ func readSpxHeader(bts []byte) *SpxHeader {
 		CreateDate:  cmn.BytesToUint32(bts[40:44]),
 		CreaterId:   cmn.BytesToUint32(bts[44:48]),
 		ExclusiveId: cmn.BytesToUint32(bts[48:52]),
-		Reserve1:    cmn.BytesToFloat32(bts[52:56]),
-		Reserve2:    cmn.BytesToFloat32(bts[56:60]),
-		Reserve3:    cmn.BytesToFloat32(bts[60:64]),
+		ShDegree:    cmn.BytesToInt32(bts[52:56]),
+		Reserve1:    cmn.BytesToFloat32(bts[56:60]),
+		Reserve2:    cmn.BytesToFloat32(bts[60:64]),
 		Hash:        cmn.BytesToUint32(bts[124:128]),
 		checkHash:   cmn.HashBytes(bts[0:124]) == cmn.BytesToUint32(bts[124:128]),
+	}
+	if header.ShDegree != 1 && header.ShDegree != 2 && header.ShDegree != 3 {
+		header.ShDegree = 0
 	}
 
 	comment := ""
@@ -135,6 +138,6 @@ func readSpxHeader(bts []byte) *SpxHeader {
 }
 
 func (h *SpxHeader) ToStringSpx() string {
-	return fmt.Sprintf("3DGS model format spx, version %v\nSplatCount  : %v\nMinX, MaxX  : %v, %v\nMinY, MaxY  : %v, %v\nMinZ, MaxZ  : %v, %v\nTopY        : %v\nMaxRadius   : %v\nCreateDate  : %v\nCreaterId   : %v\nExclusiveId : %v\nComment     : %v\nHash        : %v (%v)",
-		h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.TopY, h.MaxRadius, h.CreateDate, h.CreaterId, h.ExclusiveId, h.Comment, h.Hash, h.checkHash)
+	return fmt.Sprintf("3DGS model format spx, version %v\nSplatCount  : %v\nMinX, MaxX  : %v, %v\nMinY, MaxY  : %v, %v\nMinZ, MaxZ  : %v, %v\nTopY        : %v\nMaxRadius   : %v\nCreateDate  : %v\nCreaterId   : %v\nExclusiveId : %v\nShDegree    : %v\nComment     : %v\nHash        : %v (%v)",
+		h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.TopY, h.MaxRadius, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.Comment, h.Hash, h.checkHash)
 }

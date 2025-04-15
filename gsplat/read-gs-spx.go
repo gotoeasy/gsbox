@@ -22,11 +22,15 @@ func ReadSpx(spxFile string) []*SplatData {
 	datas := make([]*SplatData, 0)
 	offset := int64(HeaderSizeSpx)
 	var x0, x1, x2, y0, y1, y2, z0, z1, z2, i32x, i32y, i32z int32
-	for i := int32(0); i < header.SplatCount; {
+	var n1, n2, n3 int
+	for {
 		// 块数据长度、是否压缩
 		bts := make([]byte, 4)
 		_, err = file.ReadAt(bts, offset)
-		cmn.ExitOnError(err)
+		if err != nil {
+			break
+		}
+
 		blockSize := int64(math.Abs(float64(cmn.BytesToInt32(bts[0:]))))
 		isGzip := cmn.BytesToInt32(bts[0:]) < 0
 
@@ -95,7 +99,30 @@ func ReadSpx(spxFile string) []*SplatData {
 				datas = append(datas, splatData)
 			}
 
-			i += i32BlockSplatCount
+		} else if format == 1 {
+			// SH1
+			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blockSplatCount {
+				splatData := datas[n1+n]
+				splatData.SH1 = dataBytes[n*9 : n*9+9]
+			}
+			n1 += blockSplatCount
+		} else if format == 2 {
+			// SH2
+			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blockSplatCount {
+				splatData := datas[n2+n]
+				splatData.SH2 = dataBytes[n*15 : n*15+15]
+			}
+			n2 += blockSplatCount
+		} else if format == 3 {
+			// SH3
+			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blockSplatCount {
+				splatData := datas[n3+n]
+				splatData.SH3 = dataBytes[n*21 : n*21+21]
+			}
+			n3 += blockSplatCount
 		} else {
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unreadable proprietary data exists"))

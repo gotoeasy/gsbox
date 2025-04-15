@@ -7,36 +7,49 @@ import (
 	"os"
 )
 
-func WritePly(plyFile string, datas []*SplatData, comment string, simplePly bool) {
+func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) {
 	file, err := os.Create(plyFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
-	_, err = writer.WriteString(genPlyHeader(len(datas), comment, simplePly))
+	_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
 	cmn.ExitOnError(err)
 	for i := 0; i < len(datas); i++ {
-		_, err = writer.Write(genPlyDataBin(datas[i], simplePly))
+		_, err = writer.Write(genPlyDataBin(datas[i], shDegree))
 		cmn.ExitOnError(err)
 	}
 	err = writer.Flush()
 	cmn.ExitOnError(err)
 }
 
-func genPlyDataBin(splatData *SplatData, simplePly bool) []byte {
+func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 
 	bts := []byte{}
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...) // x
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...) // y
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...) // z
-	if !simplePly {
-		bts = append(bts, make([]byte, 3*4)...) // nx, ny, nz
-	}
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                       // x
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                       // y
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                       // z
+	bts = append(bts, make([]byte, 3*4)...)                                             // nx, ny, nz
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255-0.5)/SH_C0)...) // f_dc_0
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255-0.5)/SH_C0)...) // f_dc_1
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...) // f_dc_2
-	if !simplePly {
-		bts = append(bts, make([]byte, 45*4)...) // f_rest_0 ~ f_rest_44
+	if shDegree > 0 {
+		n := 0
+		for i := 0; i < len(splatData.SH1); i++ {
+			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
+			n++
+		}
+		for i := 0; i < len(splatData.SH2); i++ {
+			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_9 ~ f_rest_23
+			n++
+		}
+		for i := 0; i < len(splatData.SH3); i++ {
+			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
+			n++
+		}
+		if n < 45 {
+			bts = append(bts, make([]byte, (45-n)*4)...) // SH数据不足时补0
+		}
 	}
 	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1/(float64(splatData.ColorA)/255))-1))...) // opacity
 	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)              // scale_0
@@ -50,7 +63,7 @@ func genPlyDataBin(splatData *SplatData, simplePly bool) []byte {
 	return bts
 }
 
-func genPlyHeader(count int, comment string, simplePly bool) string {
+func genPlyHeader(count int, comment string, shDegree int) string {
 	lines := []string{}
 	lines = append(lines, "ply")
 	lines = append(lines, "format binary_little_endian 1.0")
@@ -63,16 +76,14 @@ func genPlyHeader(count int, comment string, simplePly bool) string {
 	lines = append(lines, "property float x")
 	lines = append(lines, "property float y")
 	lines = append(lines, "property float z")
-	if !simplePly {
-		lines = append(lines, "property float nx")
-		lines = append(lines, "property float ny")
-		lines = append(lines, "property float nz")
-	}
+	lines = append(lines, "property float nx")
+	lines = append(lines, "property float ny")
+	lines = append(lines, "property float nz")
 	lines = append(lines, "property float f_dc_0")
 	lines = append(lines, "property float f_dc_1")
 	lines = append(lines, "property float f_dc_2")
-	if !simplePly {
-		for i := 0; i <= 44; i++ {
+	if shDegree > 0 {
+		for i := range 45 {
 			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
 		}
 	}

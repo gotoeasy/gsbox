@@ -56,18 +56,18 @@ func usage() {
 	fmt.Println("  s2x, splat2spx           convert splat to spx")
 	fmt.Println("  x2p, spx2ply             convert spx to ply")
 	fmt.Println("  x2s, spx2splat           convert spx to splat")
-	fmt.Println("  simple-ply               simple mode to write ply")
 	fmt.Println("  info <file>              display the model file information")
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
 	fmt.Println("  -c, --comment <text>     output ply/spx with the comment")
+	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx output.(default 0)")
 	fmt.Println("  -v, --version            display version information")
 	fmt.Println("  -h, --help               display help information")
 	fmt.Println("")
 	fmt.Println("Examples:")
 	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
-	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\"")
-	fmt.Println("  gsbox x2p -i /path/to/input.spx -o /path/to/output.ply simple-ply")
+	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\" -sh 3")
+	fmt.Println("  gsbox x2p -i /path/to/input.spx -o /path/to/output.ply -sh 0")
 	fmt.Println("  gsbox s2p -i /path/to/input.splat -o /path/to/output.ply -c \"your comment\"")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
 	fmt.Println("")
@@ -130,7 +130,8 @@ func ply2spx(args *cmn.OsArgs) {
 	createOutputDir(args)
 	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
 	gsplat.Sort(datas)
-	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"))
+	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -139,7 +140,7 @@ func splat2ply(args *cmn.OsArgs) {
 	checkInputFileExists(args)
 	createOutputDir(args)
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"))
-	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
+	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), 0)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func splat2spx(args *cmn.OsArgs) {
@@ -148,7 +149,8 @@ func splat2spx(args *cmn.OsArgs) {
 	createOutputDir(args)
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"))
+	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -158,7 +160,8 @@ func spx2ply(args *cmn.OsArgs) {
 	createOutputDir(args)
 	datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), args.HasCmd("simple-ply"))
+	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func spx2splat(args *cmn.OsArgs) {

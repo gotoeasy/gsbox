@@ -359,3 +359,38 @@ func CheckLastest() {
 		fmt.Println("\nThe latest version (" + data.Ver + ") is now available.")
 	}
 }
+
+func QuantizeSH1(val float64) uint8 {
+	q := math.Round(val*128.0) + 128.0
+	q = math.Floor((q+4)/8) * 8
+	return ClipUint8(q)
+}
+func QuantizeSH23(val float64) uint8 {
+	q := math.Round(val*128.0) + 128.0
+	q = math.Floor((q+8)/16) * 16
+	return ClipUint8(q)
+}
+func UnquantizeSH(val uint8) float32 {
+	return float32(val)/128.0 - 1.0
+}
+
+// func QuantizeSH(value float64, shDegree int) uint8 {
+// 	bucketSize := 8.0
+// 	// if shDegree == 1 {
+// 	// 	bucketSize = 8.0
+// 	// }
+// 	q := math.Round(value*128.0) + 128.0
+// 	q = math.Floor((q+bucketSize/2)/bucketSize) * bucketSize
+// 	q = math.Max(0, math.Min(q, 255))
+// 	return uint8(q)
+// }
+
+// func UnquantizeSH(x uint8) float32 {
+// 	return float32(x-128) / 128.0
+// }
+// func EncodeSH(val float64) uint8 {
+// 	return uint8(math.Max(0, math.Min(math.Round(val*8.0+8.0), 15)))
+// }
+// func DecodeSH(val uint8) float32 {
+// 	return float32(val)/8.0 - 1.0
+// }

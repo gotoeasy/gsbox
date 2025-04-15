@@ -19,6 +19,9 @@ type SplatData struct {
 	RotationY uint8
 	RotationZ uint8
 	RotationW uint8
+	SH1       []uint8
+	SH2       []uint8
+	SH3       []uint8
 }
 
 func (s *SplatData) ToBytes() []byte {

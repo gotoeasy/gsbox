@@ -61,6 +61,16 @@ func ReadPly(plyFile string, plyTypes ...string) []*SplatData {
 		data.RotationW = cmn.ClipUint8((r3/qlen)*128 + 128)
 
 		datas[i] = data
+
+		for n := 0; n < 9; n++ {
+			data.SH1 = append(data.SH1, cmn.QuantizeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+		}
+		for n := 9; n < 24; n++ {
+			data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+		}
+		for n := 24; n < 45; n++ {
+			data.SH3 = append(data.SH3, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+		}
 	}
 
 	return datas
@@ -96,6 +106,10 @@ func readValue(header *PlyHeader, property string, splatDataBytes []byte) float6
 		var v uint8
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+1]), binary.LittleEndian, &v))
 		return float64(v)
+	}
+
+	if cmn.Startwiths(property, "f_rest_") {
+		return 0 // 球谐系数读取不到时，默认为0
 	}
 
 	fmt.Println("Unsupported property:", "property", typename, property)
