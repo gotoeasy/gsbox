@@ -60,7 +60,7 @@ func usage() {
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
 	fmt.Println("  -c, --comment <text>     output ply/spx with the comment")
-	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx output.(default 0)")
+	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx output")
 	fmt.Println("  -v, --version            display version information")
 	fmt.Println("  -h, --help               display help information")
 	fmt.Println("")
@@ -118,7 +118,7 @@ func ply2splat(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
+	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), 0, "ply-3dgs")
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(args.GetArgIgnorecase("-o", "--output"), datas)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
@@ -128,9 +128,15 @@ func ply2spx(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), "ply-3dgs")
+	shDegree := 3
+	if args.HasArg("-sh", "--shDegree") {
+		shDegree = cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+		if shDegree < 0 || shDegree > 3 {
+			shDegree = 0 // 球谐系数范围[0,1,2,3]，其他值都按0处理
+		}
+	}
+	datas := gsplat.ReadPly(args.GetArgIgnorecase("-i", "--input"), shDegree, "ply-3dgs")
 	gsplat.Sort(datas)
-	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
 	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -149,8 +155,7 @@ func splat2spx(args *cmn.OsArgs) {
 	createOutputDir(args)
 	datas := gsplat.ReadSplat(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
-	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
+	gsplat.WriteSpx(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), 0)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -158,9 +163,15 @@ func spx2ply(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-	datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
+	header, datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
-	shDegree := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+	shDegree := int(header.ShDegree)
+	if args.HasArg("-sh", "--shDegree") {
+		shDegree = cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), 0)
+		if shDegree < 0 || shDegree > 3 {
+			shDegree = 0 // 球谐系数范围[0,1,2,3]，其他值都按0处理
+		}
+	}
 	gsplat.WritePly(args.GetArgIgnorecase("-o", "--output"), datas, args.GetArgIgnorecase("-c", "--comment"), shDegree)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -168,7 +179,7 @@ func spx2splat(args *cmn.OsArgs) {
 	startTime := time.Now()
 	checkInputFileExists(args)
 	createOutputDir(args)
-	datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
+	_, datas := gsplat.ReadSpx(args.GetArgIgnorecase("-i", "--input"))
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(args.GetArgIgnorecase("-o", "--output"), datas)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))

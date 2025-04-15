@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func ReadSpx(spxFile string) []*SplatData {
+func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 
 	header := ParseSpxHeader(spxFile)
 	if !header.IsValid() {
@@ -112,7 +112,7 @@ func ReadSpx(spxFile string) []*SplatData {
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blockSplatCount {
 				splatData := datas[n2+n]
-				splatData.SH2 = dataBytes[n*15 : n*15+15]
+				splatData.SH2 = dataBytes[n*24 : n*24+24]
 			}
 			n2 += blockSplatCount
 		} else if format == 3 {
@@ -130,5 +130,5 @@ func ReadSpx(spxFile string) []*SplatData {
 
 	}
 
-	return datas
+	return header, datas
 }

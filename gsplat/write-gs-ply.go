@@ -35,20 +35,35 @@ func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...) // f_dc_2
 	if shDegree > 0 {
 		n := 0
-		for i := 0; i < len(splatData.SH1); i++ {
-			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
-			n++
+		if shDegree == 1 {
+			if len(splatData.SH1) > 0 {
+				for i := 0; i < len(splatData.SH1); i++ {
+					bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
+					n++
+				}
+			} else if len(splatData.SH2) > 0 {
+				for i := 0; i < 9; i++ {
+					bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_8
+					n++
+				}
+			}
+		} else if shDegree == 2 {
+			for i := 0; i < len(splatData.SH2); i++ {
+				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+				n++
+			}
+		} else if shDegree == 3 {
+			for i := 0; i < len(splatData.SH2); i++ {
+				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+				n++
+			}
+			for i := 0; i < len(splatData.SH3); i++ {
+				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
+				n++
+			}
 		}
-		for i := 0; i < len(splatData.SH2); i++ {
-			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_9 ~ f_rest_23
-			n++
-		}
-		for i := 0; i < len(splatData.SH3); i++ {
-			bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
-			n++
-		}
-		if n < 45 {
-			bts = append(bts, make([]byte, (45-n)*4)...) // SH数据不足时补0
+		for i := n; i < 45; i++ {
+			bts = append(bts, cmn.Float32ToBytes(0)...) // SH数据不足时补0
 		}
 	}
 	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1/(float64(splatData.ColorA)/255))-1))...) // opacity

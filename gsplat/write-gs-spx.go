@@ -19,9 +19,6 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
-	if shDegree < 0 || shDegree > 3 {
-		shDegree = 0 // 球谐系数范围[0,1,2,3]，其他值都按0处理
-	}
 
 	header := genSpx1Header(rows, comment, shDegree)
 	_, err = writer.Write(header.ToSpx1Bytes())
@@ -39,17 +36,18 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
 
-	if shDegree >= 1 {
+	if shDegree == 1 {
 		for i := range blockDatasList {
 			writeSpxBlockSH1(writer, blockDatasList[i])
 		}
-	}
-	if shDegree >= 2 {
+	} else if shDegree == 2 {
 		for i := range blockDatasList {
 			writeSpxBlockSH2(writer, blockDatasList[i])
 		}
-	}
-	if shDegree == 3 {
+	} else if shDegree == 3 {
+		for i := range blockDatasList {
+			writeSpxBlockSH2(writer, blockDatasList[i])
+		}
 		for i := range blockDatasList {
 			writeSpxBlockSH3(writer, blockDatasList[i])
 		}
@@ -78,7 +76,7 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int) *SpxHeader 
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {
-		header.Comment = "created by gsbox"
+		header.Comment = "created by gsbox https://github.com/gotoeasy/gsbox"
 	}
 
 	if len(datas) > 0 {
@@ -223,7 +221,7 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 		}
 	} else {
 		// 没有SH2的数据
-		bts = append(bts, make([]byte, blockSplatCount*15)...) // n*15个0
+		bts = append(bts, make([]byte, blockSplatCount*24)...) // n*24个0
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -256,7 +254,7 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 		}
 	} else {
 		// 没有SH3的数据
-		bts = append(bts, make([]byte, blockSplatCount*21)...) // n*15个0
+		bts = append(bts, make([]byte, blockSplatCount*21)...) // n*21个0
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {

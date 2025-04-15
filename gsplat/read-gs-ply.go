@@ -20,8 +20,7 @@ func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 	return getPlyHeader(file, 2048)
 }
 
-func ReadPly(plyFile string, plyTypes ...string) []*SplatData {
-
+func ReadPly(plyFile string, shDegree int, plyTypes ...string) []*SplatData {
 	file, err := os.Open(plyFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -62,15 +61,23 @@ func ReadPly(plyFile string, plyTypes ...string) []*SplatData {
 
 		datas[i] = data
 
-		for n := 0; n < 9; n++ {
-			data.SH1 = append(data.SH1, cmn.QuantizeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+		if shDegree == 1 {
+			for n := range 9 {
+				data.SH1 = append(data.SH1, cmn.QuantizeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+			}
+		} else if shDegree == 2 {
+			for n := range 24 {
+				data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+			}
+		} else if shDegree == 3 {
+			for n := range 24 {
+				data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+			}
+			for n := 24; n < 45; n++ {
+				data.SH3 = append(data.SH3, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+			}
 		}
-		for n := 9; n < 24; n++ {
-			data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-		}
-		for n := 24; n < 45; n++ {
-			data.SH3 = append(data.SH3, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-		}
+
 	}
 
 	return datas
