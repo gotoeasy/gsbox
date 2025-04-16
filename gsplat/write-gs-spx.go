@@ -182,9 +182,14 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(1)...)                       // 开放的块数据格式 1:sh1
 
 	if len(blockDatas[0].SH1) > 0 {
-		// 有SH1的数据
+		// 有SH1数据数据时直接写入
 		for n := range blockSplatCount {
 			bts = append(bts, blockDatas[n].SH1...)
+		}
+	} else if len(blockDatas[0].SH2) > 0 {
+		// 有SH2数据数据时截取SH1数据写入
+		for n := range blockSplatCount {
+			bts = append(bts, blockDatas[n].SH2[0:9]...)
 		}
 	} else {
 		// 没有SH1的数据
