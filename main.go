@@ -78,7 +78,7 @@ func usage() {
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
 	fmt.Println("  -c, --comment <text>     output ply/spx with the comment")
-	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx output")
+	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx/spz output")
 	fmt.Println("  -v, --version            display version information")
 	fmt.Println("  -h, --help               display help information")
 	fmt.Println("")
