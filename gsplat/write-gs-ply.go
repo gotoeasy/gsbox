@@ -33,37 +33,51 @@ func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255-0.5)/SH_C0)...) // f_dc_0
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255-0.5)/SH_C0)...) // f_dc_1
 	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...) // f_dc_2
-	if shDegree > 0 {
-		n := 0
-		if shDegree == 1 {
-			if len(splatData.SH1) > 0 {
-				for i := 0; i < len(splatData.SH1); i++ {
-					bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
-					n++
-				}
-			} else if len(splatData.SH2) > 0 {
-				for i := 0; i < 9; i++ {
-					bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_8
-					n++
-				}
+	if shDegree == 1 {
+		if len(splatData.SH1) > 0 {
+			for i := range 9 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
 			}
-		} else if shDegree == 2 {
-			for i := 0; i < len(splatData.SH2); i++ {
-				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
-				n++
+		} else if len(splatData.SH2) > 0 {
+			for i := range 9 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_8
 			}
-		} else if shDegree == 3 {
-			for i := 0; i < len(splatData.SH2); i++ {
-				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
-				n++
-			}
-			for i := 0; i < len(splatData.SH3); i++ {
-				bts = append(bts, cmn.Float32ToBytes(cmn.UnquantizeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
-				n++
-			}
+		} else {
+			bts = append(bts, make([]byte, 4*9)...)
 		}
-		for i := n; i < 45; i++ {
-			bts = append(bts, cmn.Float32ToBytes(0)...) // SH数据不足时补0
+	} else if shDegree == 2 {
+		if len(splatData.SH1) > 0 {
+			for i := range 9 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
+			}
+			bts = append(bts, make([]byte, 4*3*5)...)
+		} else if len(splatData.SH2) > 0 {
+			for i := range 24 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+			}
+		} else {
+			bts = append(bts, make([]byte, 4*3*8)...)
+		}
+	} else if shDegree == 3 {
+		if len(splatData.SH3) > 0 {
+			for i := range 24 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+			}
+			for i := range 21 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
+			}
+		} else if len(splatData.SH2) > 0 {
+			for i := range 24 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+			}
+			bts = append(bts, make([]byte, 4*3*7)...)
+		} else if len(splatData.SH1) > 0 {
+			for i := range 9 {
+				bts = append(bts, cmn.Float32ToBytes(cmn.SpzDecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
+			}
+			bts = append(bts, make([]byte, 4*3*12)...)
+		} else {
+			bts = append(bts, make([]byte, 4*3*15)...)
 		}
 	}
 	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1/(float64(splatData.ColorA)/255))-1))...) // opacity
@@ -97,7 +111,15 @@ func genPlyHeader(count int, comment string, shDegree int) string {
 	lines = append(lines, "property float f_dc_0")
 	lines = append(lines, "property float f_dc_1")
 	lines = append(lines, "property float f_dc_2")
-	if shDegree > 0 {
+	if shDegree == 1 {
+		for i := range 9 {
+			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
+		}
+	} else if shDegree == 2 {
+		for i := range 24 {
+			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
+		}
+	} else if shDegree == 3 {
 		for i := range 45 {
 			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
 		}

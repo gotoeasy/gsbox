@@ -1,6 +1,9 @@
 package gsplat
 
-import "gsbox/cmn"
+import (
+	"fmt"
+	"gsbox/cmn"
+)
 
 const SPLAT_DATA_SIZE = 3*4 + 3*4 + 4 + 4
 
@@ -35,4 +38,9 @@ func (s *SplatData) ToBytes() []byte {
 	bytes = append(bytes, s.ColorR, s.ColorG, s.ColorB, s.ColorA)
 	bytes = append(bytes, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
 	return bytes
+}
+
+func (s *SplatData) ToString() string {
+	return fmt.Sprintf("%v, %v, %v; %v, %v, %v; %v, %v, %v, %v; %v, %v, %v, %v",
+		s.PositionX, s.PositionY, s.PositionZ, s.ScaleX, s.ScaleY, s.ScaleZ, s.ColorR, s.ColorG, s.ColorB, s.ColorA, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
 }

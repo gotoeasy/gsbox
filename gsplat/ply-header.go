@@ -125,6 +125,17 @@ func (p *PlyHeader) Property(property string) (int, string) {
 	return p.mapOffset[property], p.mapType[property]
 }
 
+func (p *PlyHeader) MaxShDegree() int {
+	if p.mapType["f_rest_44"] != "" {
+		return 3
+	} else if p.mapType["f_rest_23"] != "" {
+		return 2
+	} else if p.mapType["f_rest_8"] != "" {
+		return 1
+	}
+	return 0
+}
+
 func (p *PlyHeader) IsPly() bool {
 	return cmn.Startwiths(p.text, "ply\n")
 }

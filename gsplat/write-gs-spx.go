@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gsbox/cmn"
 	"math"
-	"math/rand/v2"
 	"os"
 	"sort"
 )
@@ -68,15 +67,15 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int) *SpxHeader 
 	header.CreaterId = 1202056903                   // 0:官方默认识别号，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
 	header.ExclusiveId = 0                          // 0:官方开放格式的识别号
 	header.ShDegree = int32(shDegree)
-	header.Reserve1 = rand.Float32() * 10
-	header.Reserve2 = rand.Float32() * 20
+	header.Reserve1 = 0
+	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
 	if del {
 		fmt.Println("[WARN] The existing non-ASCII characters in the comment have been removed!")
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {
-		header.Comment = "created by gsbox https://github.com/gotoeasy/gsbox"
+		header.Comment = "created by gsbox " + cmn.VER + " https://github.com/gotoeasy/gsbox"
 	}
 
 	if len(datas) > 0 {
@@ -182,18 +181,15 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(1)...)                       // 开放的块数据格式 1:sh1
 
 	if len(blockDatas[0].SH1) > 0 {
-		// 有SH1数据数据时直接写入
 		for n := range blockSplatCount {
 			bts = append(bts, blockDatas[n].SH1...)
 		}
 	} else if len(blockDatas[0].SH2) > 0 {
-		// 有SH2数据数据时截取SH1数据写入
 		for n := range blockSplatCount {
 			bts = append(bts, blockDatas[n].SH2[0:9]...)
 		}
 	} else {
-		// 没有SH1的数据
-		bts = append(bts, make([]byte, blockSplatCount*9)...) // n*9个0
+		bts = append(bts, make([]byte, blockSplatCount*9)...)
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -219,14 +215,17 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(2)...)                       // 开放的块数据格式 2:sh2
 
-	if len(blockDatas[0].SH2) > 0 {
-		// 有SH2的数据
+	if len(blockDatas[0].SH1) > 0 {
+		for n := range blockSplatCount {
+			bts = append(bts, blockDatas[n].SH1...)
+			bts = append(bts, make([]byte, 15)...)
+		}
+	} else if len(blockDatas[0].SH2) > 0 {
 		for n := range blockSplatCount {
 			bts = append(bts, blockDatas[n].SH2...)
 		}
 	} else {
-		// 没有SH2的数据
-		bts = append(bts, make([]byte, blockSplatCount*24)...) // n*24个0
+		bts = append(bts, make([]byte, blockSplatCount*24)...)
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -253,13 +252,22 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(3)...)                       // 开放的块数据格式 3:sh3
 
 	if len(blockDatas[0].SH3) > 0 {
-		// 有SH3的数据
 		for n := range blockSplatCount {
+			bts = append(bts, blockDatas[n].SH2...)
 			bts = append(bts, blockDatas[n].SH3...)
 		}
+	} else if len(blockDatas[0].SH2) > 0 {
+		for n := range blockSplatCount {
+			bts = append(bts, blockDatas[n].SH2...)
+			bts = append(bts, make([]byte, 21)...)
+		}
+	} else if len(blockDatas[0].SH1) > 0 {
+		for n := range blockSplatCount {
+			bts = append(bts, blockDatas[n].SH1...)
+			bts = append(bts, make([]byte, 36)...)
+		}
 	} else {
-		// 没有SH3的数据
-		bts = append(bts, make([]byte, blockSplatCount*21)...) // n*21个0
+		bts = append(bts, make([]byte, blockSplatCount*45)...)
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {

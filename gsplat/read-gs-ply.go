@@ -47,34 +47,34 @@ func ReadPly(plyFile string, shDegree int, plyTypes ...string) []*SplatData {
 		data.ScaleX = cmn.ClipFloat32(math.Exp(readValue(header, "scale_0", dataBytes)))
 		data.ScaleY = cmn.ClipFloat32(math.Exp(readValue(header, "scale_1", dataBytes)))
 		data.ScaleZ = cmn.ClipFloat32(math.Exp(readValue(header, "scale_2", dataBytes)))
-		data.ColorR = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_0", dataBytes)) * 255)
-		data.ColorG = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_1", dataBytes)) * 255)
-		data.ColorB = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_2", dataBytes)) * 255)
-		data.ColorA = cmn.ClipUint8((1 / (1 + math.Exp(-readValue(header, "opacity", dataBytes)))) * 255)
+		data.ColorR = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_0", dataBytes)) * 255.0)
+		data.ColorG = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_1", dataBytes)) * 255.0)
+		data.ColorB = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_2", dataBytes)) * 255.0)
+		data.ColorA = cmn.ClipUint8((1.0 / (1.0 + math.Exp(-readValue(header, "opacity", dataBytes)))) * 255.0)
 
 		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
 		qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-		data.RotationX = cmn.ClipUint8((r0/qlen)*128 + 128)
-		data.RotationY = cmn.ClipUint8((r1/qlen)*128 + 128)
-		data.RotationZ = cmn.ClipUint8((r2/qlen)*128 + 128)
-		data.RotationW = cmn.ClipUint8((r3/qlen)*128 + 128)
+		data.RotationX = cmn.ClipUint8((r0/qlen)*128.0 + 128.0)
+		data.RotationY = cmn.ClipUint8((r1/qlen)*128.0 + 128.0)
+		data.RotationZ = cmn.ClipUint8((r2/qlen)*128.0 + 128.0)
+		data.RotationW = cmn.ClipUint8((r3/qlen)*128.0 + 128.0)
 
 		datas[i] = data
 
 		if shDegree == 1 {
 			for n := range 9 {
-				data.SH1 = append(data.SH1, cmn.QuantizeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH1 = append(data.SH1, cmn.SpzEncodeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		} else if shDegree == 2 {
 			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH2 = append(data.SH2, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		} else if shDegree == 3 {
 			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH2 = append(data.SH2, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 			for n := 24; n < 45; n++ {
-				data.SH3 = append(data.SH3, cmn.QuantizeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH3 = append(data.SH3, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		}
 

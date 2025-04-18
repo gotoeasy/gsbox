@@ -18,6 +18,11 @@ import (
 
 const lastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json?v=" + VER
 
+var NewVersionMessage = ""
+
+const COLOR_SCALE = 0.15
+const SH_C0 float64 = 0.28209479177387814
+
 func Trim(str string) string {
 	return strings.TrimSpace(str)
 }
@@ -98,6 +103,13 @@ func ReplaceAll(str string, old string, new string) string {
 
 func ExitOnError(err error) {
 	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func ExitOnConditionError(condition bool, err error) {
+	if condition {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -200,6 +212,11 @@ func Join(elems []string, sep string) string {
 // int 转 string
 func IntToString(i int) string {
 	return strconv.Itoa(i)
+}
+
+// uint32 转 string
+func Uint32ToString(num uint32) string {
+	return strconv.FormatUint(uint64(num), 10)
 }
 
 // 强制转换float64 -> float32，避免NaN，最后再转成[]byte
@@ -331,13 +348,13 @@ func HashBytes(bts []byte) uint32 {
 	return rs
 }
 
-func CheckLastest() {
+func init() {
 	req, err := http.NewRequest("GET", lastestVerUrl, nil)
 	if err != nil {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	client := http.Client{Timeout: 3 * time.Second}
+	client := http.Client{Timeout: 2 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return
@@ -356,20 +373,78 @@ func CheckLastest() {
 	}
 
 	if data.Ver != VER {
-		fmt.Println("\nThe latest version (" + data.Ver + ") is now available.")
+		NewVersionMessage = "\nNotice: the latest version (" + data.Ver + ") is now available.\n"
 	}
 }
 
-func QuantizeSH1(val float64) uint8 {
+func ClipUint8Round(x float64) uint8 {
+	return uint8(math.Max(0, math.Min(255, math.Round(x))))
+}
+
+// 固定24位编码
+func SpzEncodePosition(val float32) []byte {
+	return EncodeFloat32ToBytes3(val)
+}
+
+func SpzDecodePosition(bts []byte, fractionalBits uint8) float32 {
+	scale := 1.0 / float64(int(1<<fractionalBits))
+	fixed32 := int32(bts[0]) | int32(bts[1])<<8 | int32(bts[2])<<16
+	if fixed32&0x800000 != 0 {
+		fixed32 |= int32(-1) << 24 // 如果符号位为1，将高8位填充为1
+	}
+	return ClipFloat32(float64(fixed32) * scale)
+}
+
+func SpzEncodeScale(val float32) uint8 {
+	scale := math.Log(float64(val))
+	return ClipUint8Round((scale + 10.0) * 16.0)
+}
+
+func SpzDecodeScale(val uint8) float32 {
+	scale := float64(val)/16.0 - 10.0
+	return ClipFloat32(math.Exp(scale))
+}
+
+func SpzEncodeRotations(rx uint8, ry uint8, rz uint8, rw uint8) []byte {
+	r0 := float64(rx)/128.0 - 1.0
+	r1 := float64(ry)/128.0 - 1.0
+	r2 := float64(rz)/128.0 - 1.0
+	r3 := float64(rw)/128.0 - 1.0
+	if r0 < 0 {
+		r0, r1, r2, r3 = -r0, -r1, -r2, -r3
+	}
+	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+	return []byte{ClipUint8Round((r1/qlen)*127.5 + 127.5), ClipUint8Round((r2/qlen)*127.5 + 127.5), ClipUint8Round((r3/qlen)*127.5 + 127.5)}
+}
+
+func SpzDecodeRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint8) {
+	r1 := float64(rx)/127.5 - 1.0
+	r2 := float64(ry)/127.5 - 1.0
+	r3 := float64(rz)/127.5 - 1.0
+	r0 := math.Sqrt(math.Max(0.0, 1.0-(r1*r1+r2*r2+r3*r3)))
+	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
+}
+
+func SpzEncodeColor(val uint8) uint8 {
+	fColor := (float64(val)/255.0 - 0.5) / SH_C0                      // 解码为原值
+	return ClipUint8Round(fColor*(COLOR_SCALE*255.0) + (0.5 * 255.0)) // 按spz方式编码
+}
+
+func SpzDecodeColor(val uint8) uint8 {
+	fColor := (float64(val) - (0.5 * 255.0)) / (COLOR_SCALE * 255.0)
+	return ClipUint8((0.5 + SH_C0*fColor) * 255.0)
+}
+
+func SpzEncodeSH1(val float64) uint8 {
 	q := math.Round(val*128.0) + 128.0
 	q = math.Floor((q+4.0)/8.0) * 8.0
 	return ClipUint8(q)
 }
-func QuantizeSH23(val float64) uint8 {
+func SpzEncodeSH23(val float64) uint8 {
 	q := math.Round(val*128.0) + 128.0
 	q = math.Floor((q+8.0)/16.0) * 16.0
 	return ClipUint8(q)
 }
-func UnquantizeSH(val uint8) float32 {
+func SpzDecodeSH(val uint8) float32 {
 	return float32(val)/128.0 - 1.0
 }
