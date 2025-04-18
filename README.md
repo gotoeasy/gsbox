@@ -52,7 +52,7 @@ Options:
   -i, --input <file>       specify the input file
   -o, --output <file>      specify the output file
   -c, --comment <text>     output ply/spx with the comment
-  -sh, --shDegree <num>    specify the SH degree for ply/spx output
+  -sh, --shDegree <num>    specify the SH degree for ply/spx/spz output
   -v, --version            display version information
   -h, --help               display help information
 
@@ -72,5 +72,5 @@ gsbox info -i /path/to/file.spx
 ```
 
 
-## 更新履历、二进制执行文件下载
+## Update History &、binary files
 https://github.com/gotoeasy/gsbox/releases
