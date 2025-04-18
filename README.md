@@ -72,5 +72,5 @@ gsbox info -i /path/to/file.spx
 ```
 
 
-## Update History &、binary files
+## Update History & binary files
 https://github.com/gotoeasy/gsbox/releases
