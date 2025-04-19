@@ -63,14 +63,14 @@ Options:
 
 Examples:
   gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
-  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -sh 3
+  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment"
   gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0
-  gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
+  gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment" -sh 3
   gsbox info -i /path/to/file.spx
 
 
-# 把3dgs的ply转成spx并添加自定义说明
-gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here"
+# 把3dgs的ply转成spx并添加自定义说明，不保存球谐系数
+gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
 
 # 查看spx的文件头信息
 gsbox info -i /path/to/file.spx
