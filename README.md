@@ -1,3 +1,8 @@
+<p align=center>
+<img src="https://gotoeasy.github.io/3dgs/gsbox.png"/>
+</p>
+
+
 # gsbox
 
 一个关于 3d gaussian splatting 的小工具盒。<br>
