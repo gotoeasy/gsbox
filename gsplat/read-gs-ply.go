@@ -54,27 +54,27 @@ func ReadPly(plyFile string, shDegree int, plyTypes ...string) []*SplatData {
 
 		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
 		qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-		data.RotationX = cmn.ClipUint8((r0/qlen)*128.0 + 128.0)
-		data.RotationY = cmn.ClipUint8((r1/qlen)*128.0 + 128.0)
-		data.RotationZ = cmn.ClipUint8((r2/qlen)*128.0 + 128.0)
-		data.RotationW = cmn.ClipUint8((r3/qlen)*128.0 + 128.0)
+		data.RotationW = cmn.ClipUint8((r0/qlen)*128.0 + 128.0)
+		data.RotationX = cmn.ClipUint8((r1/qlen)*128.0 + 128.0)
+		data.RotationY = cmn.ClipUint8((r2/qlen)*128.0 + 128.0)
+		data.RotationZ = cmn.ClipUint8((r3/qlen)*128.0 + 128.0)
 
 		datas[i] = data
 
 		if shDegree == 1 {
 			for n := range 9 {
-				data.SH1 = append(data.SH1, cmn.SpzEncodeSH1(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH1 = append(data.SH1, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		} else if shDegree == 2 {
 			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH2 = append(data.SH2, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		} else if shDegree == 3 {
 			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH2 = append(data.SH2, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 			for n := 24; n < 45; n++ {
-				data.SH3 = append(data.SH3, cmn.SpzEncodeSH23(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
+				data.SH3 = append(data.SH3, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
 			}
 		}
 

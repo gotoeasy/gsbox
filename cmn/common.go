@@ -405,11 +405,11 @@ func SpzDecodeScale(val uint8) float32 {
 	return ClipFloat32(math.Exp(scale))
 }
 
-func SpzEncodeRotations(rx uint8, ry uint8, rz uint8, rw uint8) []byte {
-	r0 := float64(rx)/128.0 - 1.0
-	r1 := float64(ry)/128.0 - 1.0
-	r2 := float64(rz)/128.0 - 1.0
-	r3 := float64(rw)/128.0 - 1.0
+func SpzEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
+	r0 := float64(rw)/128.0 - 1.0
+	r1 := float64(rx)/128.0 - 1.0
+	r2 := float64(ry)/128.0 - 1.0
+	r3 := float64(rz)/128.0 - 1.0
 	if r0 < 0 {
 		r0, r1, r2, r3 = -r0, -r1, -r2, -r3
 	}
@@ -435,16 +435,23 @@ func SpzDecodeColor(val uint8) uint8 {
 	return ClipUint8((0.5 + SH_C0*fColor) * 255.0)
 }
 
-func SpzEncodeSH1(val float64) uint8 {
-	q := math.Round(val*128.0) + 128.0
+func SpzEncodeSH1(val uint8) uint8 {
+	q := float64(DecodeSH(val))
 	q = math.Floor((q+4.0)/8.0) * 8.0
 	return ClipUint8(q)
 }
-func SpzEncodeSH23(val float64) uint8 {
-	q := math.Round(val*128.0) + 128.0
+func SpzEncodeSH23(val uint8) uint8 {
+	q := float64(DecodeSH(val))
 	q = math.Floor((q+8.0)/16.0) * 16.0
 	return ClipUint8(q)
 }
-func SpzDecodeSH(val uint8) float32 {
+
+func EncodeSH(val float64) uint8 {
+	val = math.Round(val*128.0) + 128.0
+	q := math.Floor((float64(val)+4.0)/8.0) * 8.0
+	return ClipUint8(q)
+}
+
+func DecodeSH(val uint8) float32 {
 	return float32(val)/128.0 - 1.0
 }

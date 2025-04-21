@@ -73,7 +73,7 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 		data.ColorG = cmn.SpzDecodeColor(colors[i*3+1])
 		data.ColorB = cmn.SpzDecodeColor(colors[i*3+2])
 		data.ColorA = alphas[i]
-		data.RotationX, data.RotationY, data.RotationZ, data.RotationW = cmn.SpzDecodeRotations(rotations[i*3], rotations[i*3+1], rotations[i*3+2])
+		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotations(rotations[i*3], rotations[i*3+1], rotations[i*3+2])
 		if h.ShDegree == 1 {
 			data.SH1 = shs[i*9 : i*9+9]
 		} else if h.ShDegree == 2 {

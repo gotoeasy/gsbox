@@ -18,10 +18,10 @@ type SplatData struct {
 	ColorG    uint8
 	ColorB    uint8
 	ColorA    uint8
+	RotationW uint8
 	RotationX uint8
 	RotationY uint8
 	RotationZ uint8
-	RotationW uint8
 	SH1       []uint8
 	SH2       []uint8
 	SH3       []uint8
@@ -36,11 +36,11 @@ func (s *SplatData) ToBytes() []byte {
 	bytes = append(bytes, cmn.Float32ToBytes(s.ScaleY)...)
 	bytes = append(bytes, cmn.Float32ToBytes(s.ScaleZ)...)
 	bytes = append(bytes, s.ColorR, s.ColorG, s.ColorB, s.ColorA)
-	bytes = append(bytes, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
+	bytes = append(bytes, s.RotationW, s.RotationX, s.RotationY, s.RotationZ)
 	return bytes
 }
 
 func (s *SplatData) ToString() string {
 	return fmt.Sprintf("%v, %v, %v; %v, %v, %v; %v, %v, %v, %v; %v, %v, %v, %v",
-		s.PositionX, s.PositionY, s.PositionZ, s.ScaleX, s.ScaleY, s.ScaleZ, s.ColorR, s.ColorG, s.ColorB, s.ColorA, s.RotationX, s.RotationY, s.RotationZ, s.RotationW)
+		s.PositionX, s.PositionY, s.PositionZ, s.ScaleX, s.ScaleY, s.ScaleZ, s.ColorR, s.ColorG, s.ColorB, s.ColorA, s.RotationW, s.RotationX, s.RotationY, s.RotationZ)
 }

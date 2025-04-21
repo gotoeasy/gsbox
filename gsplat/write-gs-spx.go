@@ -46,8 +46,6 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	} else if shDegree == 3 {
 		for i := range blockDatasList {
 			writeSpxBlockSH2(writer, blockDatasList[i])
-		}
-		for i := range blockDatasList {
 			writeSpxBlockSH3(writer, blockDatasList[i])
 		}
 	}
@@ -145,6 +143,9 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 		bts = append(bts, blockDatas[n].ColorA)
 	}
 	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].RotationW)
+	}
+	for n := range blockSplatCount {
 		bts = append(bts, blockDatas[n].RotationX)
 	}
 	for n := range blockSplatCount {
@@ -152,9 +153,6 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 	for n := range blockSplatCount {
 		bts = append(bts, blockDatas[n].RotationZ)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].RotationW)
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -253,21 +251,10 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 
 	if len(blockDatas[0].SH3) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH2...)
 			bts = append(bts, blockDatas[n].SH3...)
 		}
-	} else if len(blockDatas[0].SH2) > 0 {
-		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH2...)
-			bts = append(bts, make([]byte, 21)...)
-		}
-	} else if len(blockDatas[0].SH1) > 0 {
-		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH1...)
-			bts = append(bts, make([]byte, 36)...)
-		}
 	} else {
-		bts = append(bts, make([]byte, blockSplatCount*45)...)
+		bts = append(bts, make([]byte, blockSplatCount*21)...)
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {

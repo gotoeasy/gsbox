@@ -75,10 +75,10 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				splatData.ColorG = dataBytes[blockSplatCount*13+n]
 				splatData.ColorB = dataBytes[blockSplatCount*14+n]
 				splatData.ColorA = dataBytes[blockSplatCount*15+n]
-				splatData.RotationX = dataBytes[blockSplatCount*16+n]
-				splatData.RotationY = dataBytes[blockSplatCount*17+n]
-				splatData.RotationZ = dataBytes[blockSplatCount*18+n]
-				splatData.RotationW = dataBytes[blockSplatCount*19+n]
+				splatData.RotationW = dataBytes[blockSplatCount*16+n]
+				splatData.RotationX = dataBytes[blockSplatCount*17+n]
+				splatData.RotationY = dataBytes[blockSplatCount*18+n]
+				splatData.RotationZ = dataBytes[blockSplatCount*19+n]
 
 				i32x = x0 | (x1 << 8) | (x2 << 16)
 				if i32x&0x800000 > 0 {
