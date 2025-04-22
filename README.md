@@ -35,7 +35,7 @@
 - `.spx`格式说明 https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
 - `.spx`格式模型的渲染查看 https://github.com/reall3d-com/Reall3dViewer
 
-## 命令示例
+## Usage
 ```shell
 Usage:
   gsbox [options]
@@ -69,10 +69,10 @@ Examples:
   gsbox info -i /path/to/file.spx
 
 
-# 把3dgs的ply转成spx并添加自定义说明，不保存球谐系数
+# Convert the ply to spx without saving SH coefficients and add custom comments.
 gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
 
-# 查看spx的文件头信息
+# Inspect the header information of the spx file
 gsbox info -i /path/to/file.spx
 ```
 
