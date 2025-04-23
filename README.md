@@ -25,6 +25,11 @@
 - [x] 文件格式之间相互装换，支持`3DGS`的`.ply`、`.splat`、`.spx`、`.spz`格式
 - [x] 查看`.ply`、`.spx`、`.spz`的文件头信息或`.splat`的高斯点数量
 
+
+## TODO
+- 转换支持球谐系数
+
+
 ## `.spz`
 - `.spz`是个开放的3DGS模型格式，它的编码算法非常值得称赞，再加上gzip压缩，能有效减少模型文件大小
 - `.spz`格式官方开源地址 https://github.com/nianticlabs/spz
