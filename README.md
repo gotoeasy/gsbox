@@ -21,20 +21,20 @@
     <a href="https://github.com/gotoeasy/gsbox/blob/master/LICENSE"><img src="https://img.shields.io/github/license/gotoeasy/gsbox"></a>
 <p>
 
-## 功能
-- [x] 文件格式之间相互装换，支持`3DGS`的`.ply`、`.splat`、`.spx`、`.spz`格式
-- [x] 查看`.ply`、`.spx`、`.spz`的文件头信息或`.splat`的高斯点数量
+## Features
+- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz` formats for 3DGS.
+- [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or the number of Gaussian points in `.splat` files.
 
 
 ## `.spz`
-- `.spz`是个开放的3DGS模型格式，它的编码算法非常值得称赞，再加上gzip压缩，能有效减少模型文件大小
-- `.spz`格式官方开源地址 https://github.com/nianticlabs/spz
-- `.spz`格式模型的渲染查看 https://github.com/mkkellogg/GaussianSplats3D
+- The `.spz` format is an open 3DGS model format. Its encoding algorithm is highly commendable, and combined with gzip compression, it can significantly reduce the size of model files without any noticeable loss in visual quality.
+- The official open-source repository for the `.spz` format is available at https://github.com/nianticlabs/spz. This format is about 10x smaller than the equivalent PLY format and is offered as open source by Niantic Labs. More details can be found at https://scaniverse.com/spz.
+- For rendering and viewing `.spz` format models, you can refer to https://github.com/mkkellogg/GaussianSplats3D
 
 ## `.spx`
-- `.spx`格式灵活可扩充且支持专有数据保护，其开放格式综合参考了`.splat`和`.spz`的编码方式，并增加了分块压缩处理，支持渐进加载，支持大文件模型
-- `.spx`格式说明 https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_ZH.md
-- `.spx`格式模型的渲染查看 https://github.com/reall3d-com/Reall3dViewer
+- The `.spx` format is flexible, expandable, and supports proprietary data protection. It incorporates encoding methods from both `.splat` and `.spz` formats and adds block compression processing. It supports progressive loading and is suitable for large file models.
+- For detailed information about the `.spx` format, please refer to https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md
+- To render and view models in the `.spx` format, you can use https://github.com/reall3d-com/Reall3dViewer. This viewer is built on Three.js and supports features such as marking, measurements, and text watermarks.
 
 ## Usage
 ```shell
