@@ -26,10 +26,6 @@
 - [x] 查看`.ply`、`.spx`、`.spz`的文件头信息或`.splat`的高斯点数量
 
 
-## TODO
-- 转换支持球谐系数
-
-
 ## `.spz`
 - `.spz`是个开放的3DGS模型格式，它的编码算法非常值得称赞，再加上gzip压缩，能有效减少模型文件大小
 - `.spz`格式官方开源地址 https://github.com/nianticlabs/spz
@@ -49,15 +45,19 @@ Options:
   p2s, ply2splat           convert ply to splat
   p2x, ply2spx             convert ply to spx
   p2z, ply2spz             convert ply to spz
+  p2p, ply2ply             convert ply to ply
   s2p, splat2ply           convert splat to ply
   s2x, splat2spx           convert splat to spx
   s2z, splat2spz           convert splat to spz
+  s2s, splat2splat         convert splat to splat
   x2p, spx2ply             convert spx to ply
   x2s, spx2splat           convert spx to splat
   x2z, spx2spz             convert spx to spz
+  x2x, spx2spx             convert spx to spx
   z2p, spz2ply             convert spz to ply
   z2s, spz2splat           convert spz to splat
   z2x, spz2spx             convert spz to spx
+  z2z, spz2spz             convert spz to spz
   info <file>              display the model file information
   -i, --input <file>       specify the input file
   -o, --output <file>      specify the output file

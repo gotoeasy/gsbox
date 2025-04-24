@@ -26,68 +26,62 @@ func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) 
 func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 
 	bts := []byte{}
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                       // x
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                       // y
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                       // z
-	bts = append(bts, make([]byte, 3*4)...)                                             // nx, ny, nz
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255-0.5)/SH_C0)...) // f_dc_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255-0.5)/SH_C0)...) // f_dc_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255-0.5)/SH_C0)...) // f_dc_2
-	if shDegree == 1 {
-		if len(splatData.SH1) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                         // x
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                         // y
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                         // z
+	bts = append(bts, make([]byte, 3*4)...)                                               // nx, ny, nz
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255.0-0.5)/SH_C0)...) // f_dc_0
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255.0-0.5)/SH_C0)...) // f_dc_1
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255.0-0.5)/SH_C0)...) // f_dc_2
+
+	if shDegree > 0 {
+		shDim := 0
+		var shs []byte
+		if shDegree == 1 {
+			shDim = 3
+			if len(splatData.SH1) > 0 {
+				shs = append(shs, splatData.SH1...)
+			} else if len(splatData.SH2) > 0 {
+				shs = append(shs, splatData.SH2[:9]...)
 			}
-		} else if len(splatData.SH2) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_8
+		} else if shDegree == 2 {
+			shDim = 8
+			if len(splatData.SH1) > 0 {
+				shs = append(shs, splatData.SH1...)
+			} else if len(splatData.SH2) > 0 {
+				shs = append(shs, splatData.SH2...)
 			}
-		} else {
-			bts = append(bts, make([]byte, 4*9)...)
+		} else if shDegree == 3 {
+			shDim = 15
+			if len(splatData.SH3) > 0 {
+				shs = append(shs, splatData.SH2...)
+				shs = append(shs, splatData.SH3...)
+			} else if len(splatData.SH2) > 0 {
+				shs = append(shs, splatData.SH2...)
+			} else if len(splatData.SH1) > 0 {
+				shs = append(shs, splatData.SH1...)
+			}
 		}
-	} else if shDegree == 2 {
-		if len(splatData.SH1) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
-			}
-			bts = append(bts, make([]byte, 4*3*5)...)
-		} else if len(splatData.SH2) > 0 {
-			for i := range 24 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
-			}
-		} else {
-			bts = append(bts, make([]byte, 4*3*8)...)
+
+		for i := len(shs); i < 45; i++ {
+			shs = append(shs, cmn.EncodeSH(0))
 		}
-	} else if shDegree == 3 {
-		if len(splatData.SH3) > 0 {
-			for i := range 24 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
+
+		for c := range 3 {
+			for i := range shDim {
+				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(shs[c+i*3]))...)
 			}
-			for i := range 21 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH3[i]))...) // f_rest_24 ~ f_rest_44
-			}
-		} else if len(splatData.SH2) > 0 {
-			for i := range 24 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH2[i]))...) // f_rest_0 ~ f_rest_23
-			}
-			bts = append(bts, make([]byte, 4*3*7)...)
-		} else if len(splatData.SH1) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(splatData.SH1[i]))...) // f_rest_0 ~ f_rest_8
-			}
-			bts = append(bts, make([]byte, 4*3*12)...)
-		} else {
-			bts = append(bts, make([]byte, 4*3*15)...)
 		}
 	}
-	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1/(float64(splatData.ColorA)/255))-1))...) // opacity
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)              // scale_0
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)              // scale_1
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleZ)))...)              // scale_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128)/128)...)           // rot_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128)/128)...)           // rot_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128)/128)...)           // rot_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128)/128)...)           // rot_3
+
+	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1.0/(float64(splatData.ColorA)/255.0))-1.0))...) // opacity
+	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)                    // scale_0
+	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)                    // scale_1
+	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleZ)))...)                    // scale_2
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128.0)/128.0)...)             // rot_0
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128.0)/128.0)...)             // rot_1
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128.0)/128.0)...)             // rot_2
+	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128.0)/128.0)...)             // rot_3
 
 	return bts
 }

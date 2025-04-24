@@ -180,11 +180,15 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 
 	if len(blockDatas[0].SH1) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH1...)
+			for i := range 9 {
+				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH1[i]))
+			}
 		}
 	} else if len(blockDatas[0].SH2) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH2[0:9]...)
+			for i := range 9 {
+				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH2[i]))
+			}
 		}
 	} else {
 		bts = append(bts, make([]byte, blockSplatCount*9)...)
@@ -215,12 +219,16 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 
 	if len(blockDatas[0].SH1) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH1...)
+			for i := range 9 {
+				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH1[i]))
+			}
 			bts = append(bts, make([]byte, 15)...)
 		}
 	} else if len(blockDatas[0].SH2) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH2...)
+			for i := range 24 {
+				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH2[i]))
+			}
 		}
 	} else {
 		bts = append(bts, make([]byte, blockSplatCount*24)...)
@@ -251,7 +259,9 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 
 	if len(blockDatas[0].SH3) > 0 {
 		for n := range blockSplatCount {
-			bts = append(bts, blockDatas[n].SH3...)
+			for i := range 21 {
+				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH3[i]))
+			}
 		}
 	} else {
 		bts = append(bts, make([]byte, blockSplatCount*21)...)

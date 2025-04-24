@@ -435,23 +435,25 @@ func SpzDecodeColor(val uint8) uint8 {
 	return ClipUint8((0.5 + SH_C0*fColor) * 255.0)
 }
 
-func SpzEncodeSH1(val uint8) uint8 {
-	q := float64(DecodeSH(val))
-	q = math.Floor((q+4.0)/8.0) * 8.0
+func SpzEncodeSH1(encodeSHval uint8) uint8 {
+	q := math.Floor((float64(encodeSHval)+4.0)/8.0) * 8.0
 	return ClipUint8(q)
 }
-func SpzEncodeSH23(val uint8) uint8 {
-	q := float64(DecodeSH(val))
-	q = math.Floor((q+8.0)/16.0) * 16.0
+
+func SpzEncodeSH23(encodeSHval uint8) uint8 {
+	q := math.Floor((float64(encodeSHval)+8.0)/16.0) * 16.0
+	return ClipUint8(q)
+}
+
+func SpxEncodeSH(encodeSHval uint8) uint8 {
+	q := math.Floor((float64(encodeSHval)+4.0)/8.0) * 8.0
 	return ClipUint8(q)
 }
 
 func EncodeSH(val float64) uint8 {
-	val = math.Round(val*128.0) + 128.0
-	q := math.Floor((float64(val)+4.0)/8.0) * 8.0
-	return ClipUint8(q)
+	return ClipUint8(math.Round(val*128.0) + 128.0)
 }
 
 func DecodeSH(val uint8) float32 {
-	return float32(val)/128.0 - 1.0
+	return (float32(val) - 128.0) / 128.0
 }

@@ -47,14 +47,14 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 	if shDegree == 1 {
 		if len(rows[0].SH1) > 0 {
 			for i := range rows {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[j]))
+				for n := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
 				}
 			}
 		} else if len(rows[0].SH2) > 0 {
 			for i := range rows {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[j]))
+				for n := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[n]))
 				}
 			}
 		} else {
@@ -63,15 +63,15 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 	} else if shDegree == 2 {
 		if len(rows[0].SH1) > 0 {
 			for i := range rows {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[j]))
+				for n := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
 				}
 				bts = append(bts, make([]byte, 15)...)
 			}
 		} else if len(rows[0].SH2) > 0 {
 			for i := range rows {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[j]))
+				for n := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[n]))
 				}
 				for j := 9; j < 24; j++ {
 					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH2[j]))
@@ -89,7 +89,7 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 				for j := 9; j < 24; j++ {
 					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH2[j]))
 				}
-				for j := 0; j < 21; j++ {
+				for j := range 21 {
 					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH3[j]))
 				}
 			}
@@ -105,8 +105,8 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 			}
 		} else if len(rows[0].SH1) > 0 {
 			for i := range rows {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[j]))
+				for n := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
 				}
 				bts = append(bts, make([]byte, 36)...)
 			}

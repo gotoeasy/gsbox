@@ -20,7 +20,7 @@ func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 	return getPlyHeader(file, 2048)
 }
 
-func ReadPly(plyFile string, shDegree int, plyTypes ...string) []*SplatData {
+func ReadPly(plyFile string, plyTypes ...string) (*PlyHeader, []*SplatData) {
 	file, err := os.Open(plyFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -53,34 +53,46 @@ func ReadPly(plyFile string, shDegree int, plyTypes ...string) []*SplatData {
 		data.ColorA = cmn.ClipUint8((1.0 / (1.0 + math.Exp(-readValue(header, "opacity", dataBytes)))) * 255.0)
 
 		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
-		qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-		data.RotationW = cmn.ClipUint8((r0/qlen)*128.0 + 128.0)
-		data.RotationX = cmn.ClipUint8((r1/qlen)*128.0 + 128.0)
-		data.RotationY = cmn.ClipUint8((r2/qlen)*128.0 + 128.0)
-		data.RotationZ = cmn.ClipUint8((r3/qlen)*128.0 + 128.0)
+		data.RotationW = cmn.ClipUint8(r0*128.0 + 128.0)
+		data.RotationX = cmn.ClipUint8(r1*128.0 + 128.0)
+		data.RotationY = cmn.ClipUint8(r2*128.0 + 128.0)
+		data.RotationZ = cmn.ClipUint8(r3*128.0 + 128.0)
 
 		datas[i] = data
 
-		if shDegree == 1 {
-			for n := range 9 {
-				data.SH1 = append(data.SH1, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-			}
-		} else if shDegree == 2 {
-			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-			}
-		} else if shDegree == 3 {
-			for n := range 24 {
-				data.SH2 = append(data.SH2, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-			}
-			for n := 24; n < 45; n++ {
-				data.SH3 = append(data.SH3, cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(n), dataBytes)))
-			}
+		shDim := 0
+		maxShDegree := header.MaxShDegree()
+		if maxShDegree == 1 {
+			shDim = 3
+		} else if maxShDegree == 2 {
+			shDim = 5
+		} else if maxShDegree == 3 {
+			shDim = 15
 		}
 
+		shs := make([]byte, 45)
+		n := 0
+		for j := range shDim {
+			for c := range 3 {
+				shs[n] = cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), dataBytes))
+				n++
+			}
+		}
+		for ; n < 45; n++ {
+			shs[n] = cmn.EncodeSH(0)
+		}
+
+		if maxShDegree == 3 {
+			data.SH2 = shs[:24]
+			data.SH3 = shs[24:]
+		} else if maxShDegree == 2 {
+			data.SH2 = shs[:24]
+		} else if maxShDegree == 1 {
+			data.SH1 = shs[:9]
+		}
 	}
 
-	return datas
+	return header, datas
 }
 
 func readValue(header *PlyHeader, property string, splatDataBytes []byte) float64 {
