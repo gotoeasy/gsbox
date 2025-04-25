@@ -63,7 +63,7 @@ func ParseSpzHeader(bts []byte) *SpzHeader {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: Unsupported SH degree: " + cmn.IntToString(int(header.ShDegree))))
 	}
 	if header.FractionalBits != 12 {
-		// 仅支持这一种编码方式
+		// 仅支持这一种编码方式（坐标24位整数编码）
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: Unsupported FractionalBits: " + cmn.IntToString(int(header.FractionalBits))))
 	}
 

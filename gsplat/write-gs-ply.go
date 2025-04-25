@@ -3,7 +3,6 @@ package gsplat
 import (
 	"bufio"
 	"gsbox/cmn"
-	"math"
 	"os"
 )
 
@@ -26,13 +25,13 @@ func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) 
 func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 
 	bts := []byte{}
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                         // x
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                         // y
-	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                         // z
-	bts = append(bts, make([]byte, 3*4)...)                                               // nx, ny, nz
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorR)/255.0-0.5)/SH_C0)...) // f_dc_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorG)/255.0-0.5)/SH_C0)...) // f_dc_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.ColorB)/255.0-0.5)/SH_C0)...) // f_dc_2
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                    // x
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...)                    // y
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...)                    // z
+	bts = append(bts, make([]byte, 3*4)...)                                          // nx, ny, nz
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatColor(splatData.ColorR))...) // f_dc_0
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatColor(splatData.ColorG))...) // f_dc_1
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatColor(splatData.ColorB))...) // f_dc_2
 
 	if shDegree > 0 {
 		shDim := 0
@@ -64,24 +63,24 @@ func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 		}
 
 		for i := len(shs); i < 45; i++ {
-			shs = append(shs, cmn.EncodeSH(0))
+			shs = append(shs, cmn.EncodeSplatSH(0))
 		}
 
 		for c := range 3 {
 			for i := range shDim {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSH(shs[c+i*3]))...)
+				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatSH(shs[c+i*3]))...) // f_rest_0 ... f_rest_n
 			}
 		}
 	}
 
-	bts = append(bts, cmn.ToFloat32Bytes(-math.Log((1.0/(float64(splatData.ColorA)/255.0))-1.0))...) // opacity
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleX)))...)                    // scale_0
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleY)))...)                    // scale_1
-	bts = append(bts, cmn.ToFloat32Bytes(math.Log(float64(splatData.ScaleZ)))...)                    // scale_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationW)-128.0)/128.0)...)             // rot_0
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationX)-128.0)/128.0)...)             // rot_1
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationY)-128.0)/128.0)...)             // rot_2
-	bts = append(bts, cmn.ToFloat32Bytes((float64(splatData.RotationZ)-128.0)/128.0)...)             // rot_3
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatOpacity(splatData.ColorA))...)     // opacity
+	bts = append(bts, cmn.Float32ToBytes(splatData.ScaleX)...)                             // scale_0
+	bts = append(bts, cmn.Float32ToBytes(splatData.ScaleY)...)                             // scale_1
+	bts = append(bts, cmn.Float32ToBytes(splatData.ScaleZ)...)                             // scale_2
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatRotation(splatData.RotationW))...) // rot_0
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatRotation(splatData.RotationX))...) // rot_1
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatRotation(splatData.RotationY))...) // rot_2
+	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatRotation(splatData.RotationZ))...) // rot_3
 
 	return bts
 }
@@ -92,8 +91,7 @@ func genPlyHeader(count int, comment string, shDegree int) string {
 	lines = append(lines, "format binary_little_endian 1.0")
 	lines = append(lines, "element vertex "+cmn.IntToString(count))
 	if comment != "" {
-		comment = cmn.ReplaceAll(comment, "\r", "\\r")
-		comment = cmn.ReplaceAll(comment, "\n", "\\n")
+		_, comment = cmn.RemoveNonASCII(comment)
 		lines = append(lines, "comment "+comment)
 	}
 	lines = append(lines, "property float x")

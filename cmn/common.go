@@ -390,19 +390,18 @@ func SpzDecodePosition(bts []byte, fractionalBits uint8) float32 {
 	scale := 1.0 / float64(int(1<<fractionalBits))
 	fixed32 := int32(bts[0]) | int32(bts[1])<<8 | int32(bts[2])<<16
 	if fixed32&0x800000 != 0 {
-		fixed32 |= int32(-1) << 24 // 如果符号位为1，将高8位填充为1
+		// fixed32 |= int32(-1) << 24 // 如果符号位为1，将高8位填充为1
+		fixed32 |= -0x1000000
 	}
 	return ClipFloat32(float64(fixed32) * scale)
 }
 
 func SpzEncodeScale(val float32) uint8 {
-	scale := math.Log(float64(val))
-	return ClipUint8Round((scale + 10.0) * 16.0)
+	return ClipUint8Round((float64(val) + 10.0) * 16.0)
 }
 
 func SpzDecodeScale(val uint8) float32 {
-	scale := float64(val)/16.0 - 10.0
-	return ClipFloat32(math.Exp(scale))
+	return float32(val)/16.0 - 10.0
 }
 
 func SpzEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
@@ -445,15 +444,68 @@ func SpzEncodeSH23(encodeSHval uint8) uint8 {
 	return ClipUint8(q)
 }
 
-func SpxEncodeSH(encodeSHval uint8) uint8 {
-	q := math.Floor((float64(encodeSHval)+4.0)/8.0) * 8.0
-	return ClipUint8(q)
+// ------------------ Splat ------------------
+func EncodeSplatScale(val float32) float32 {
+	return ClipFloat32(math.Exp(float64(val)))
+}
+func DecodeSplatScale(encodedVal float32) float32 {
+	return ClipFloat32(math.Log(float64(encodedVal)))
 }
 
-func EncodeSH(val float64) uint8 {
+func EncodeSplatColor(val float64) uint8 {
+	return ClipUint8((0.5 + SH_C0*val) * 255.0)
+}
+func DecodeSplatColor(val uint8) float32 {
+	return ClipFloat32((float64(val)/255.0 - 0.5) / SH_C0)
+}
+
+func EncodeSplatOpacity(val float64) uint8 {
+	return ClipUint8((1.0 / (1.0 + math.Exp(-val))) * 255.0)
+}
+func DecodeSplatOpacity(val uint8) float32 {
+	return ClipFloat32(-math.Log((1.0 / (float64(val) / 255.0)) - 1.0))
+}
+
+func EncodeSplatRotation(val float64) uint8 {
+	return ClipUint8(val*128.0 + 128.0)
+}
+func DecodeSplatRotation(val uint8) float32 {
+	return (float32(val) - 128.0) / 128.0
+}
+
+func EncodeSplatSH(val float64) uint8 {
 	return ClipUint8(math.Round(val*128.0) + 128.0)
 }
-
-func DecodeSH(val uint8) float32 {
+func DecodeSplatSH(val uint8) float32 {
 	return (float32(val) - 128.0) / 128.0
+}
+
+// ------------------ SPX ------------------
+func EncodeSpxPositionUint24(val float32) []byte {
+	fixed32 := int32(math.Round(float64(val) * 4096.0))
+	return []byte{
+		byte(fixed32 & 0xFF),         // 最低字节
+		byte((fixed32 >> 8) & 0xFF),  // 中间字节
+		byte((fixed32 >> 16) & 0xFF), // 最高字节
+	}
+}
+func DecodeSpxPositionUint24(b0 uint8, b1 uint8, b2 uint8) float32 {
+	i32 := int32(b0) | (int32(b1) << 8) | (int32(b2) << 16)
+	if i32&0x800000 > 0 {
+		i32 |= -0x1000000
+	}
+	return float32(i32) / 4096.0
+}
+
+func EncodeSpxScale(val float32) uint8 {
+	return ClipUint8Round((float64(val) + 10.0) * 16.0)
+}
+
+func DecodeSpxScale(val uint8) float32 {
+	return float32(val)/16.0 - 10.0
+}
+
+func EncodeSpxSH(encodeSHval uint8) uint8 {
+	q := math.Floor((float64(encodeSHval)+4.0)/8.0) * 8.0
+	return ClipUint8(q)
 }

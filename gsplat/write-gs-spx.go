@@ -12,14 +12,14 @@ import (
 const BlockSize = 20480
 const MinGzipBlockSize = 64
 
-func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
+func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
 
-	header := genSpx1Header(rows, comment, shDegree)
+	header := genSpx1Header(rows, comment, shDegree, flag1)
 	_, err = writer.Write(header.ToSpx1Bytes())
 	cmn.ExitOnError(err)
 
@@ -54,7 +54,7 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	cmn.ExitOnError(err)
 }
 
-func genSpx1Header(datas []*SplatData, comment string, shDegree int) *SpxHeader {
+func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8) *SpxHeader {
 
 	header := new(SpxHeader)
 	header.Fixed = "spx"
@@ -64,7 +64,10 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int) *SpxHeader 
 	header.CreateDate = cmn.GetSystemDateYYYYMMDD() // 创建日期
 	header.CreaterId = 1202056903                   // 0:官方默认识别号，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
 	header.ExclusiveId = 0                          // 0:官方开放格式的识别号
-	header.ShDegree = int32(shDegree)
+	header.ShDegree = uint8(shDegree)
+	header.Flag1 = flag1
+	header.Flag2 = 0
+	header.Flag3 = 0
 	header.Reserve1 = 0
 	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
@@ -113,22 +116,22 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	bts = append(bts, cmn.Uint32ToBytes(20)...)                      // 开放的块数据格式 20:splat20重排
 
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToBytes3(blockDatas[n].PositionX)...)
+		bts = append(bts, cmn.EncodeSpxPositionUint24(blockDatas[n].PositionX)...)
 	}
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToBytes3(blockDatas[n].PositionY)...)
+		bts = append(bts, cmn.EncodeSpxPositionUint24(blockDatas[n].PositionY)...)
 	}
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToBytes3(blockDatas[n].PositionZ)...)
+		bts = append(bts, cmn.EncodeSpxPositionUint24(blockDatas[n].PositionZ)...)
 	}
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToByte(blockDatas[n].ScaleX))
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleX))
 	}
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToByte(blockDatas[n].ScaleY))
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleY))
 	}
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeFloat32ToByte(blockDatas[n].ScaleZ))
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleZ))
 	}
 	for n := range blockSplatCount {
 		bts = append(bts, blockDatas[n].ColorR)
@@ -181,17 +184,19 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	if len(blockDatas[0].SH1) > 0 {
 		for n := range blockSplatCount {
 			for i := range 9 {
-				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH1[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
 			}
 		}
 	} else if len(blockDatas[0].SH2) > 0 {
 		for n := range blockSplatCount {
 			for i := range 9 {
-				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH2[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
 			}
 		}
 	} else {
-		bts = append(bts, make([]byte, blockSplatCount*9)...)
+		for range blockSplatCount * 9 {
+			bts = append(bts, cmn.EncodeSpxSH(cmn.EncodeSplatSH(0.0)))
+		}
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -220,18 +225,22 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 	if len(blockDatas[0].SH1) > 0 {
 		for n := range blockSplatCount {
 			for i := range 9 {
-				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH1[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
 			}
-			bts = append(bts, make([]byte, 15)...)
+			for range 15 {
+				bts = append(bts, cmn.EncodeSplatSH(0.0))
+			}
 		}
 	} else if len(blockDatas[0].SH2) > 0 {
 		for n := range blockSplatCount {
 			for i := range 24 {
-				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH2[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
 			}
 		}
 	} else {
-		bts = append(bts, make([]byte, blockSplatCount*24)...)
+		for range blockSplatCount * 24 {
+			bts = append(bts, cmn.EncodeSplatSH(0.0))
+		}
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {
@@ -260,11 +269,13 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 	if len(blockDatas[0].SH3) > 0 {
 		for n := range blockSplatCount {
 			for i := range 21 {
-				bts = append(bts, cmn.SpxEncodeSH(blockDatas[n].SH3[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH3[i]))
 			}
 		}
 	} else {
-		bts = append(bts, make([]byte, blockSplatCount*21)...)
+		for range blockSplatCount * 21 {
+			bts = append(bts, cmn.EncodeSplatSH(0.0))
+		}
 	}
 
 	if blockSplatCount >= MinGzipBlockSize {

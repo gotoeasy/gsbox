@@ -40,6 +40,10 @@ func ReadSplat(splatFile string) []*SplatData {
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[29:30]), binary.LittleEndian, &splatData.RotationX))
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[30:31]), binary.LittleEndian, &splatData.RotationY))
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatBytes[31:32]), binary.LittleEndian, &splatData.RotationZ))
+
+		splatData.ScaleX = cmn.DecodeSplatScale(splatData.ScaleX)
+		splatData.ScaleY = cmn.DecodeSplatScale(splatData.ScaleY)
+		splatData.ScaleZ = cmn.DecodeSplatScale(splatData.ScaleZ)
 		datas[i] = splatData
 	}
 

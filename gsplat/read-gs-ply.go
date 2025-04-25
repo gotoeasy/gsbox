@@ -6,9 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"gsbox/cmn"
-	"math"
 	"os"
-	"sort"
 )
 
 const SH_C0 float64 = 0.28209479177387814
@@ -44,19 +42,17 @@ func ReadPly(plyFile string, plyTypes ...string) (*PlyHeader, []*SplatData) {
 		data.PositionX = cmn.ClipFloat32(readValue(header, "x", dataBytes))
 		data.PositionY = cmn.ClipFloat32(readValue(header, "y", dataBytes))
 		data.PositionZ = cmn.ClipFloat32(readValue(header, "z", dataBytes))
-		data.ScaleX = cmn.ClipFloat32(math.Exp(readValue(header, "scale_0", dataBytes)))
-		data.ScaleY = cmn.ClipFloat32(math.Exp(readValue(header, "scale_1", dataBytes)))
-		data.ScaleZ = cmn.ClipFloat32(math.Exp(readValue(header, "scale_2", dataBytes)))
-		data.ColorR = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_0", dataBytes)) * 255.0)
-		data.ColorG = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_1", dataBytes)) * 255.0)
-		data.ColorB = cmn.ClipUint8((0.5 + SH_C0*readValue(header, "f_dc_2", dataBytes)) * 255.0)
-		data.ColorA = cmn.ClipUint8((1.0 / (1.0 + math.Exp(-readValue(header, "opacity", dataBytes)))) * 255.0)
-
-		r0, r1, r2, r3 := readValue(header, "rot_0", dataBytes), readValue(header, "rot_1", dataBytes), readValue(header, "rot_2", dataBytes), readValue(header, "rot_3", dataBytes)
-		data.RotationW = cmn.ClipUint8(r0*128.0 + 128.0)
-		data.RotationX = cmn.ClipUint8(r1*128.0 + 128.0)
-		data.RotationY = cmn.ClipUint8(r2*128.0 + 128.0)
-		data.RotationZ = cmn.ClipUint8(r3*128.0 + 128.0)
+		data.ScaleX = cmn.ClipFloat32(readValue(header, "scale_0", dataBytes))
+		data.ScaleY = cmn.ClipFloat32(readValue(header, "scale_1", dataBytes))
+		data.ScaleZ = cmn.ClipFloat32(readValue(header, "scale_2", dataBytes))
+		data.ColorR = cmn.EncodeSplatColor(readValue(header, "f_dc_0", dataBytes))
+		data.ColorG = cmn.EncodeSplatColor(readValue(header, "f_dc_1", dataBytes))
+		data.ColorB = cmn.EncodeSplatColor(readValue(header, "f_dc_2", dataBytes))
+		data.ColorA = cmn.EncodeSplatOpacity(readValue(header, "opacity", dataBytes))
+		data.RotationW = cmn.EncodeSplatRotation(readValue(header, "rot_0", dataBytes))
+		data.RotationX = cmn.EncodeSplatRotation(readValue(header, "rot_1", dataBytes))
+		data.RotationY = cmn.EncodeSplatRotation(readValue(header, "rot_2", dataBytes))
+		data.RotationZ = cmn.EncodeSplatRotation(readValue(header, "rot_3", dataBytes))
 
 		datas[i] = data
 
@@ -74,12 +70,12 @@ func ReadPly(plyFile string, plyTypes ...string) (*PlyHeader, []*SplatData) {
 		n := 0
 		for j := range shDim {
 			for c := range 3 {
-				shs[n] = cmn.EncodeSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), dataBytes))
+				shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), dataBytes))
 				n++
 			}
 		}
 		for ; n < 45; n++ {
-			shs[n] = cmn.EncodeSH(0)
+			shs[n] = cmn.EncodeSplatSH(0)
 		}
 
 		if maxShDegree == 3 {
@@ -134,12 +130,4 @@ func readValue(header *PlyHeader, property string, splatDataBytes []byte) float6
 	fmt.Println("Unsupported property:", "property", typename, property)
 	os.Exit(1)
 	return 0
-}
-
-// 排序
-func Sort(rows []*SplatData) {
-	sort.Slice(rows, func(i, j int) bool {
-		return math.Exp(float64(rows[i].ScaleX+rows[i].ScaleY+rows[i].ScaleZ))*float64(rows[i].ColorA) <
-			math.Exp(float64(rows[j].ScaleX+rows[j].ScaleY+rows[j].ScaleZ))*float64(rows[j].ColorA)
-	})
 }
