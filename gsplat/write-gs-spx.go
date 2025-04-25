@@ -12,15 +12,15 @@ import (
 const BlockSize = 20480
 const MinGzipBlockSize = 64
 
-func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8) {
+func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
 	writer := bufio.NewWriter(file)
 
-	header := genSpx1Header(rows, comment, shDegree, flag1)
-	_, err = writer.Write(header.ToSpx1Bytes())
+	header := genSpxHeader(rows, comment, shDegree, flag1, flag2, flag3)
+	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
 	var blockDatasList [][]*SplatData
@@ -54,7 +54,7 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, f
 	cmn.ExitOnError(err)
 }
 
-func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8) *SpxHeader {
+func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) *SpxHeader {
 
 	header := new(SpxHeader)
 	header.Fixed = "spx"
@@ -66,8 +66,8 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8
 	header.ExclusiveId = 0                          // 0:官方开放格式的识别号
 	header.ShDegree = uint8(shDegree)
 	header.Flag1 = flag1
-	header.Flag2 = 0
-	header.Flag3 = 0
+	header.Flag2 = flag2
+	header.Flag3 = flag3
 	header.Reserve1 = 0
 	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
@@ -102,22 +102,24 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8
 		header.MinZ = cmn.ToFloat32(minZ)
 		header.MaxZ = cmn.ToFloat32(maxZ)
 
-		// MaxRadius, TopY
+		// TopY
 		centerX := cmn.ToFloat32((maxX + minX) / 2)
 		centerY := cmn.ToFloat32((maxY + minY) / 2)
 		centerZ := cmn.ToFloat32((maxZ + minZ) / 2)
-		header.MaxRadius = cmn.ToFloat32(math.Sqrt(float64((centerX-header.MaxX)*(centerX-header.MaxX) +
-			(centerY-header.MaxY)*(centerY-header.MaxY) +
-			(centerZ-header.MaxZ)*(centerZ-header.MaxZ))))
+		radius10 := math.Sqrt(float64((centerX-header.MaxX)*(centerX-header.MaxX)+
+			(centerY-header.MaxY)*(centerY-header.MaxY)+
+			(centerZ-header.MaxZ)*(centerZ-header.MaxZ))) * 0.1
 
-		rdius10 := float64(header.MaxRadius * 0.1)
-		topY := math.MaxFloat32 // 模型是Y轴倒立
+		minTopY := math.MaxFloat32
+		maxTopY := -math.MaxFloat32
 		for i := range datas {
-			if math.Sqrt(float64(datas[i].PositionX)*float64(datas[i].PositionX)+float64(datas[i].PositionZ)*float64(datas[i].PositionZ)) <= rdius10 {
-				topY = math.Min(topY, float64(datas[i].PositionY))
+			if math.Sqrt(float64(datas[i].PositionX)*float64(datas[i].PositionX)+float64(datas[i].PositionZ)*float64(datas[i].PositionZ)) <= radius10 {
+				minTopY = math.Min(minTopY, float64(datas[i].PositionY))
+				maxTopY = math.Max(maxTopY, float64(datas[i].PositionY))
 			}
 		}
-		header.TopY = cmn.ToFloat32(topY)
+		header.MinTopY = cmn.ToFloat32(minTopY)
+		header.MaxTopY = cmn.ToFloat32(maxTopY)
 	}
 
 	return header
@@ -212,7 +214,7 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 		}
 	} else {
 		for range blockSplatCount * 9 {
-			bts = append(bts, cmn.EncodeSpxSH(cmn.EncodeSplatSH(0.0)))
+			bts = append(bts, cmn.EncodeSplatSH(0.0))
 		}
 	}
 

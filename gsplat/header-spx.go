@@ -31,10 +31,10 @@ type SpxHeader struct {
 	MinZ float32
 	/** Model bounding box vertices */
 	MaxZ float32
-	/** Center height */
-	TopY float32
-	/** Maximum radius */
-	MaxRadius float32
+	/** Min Center height */
+	MinTopY float32
+	/** Max Center height */
+	MaxTopY float32
 	/** Creation date (YYYYMMDD) */
 	CreateDate uint32
 	/** Creator identifier, 0 represents official tools */
@@ -63,7 +63,7 @@ func (h *SpxHeader) IsValid() bool {
 	return h.checkHash
 }
 
-func (h *SpxHeader) ToSpx1Bytes() []byte {
+func (h *SpxHeader) ToBytes() []byte {
 	bts := make([]byte, 0)
 	bts = append(bts, h.Fixed...)
 	bts = append(bts, h.Version)
@@ -74,8 +74,8 @@ func (h *SpxHeader) ToSpx1Bytes() []byte {
 	bts = append(bts, cmn.Float32ToBytes(h.MaxY)...)
 	bts = append(bts, cmn.Float32ToBytes(h.MinZ)...)
 	bts = append(bts, cmn.Float32ToBytes(h.MaxZ)...)
-	bts = append(bts, cmn.Float32ToBytes(h.TopY)...)
-	bts = append(bts, cmn.Float32ToBytes(h.MaxRadius)...)
+	bts = append(bts, cmn.Float32ToBytes(h.MinTopY)...)
+	bts = append(bts, cmn.Float32ToBytes(h.MaxTopY)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.CreateDate)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.CreaterId)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.ExclusiveId)...)
@@ -120,8 +120,8 @@ func readSpxHeader(bts []byte) *SpxHeader {
 		MaxY:        cmn.BytesToFloat32(bts[20:24]),
 		MinZ:        cmn.BytesToFloat32(bts[24:28]),
 		MaxZ:        cmn.BytesToFloat32(bts[28:32]),
-		TopY:        cmn.BytesToFloat32(bts[32:36]),
-		MaxRadius:   cmn.BytesToFloat32(bts[36:40]),
+		MinTopY:     cmn.BytesToFloat32(bts[32:36]),
+		MaxTopY:     cmn.BytesToFloat32(bts[36:40]),
 		CreateDate:  cmn.BytesToUint32(bts[40:44]),
 		CreaterId:   cmn.BytesToUint32(bts[44:48]),
 		ExclusiveId: cmn.BytesToUint32(bts[48:52]),
@@ -148,6 +148,6 @@ func readSpxHeader(bts []byte) *SpxHeader {
 }
 
 func (h *SpxHeader) ToStringSpx() string {
-	return fmt.Sprintf("3DGS model format spx\nSpx version : %v\nSplatCount  : %v\nMinX, MaxX  : %v, %v\nMinY, MaxY  : %v, %v\nMinZ, MaxZ  : %v, %v\nTopY        : %v\nMaxRadius   : %v\nCreateDate  : %v\nCreaterId   : %v\nExclusiveId : %v\nShDegree    : %v\nFlag1       : %v\nFlag2       : %v\nFlag3       : %v\nComment     : %v\nHash        : %v (%v)",
-		h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.TopY, h.MaxRadius, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.Flag1, h.Flag2, h.Flag3, h.Comment, h.Hash, h.checkHash)
+	return fmt.Sprintf("3DGS model format spx\nSpx version : %v\nSplatCount  : %v\nMinX, MaxX  : %v, %v\nMinY, MaxY  : %v, %v\nMinZ, MaxZ  : %v, %v\nMinTopY     : %v\nMaxTopY     : %v\nCreateDate  : %v\nCreaterId   : %v\nExclusiveId : %v\nShDegree    : %v\nFlag1       : %v\nFlag2       : %v\nFlag3       : %v\nComment     : %v\nHash        : %v (%v)",
+		h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.Flag1, h.Flag2, h.Flag3, h.Comment, h.Hash, h.checkHash)
 }
