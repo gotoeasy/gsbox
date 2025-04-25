@@ -170,9 +170,9 @@ func ply2spx(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(header.MaxShDegree(), args)
-	flag1 := getArgFlag1(0, args)
-	flag2 := getArgFlag1(0, args)
-	flag3 := getArgFlag1(0, args)
+	flag1 := getArgFlag(0, args, "-f1", "--flag1")
+	flag2 := getArgFlag(0, args, "-f2", "--flag2")
+	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -219,9 +219,9 @@ func splat2spx(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(0, args)
-	flag1 := getArgFlag1(0, args)
-	flag2 := getArgFlag1(0, args)
-	flag3 := getArgFlag1(0, args)
+	flag1 := getArgFlag(0, args, "-f1", "--flag1")
+	flag2 := getArgFlag(0, args, "-f2", "--flag2")
+	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -282,9 +282,9 @@ func spx2spx(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(int(header.ShDegree), args)
-	flag1 := getArgFlag1(header.Flag1, args)
-	flag2 := getArgFlag1(header.Flag2, args)
-	flag3 := getArgFlag1(header.Flag3, args)
+	flag1 := getArgFlag(0, args, "-f1", "--flag1")
+	flag2 := getArgFlag(0, args, "-f2", "--flag2")
+	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -319,9 +319,9 @@ func spz2spx(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(int(header.ShDegree), args)
-	flag1 := getArgFlag1(0, args)
-	flag2 := getArgFlag1(0, args)
-	flag3 := getArgFlag1(0, args)
+	flag1 := getArgFlag(0, args, "-f1", "--flag1")
+	flag2 := getArgFlag(0, args, "-f2", "--flag2")
+	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
 	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
@@ -361,13 +361,13 @@ func getArgShDegree(dataShDegree int, args *cmn.OsArgs) int {
 	return shDegree
 }
 
-func getArgFlag1(flag uint8, args *cmn.OsArgs) uint8 {
-	flag1 := flag
-	if args.HasArg("-f1", "--flag1") {
-		val := cmn.StringToInt(args.GetArgIgnorecase("-f1", "--flag1"), -1)
+func getArgFlag(defaultFlag uint8, args *cmn.OsArgs, arg1 string, arg2 string) uint8 {
+	flag := defaultFlag
+	if args.HasArg(arg1, arg2) {
+		val := cmn.StringToInt(args.GetArgIgnorecase(arg1, arg2), -1)
 		if val >= 0 && val < 256 {
-			flag1 = uint8(val)
+			flag = uint8(val)
 		}
 	}
-	return flag1
+	return flag
 }
