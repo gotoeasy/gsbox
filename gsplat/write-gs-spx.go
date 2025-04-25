@@ -84,15 +84,15 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8
 		minY := float64(datas[0].PositionY)
 		minZ := float64(datas[0].PositionZ)
 		maxX := float64(datas[0].PositionX)
-		maxY := float64(datas[0].PositionY) // 模型是Y轴倒立
+		maxY := float64(datas[0].PositionY)
 		maxZ := float64(datas[0].PositionZ)
 
 		for i := 1; i < len(datas); i++ {
 			minX = math.Min(minX, float64(datas[i].PositionX))
-			minY = math.Max(minY, float64(datas[i].PositionY))
+			minY = math.Min(minY, float64(datas[i].PositionY))
 			minZ = math.Min(minZ, float64(datas[i].PositionZ))
 			maxX = math.Max(maxX, float64(datas[i].PositionX))
-			maxY = math.Min(maxY, float64(datas[i].PositionY))
+			maxY = math.Max(maxY, float64(datas[i].PositionY))
 			maxZ = math.Max(maxZ, float64(datas[i].PositionZ))
 		}
 		header.MinX = cmn.ToFloat32(minX)
@@ -111,7 +111,7 @@ func genSpx1Header(datas []*SplatData, comment string, shDegree int, flag1 uint8
 			(centerZ-header.MaxZ)*(centerZ-header.MaxZ))))
 
 		rdius10 := float64(header.MaxRadius * 0.1)
-		topY := math.MaxFloat32
+		topY := math.MaxFloat32 // 模型是Y轴倒立
 		for i := range datas {
 			if math.Sqrt(float64(datas[i].PositionX)*float64(datas[i].PositionX)+float64(datas[i].PositionZ)*float64(datas[i].PositionZ)) <= rdius10 {
 				topY = math.Min(topY, float64(datas[i].PositionY))
