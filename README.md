@@ -61,8 +61,11 @@ Options:
   info <file>              display the model file information
   -i, --input <file>       specify the input file
   -o, --output <file>      specify the output file
-  -c, --comment <text>     output ply/spx with the comment
+  -c, --comment <text>     specify the comment for ply/spx output
   -sh, --shDegree <num>    specify the SH degree for ply/spx/spz output
+  -f1, --flag1 <num>       specify the header flag1 for spx output
+  -f2, --flag2 <num>       specify the header flag2 for spx output
+  -f3, --flag3 <num>       specify the header flag3 for spx output
   -v, --version            display version information
   -h, --help               display help information
 
