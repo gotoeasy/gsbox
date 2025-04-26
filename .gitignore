@@ -5,6 +5,7 @@
 *.dll
 *.so
 *.dylib
+*.zip
 /gsbox
 
 # Test binary, built with `go test -c`
