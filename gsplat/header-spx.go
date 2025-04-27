@@ -8,6 +8,9 @@ import (
 	"strings"
 )
 
+/** 创建者ID */
+const ID1202056903 uint32 = 1202056903
+
 /** spx文件头长度 */
 const HeaderSizeSpx = 128
 
@@ -102,7 +105,11 @@ func ParseSpxHeader(spxFile string) *SpxHeader {
 	}
 
 	if bs[0] == 's' && bs[1] == 'p' && bs[2] == 'x' && bs[3] == 1 {
-		return readSpxHeader(bs)
+		header := readSpxHeader(bs)
+		if header.ExclusiveId != 0 {
+			cmn.ExitOnError(errors.New("unknown exclusive id: " + cmn.Uint32ToString(header.ExclusiveId))) // 内含不识别的专属格式时，退出
+		}
+		return header
 	}
 
 	cmn.ExitOnError(errors.New("unknown format: " + spxFile))
