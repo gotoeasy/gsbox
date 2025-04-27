@@ -7,6 +7,8 @@ import (
 	"sort"
 )
 
+var Args *cmn.OsArgs
+
 const SPLAT_DATA_SIZE = 3*4 + 3*4 + 4 + 4
 
 type SplatData struct {

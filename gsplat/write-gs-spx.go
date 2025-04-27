@@ -9,7 +9,6 @@ import (
 	"sort"
 )
 
-const BlockSize = 20480
 const MinGzipBlockSize = 64
 
 func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) {
@@ -19,16 +18,25 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, f
 
 	writer := bufio.NewWriter(file)
 
+	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), 20480)
+	if blockSize <= 0 {
+		blockSize = len(rows) // 所有数据放到一个块
+	} else if blockSize < MinGzipBlockSize {
+		blockSize = MinGzipBlockSize // 最小
+	} else if blockSize > 512000 {
+		blockSize = 512000 // 最大512000
+	}
+
 	header := genSpxHeader(rows, comment, shDegree, flag1, flag2, flag3)
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
 	var blockDatasList [][]*SplatData
-	blockCnt := (int(header.SplatCount) + BlockSize - 1) / BlockSize
+	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
 	for i := range blockCnt {
 		blockDatas := make([]*SplatData, 0)
-		max := min(i*BlockSize+BlockSize, int(header.SplatCount))
-		for n := i * BlockSize; n < max; n++ {
+		max := min(i*blockSize+blockSize, int(header.SplatCount))
+		for n := i * blockSize; n < max; n++ {
 			blockDatas = append(blockDatas, rows[n])
 		}
 		writeSpxBlockSplat20(writer, blockDatas, len(blockDatas))

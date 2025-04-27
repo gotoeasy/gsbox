@@ -11,6 +11,7 @@ import (
 
 func main() {
 	args := cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
+	gsplat.Args = args
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
@@ -90,6 +91,7 @@ func usage() {
 	fmt.Println("  -i, --input <file>       specify the input file")
 	fmt.Println("  -o, --output <file>      specify the output file")
 	fmt.Println("  -c, --comment <text>     specify the comment for ply/spx output")
+	fmt.Println("  -bs, --block-size <num>  specify the block size for spx output (default 20480)")
 	fmt.Println("  -sh, --shDegree <num>    specify the SH degree for ply/spx/spz output")
 	fmt.Println("  -f1, --flag1 <num>       specify the header flag1 for spx output")
 	fmt.Println("  -f2, --flag2 <num>       specify the header flag2 for spx output")
@@ -99,7 +101,7 @@ func usage() {
 	fmt.Println("")
 	fmt.Println("Examples:")
 	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
-	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\" -sh 3")
+	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\" -bs 10240")
 	fmt.Println("  gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0")
 	fmt.Println("  gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c \"your comment\"")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
