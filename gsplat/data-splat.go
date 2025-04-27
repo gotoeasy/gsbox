@@ -37,8 +37,9 @@ func (s *SplatData) ToString() string {
 }
 
 func Sort(rows []*SplatData) {
+	// https://github.com/antimatter15/splat/blob/main/convert.py
 	sort.Slice(rows, func(i, j int) bool {
-		return math.Exp(float64(cmn.EncodeSplatScale(rows[i].ScaleX)+cmn.EncodeSplatScale(rows[i].ScaleY)+cmn.EncodeSplatScale(rows[i].ScaleZ)))*float64(rows[i].ColorA) <
-			math.Exp(float64(cmn.EncodeSplatScale(rows[j].ScaleX)+cmn.EncodeSplatScale(rows[j].ScaleY)+cmn.EncodeSplatScale(rows[j].ScaleZ)))*float64(rows[j].ColorA)
+		return math.Exp(float64(cmn.EncodeSplatScale(rows[i].ScaleX)+cmn.EncodeSplatScale(rows[i].ScaleY)+cmn.EncodeSplatScale(rows[i].ScaleZ)))/(1.0+math.Exp(float64(rows[i].ColorA))) <
+			math.Exp(float64(cmn.EncodeSplatScale(rows[j].ScaleX)+cmn.EncodeSplatScale(rows[j].ScaleY)+cmn.EncodeSplatScale(rows[j].ScaleZ)))/(1.0+math.Exp(float64(rows[i].ColorA)))
 	})
 }
