@@ -118,10 +118,10 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8,
 			(centerY-header.MaxY)*(centerY-header.MaxY)+
 			(centerZ-header.MaxZ)*(centerZ-header.MaxZ))) * 0.1
 
-		minTopY := math.MaxFloat32
-		maxTopY := -math.MaxFloat32
+		minTopY := 30.0
+		maxTopY := -30.0
 		for i := range datas {
-			if math.Sqrt(float64(datas[i].PositionX)*float64(datas[i].PositionX)+float64(datas[i].PositionZ)*float64(datas[i].PositionZ)) <= radius10 {
+			if math.Abs(float64(datas[i].PositionY)) < 30 && math.Sqrt(float64(datas[i].PositionX)*float64(datas[i].PositionX)+float64(datas[i].PositionZ)*float64(datas[i].PositionZ)) <= radius10 {
 				minTopY = math.Min(minTopY, float64(datas[i].PositionY))
 				maxTopY = math.Max(maxTopY, float64(datas[i].PositionY))
 			}
