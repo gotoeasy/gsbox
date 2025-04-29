@@ -101,7 +101,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 			n3 += blockSplatCount
 		} else {
 			// 存在无法识别读取的专有格式数据
-			cmn.ExitOnError(errors.New("unreadable proprietary data exists"))
+			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
 		}
 
 	}
