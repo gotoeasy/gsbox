@@ -3,6 +3,7 @@ package gsplat
 import (
 	"fmt"
 	"gsbox/cmn"
+	"log"
 	"math"
 	"sort"
 )
@@ -55,6 +56,8 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		for _, data := range datas {
 			data.Rotate(degreeX, degreeY, degreeZ, shr)
 		}
+
+		log.Println("[Transform] Rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
 	}
 
 	// 2, 缩放
@@ -63,6 +66,7 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		for _, data := range datas {
 			data.Scale(scale)
 		}
+		log.Println("[Transform] Scaling factor:", scale)
 	}
 
 	// 3, 平移
@@ -71,6 +75,7 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		for _, data := range datas {
 			data.Translate(tx, ty, tz)
 		}
+		log.Println("[Transform] Make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
 	}
 	return datas
 }

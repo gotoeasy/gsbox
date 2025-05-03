@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"math"
 	"net/http"
 	"os"
@@ -128,14 +129,14 @@ func ReplaceAll(str string, old string, new string) string {
 
 func ExitOnError(err error) {
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }
 
 func ExitOnConditionError(condition bool, err error) {
 	if condition {
-		fmt.Println(err)
+		log.Println(err)
 		os.Exit(1)
 	}
 }

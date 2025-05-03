@@ -2,8 +2,8 @@ package gsplat
 
 import (
 	"bufio"
-	"fmt"
 	"gsbox/cmn"
+	"log"
 	"math"
 	"os"
 	"sort"
@@ -80,7 +80,7 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8,
 	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
 	if del {
-		fmt.Println("[WARN] The existing non-ASCII characters in the comment have been removed!")
+		log.Println("[WARN] The existing non-ASCII characters in the comment have been removed!")
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {

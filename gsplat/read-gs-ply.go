@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"gsbox/cmn"
+	"log"
 	"os"
 )
 
@@ -127,7 +127,7 @@ func readValue(header *PlyHeader, property string, splatDataBytes []byte) float6
 		return 0 // 球谐系数读取不到时，默认为0
 	}
 
-	fmt.Println("Unsupported property:", "property", typename, property)
+	log.Println("Unsupported property:", "property", typename, property)
 	os.Exit(1)
 	return 0
 }

@@ -2,8 +2,8 @@ package gsplat
 
 import (
 	"errors"
-	"fmt"
 	"gsbox/cmn"
+	"log"
 	"os"
 	"strings"
 )
@@ -116,7 +116,7 @@ func getTypeSize(name string) int {
 		return 1
 	}
 
-	fmt.Println("Unsupported property type:", name)
+	log.Println("Unsupported property type:", name)
 	os.Exit(1)
 	return 0 // unknown
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gsbox/cmn"
 	"gsbox/gsplat"
+	"log"
 	"os"
 	"time"
 )
@@ -162,6 +163,7 @@ func plyInfo(args *cmn.OsArgs) {
 }
 
 func ply2splat(args *cmn.OsArgs) {
+	log.Println("Convert ply to splat.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -169,10 +171,12 @@ func ply2splat(args *cmn.OsArgs) {
 	gsplat.RstTransformDatas(datas)
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(output, datas)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func ply2spx(args *cmn.OsArgs) {
+	log.Println("Convert ply to spx.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -185,10 +189,12 @@ func ply2spx(args *cmn.OsArgs) {
 	flag2 := getArgFlag(0, args, "-f2", "--flag2")
 	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func ply2spz(args *cmn.OsArgs) {
+	log.Println("Convert ply to spz.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -197,10 +203,12 @@ func ply2spz(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	shDegree := getArgShDegree(header.MaxShDegree(), args)
 	gsplat.WriteSpz(output, datas, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func ply2ply(args *cmn.OsArgs) {
+	log.Println("Convert ply to ply.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -210,10 +218,12 @@ func ply2ply(args *cmn.OsArgs) {
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(header.MaxShDegree(), args)
 	gsplat.WritePly(output, datas, comment, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func splat2ply(args *cmn.OsArgs) {
+	log.Println("Convert splat to ply.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -223,9 +233,11 @@ func splat2ply(args *cmn.OsArgs) {
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(0, args)
 	gsplat.WritePly(output, datas, comment, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func splat2spx(args *cmn.OsArgs) {
+	log.Println("Convert splat to spx.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -238,9 +250,11 @@ func splat2spx(args *cmn.OsArgs) {
 	flag2 := getArgFlag(0, args, "-f2", "--flag2")
 	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func splat2spz(args *cmn.OsArgs) {
+	log.Println("Convert splat to spz.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -248,9 +262,11 @@ func splat2spz(args *cmn.OsArgs) {
 	gsplat.RstTransformDatas(datas)
 	gsplat.Sort(datas)
 	gsplat.WriteSpz(output, datas, 0)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func splat2splat(args *cmn.OsArgs) {
+	log.Println("Convert splat to splat.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -258,10 +274,12 @@ func splat2splat(args *cmn.OsArgs) {
 	gsplat.RstTransformDatas(datas)
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(output, datas)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func spx2ply(args *cmn.OsArgs) {
+	log.Println("Convert spx to ply.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -271,9 +289,11 @@ func spx2ply(args *cmn.OsArgs) {
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(int(header.ShDegree), args)
 	gsplat.WritePly(output, datas, comment, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func spx2splat(args *cmn.OsArgs) {
+	log.Println("Convert spx to splat.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -281,9 +301,11 @@ func spx2splat(args *cmn.OsArgs) {
 	gsplat.RstTransformDatas(datas)
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(output, datas)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func spx2spz(args *cmn.OsArgs) {
+	log.Println("Convert spx to spz.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -292,9 +314,11 @@ func spx2spz(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	shDegree := getArgShDegree(int(header.ShDegree), args)
 	gsplat.WriteSpz(output, datas, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func spx2spx(args *cmn.OsArgs) {
+	log.Println("Convert spx to spx.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -307,10 +331,12 @@ func spx2spx(args *cmn.OsArgs) {
 	flag2 := getArgFlag(0, args, "-f2", "--flag2")
 	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func spz2ply(args *cmn.OsArgs) {
+	log.Println("Convert spz to ply.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -320,10 +346,12 @@ func spz2ply(args *cmn.OsArgs) {
 	comment := args.GetArgIgnorecase("-c", "--comment")
 	shDegree := getArgShDegree(int(header.ShDegree), args)
 	gsplat.WritePly(output, datas, comment, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func spz2splat(args *cmn.OsArgs) {
+	log.Println("Convert spz to splat.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -331,10 +359,12 @@ func spz2splat(args *cmn.OsArgs) {
 	gsplat.RstTransformDatas(datas)
 	gsplat.Sort(datas)
 	gsplat.WriteSplat(output, datas)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func spz2spx(args *cmn.OsArgs) {
+	log.Println("Convert spz to spx.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -347,9 +377,11 @@ func spz2spx(args *cmn.OsArgs) {
 	flag2 := getArgFlag(0, args, "-f2", "--flag2")
 	flag3 := getArgFlag(0, args, "-f3", "--flag3")
 	gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 func spz2spz(args *cmn.OsArgs) {
+	log.Println("Convert spz to spz.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
@@ -358,7 +390,8 @@ func spz2spz(args *cmn.OsArgs) {
 	gsplat.Sort(datas)
 	shDegree := getArgShDegree(int(header.ShDegree), args)
 	gsplat.WriteSpz(output, datas, shDegree)
-	fmt.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+	log.Println(input, " --> ", output)
+	log.Println("Processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func checkInputFileExists(args *cmn.OsArgs) string {

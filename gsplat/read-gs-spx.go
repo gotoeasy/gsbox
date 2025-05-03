@@ -2,8 +2,8 @@ package gsplat
 
 import (
 	"errors"
-	"fmt"
 	"gsbox/cmn"
+	"log"
 	"math"
 	"os"
 )
@@ -12,7 +12,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 
 	header := ParseSpxHeader(spxFile)
 	if !header.IsValid() {
-		fmt.Println("[WARN] hash check failed! CreaterId:" + cmn.Uint32ToString(header.CreaterId) + ", ExclusiveId:" + cmn.Uint32ToString(header.ExclusiveId))
+		log.Println("[WARN] hash check failed! CreaterId:" + cmn.Uint32ToString(header.CreaterId) + ", ExclusiveId:" + cmn.Uint32ToString(header.ExclusiveId))
 	}
 
 	file, err := os.Open(spxFile)
