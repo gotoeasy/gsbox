@@ -23,6 +23,31 @@ var NewVersionMessage = ""
 const COLOR_SCALE = 0.15
 const SH_C0 float64 = 0.28209479177387814
 
+const DEG2RAD = math.Pi / 180
+const RAD2DEG = 180 / math.Pi
+
+// DegToRad :
+func DegToRad(degrees float64) float64 {
+	return degrees * DEG2RAD
+}
+
+// RadToDeg :
+func RadToDeg(radians float64) float64 {
+	return radians * RAD2DEG
+}
+
+func StringToFloat32(s string, defaultVal ...float32) float32 {
+	v, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		var defaultValue float32
+		if len(defaultVal) > 0 {
+			defaultValue = defaultVal[0]
+		}
+		return defaultValue
+	}
+	return ClipFloat32(v)
+}
+
 func Trim(str string) string {
 	return strings.TrimSpace(str)
 }
