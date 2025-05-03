@@ -29,7 +29,7 @@
 
 ## `.spz`
 - The `.spz` format is an open 3DGS model format. Its encoding algorithm is highly commendable, and combined with gzip compression, it can significantly reduce the size of model files without any noticeable loss in visual quality.
-- The official open-source repository for the `.spz` format is available at https://github.com/nianticlabs/spz. This format is about 10x smaller than the equivalent PLY format and is offered as open source by Niantic Labs. More details can be found at https://scaniverse.com/spz.
+- The official open-source repository for the `.spz` format is available at https://github.com/nianticlabs/spz. This format is about 10x smaller than the equivalent PLY format and is offered as open source by Niantic Labs. More details can be found at https://scaniverse.com/spz
 - For rendering and viewing `.spz` format models, you can refer to https://github.com/mkkellogg/GaussianSplats3D
 
 ## `.spx`
