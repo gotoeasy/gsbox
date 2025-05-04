@@ -129,14 +129,14 @@ func ReplaceAll(str string, old string, new string) string {
 
 func ExitOnError(err error) {
 	if err != nil {
-		log.Println(err)
+		log.Println("[Error]", err)
 		os.Exit(1)
 	}
 }
 
 func ExitOnConditionError(condition bool, err error) {
 	if condition {
-		log.Println(err)
+		log.Println("[Error]", err)
 		os.Exit(1)
 	}
 }

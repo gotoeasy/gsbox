@@ -116,7 +116,7 @@ func getTypeSize(name string) int {
 		return 1
 	}
 
-	log.Println("Unsupported property type:", name)
+	log.Println("[Error] unsupported property type:", name)
 	os.Exit(1)
 	return 0 // unknown
 }

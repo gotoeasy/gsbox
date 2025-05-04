@@ -57,7 +57,7 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 			data.Rotate(degreeX, degreeY, degreeZ, shr)
 		}
 
-		log.Println("[Transform] Rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
+		log.Println("[Info] (Transform) rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
 	}
 
 	// 2, 缩放
@@ -66,7 +66,7 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		for _, data := range datas {
 			data.Scale(scale)
 		}
-		log.Println("[Transform] Scaling factor:", scale)
+		log.Println("[Info] (Transform) scaling factor:", scale)
 	}
 
 	// 3, 平移
@@ -75,7 +75,7 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		for _, data := range datas {
 			data.Translate(tx, ty, tz)
 		}
-		log.Println("[Transform] Make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
+		log.Println("[Info] (Transform) make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
 	}
 	return datas
 }

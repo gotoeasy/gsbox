@@ -3,6 +3,7 @@ package gsplat
 import (
 	"bufio"
 	"gsbox/cmn"
+	"log"
 	"os"
 )
 
@@ -11,6 +12,7 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 	cmn.ExitOnError(err)
 	defer file.Close()
 
+	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
 	h := &SpzHeader{

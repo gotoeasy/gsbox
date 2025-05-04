@@ -3,6 +3,7 @@ package gsplat
 import (
 	"bufio"
 	"gsbox/cmn"
+	"log"
 	"os"
 )
 
@@ -11,6 +12,7 @@ func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) 
 	cmn.ExitOnError(err)
 	defer file.Close()
 
+	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 	_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
 	cmn.ExitOnError(err)

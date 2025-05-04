@@ -16,6 +16,7 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, f
 	cmn.ExitOnError(err)
 	defer file.Close()
 
+	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
 	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), 20480)
@@ -80,7 +81,7 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8,
 	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
 	if del {
-		log.Println("[WARN] The existing non-ASCII characters in the comment have been removed!")
+		log.Println("[Warn] The existing non-ASCII characters in the comment have been removed!")
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {
