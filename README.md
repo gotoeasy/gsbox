@@ -5,12 +5,12 @@
 
 # gsbox
 
-A lightweight command-line tool for 3D Gaussian Splatting, focusing on model format conversion and optimization.
+A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format conversion and optimization.
 
 <br>
 
 <p align="center">
-    <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"><img src="https://img.shields.io/badge/Model-3DGS-brightgreen.svg"></a>
+    <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/"><img src="https://img.shields.io/badge/model-3DGS-brightgreen.svg"></a>
     <a href="https://github.com/gotoeasy/gsbox/releases/latest"><img src="https://img.shields.io/github/release/gotoeasy/gsbox.svg"></a>
     <a href="https://github.com/gotoeasy/gsbox/blob/master/LICENSE"><img src="https://img.shields.io/github/license/gotoeasy/gsbox"></a>
 <p>
