@@ -209,21 +209,19 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(1)...)                       // 开放的块数据格式 1:sh1
 
-	if len(blockDatas[0].SH1) > 0 {
-		for n := range blockSplatCount {
+	for n := range blockSplatCount {
+		if len(blockDatas[n].SH1) > 0 {
 			for i := range 9 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
 			}
-		}
-	} else if len(blockDatas[0].SH2) > 0 {
-		for n := range blockSplatCount {
+		} else if len(blockDatas[n].SH2) > 0 {
 			for i := range 9 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
 			}
-		}
-	} else {
-		for range blockSplatCount * 9 {
-			bts = append(bts, cmn.EncodeSplatSH(0.0))
+		} else {
+			for range 9 {
+				bts = append(bts, cmn.EncodeSplatSH(0.0))
+			}
 		}
 	}
 
@@ -250,24 +248,22 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(2)...)                       // 开放的块数据格式 2:sh2
 
-	if len(blockDatas[0].SH1) > 0 {
-		for n := range blockSplatCount {
+	for n := range blockSplatCount {
+		if len(blockDatas[n].SH1) > 0 {
 			for i := range 9 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
 			}
 			for range 15 {
 				bts = append(bts, cmn.EncodeSplatSH(0.0))
 			}
-		}
-	} else if len(blockDatas[0].SH2) > 0 {
-		for n := range blockSplatCount {
+		} else if len(blockDatas[n].SH2) > 0 {
 			for i := range 24 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
 			}
-		}
-	} else {
-		for range blockSplatCount * 24 {
-			bts = append(bts, cmn.EncodeSplatSH(0.0))
+		} else {
+			for range 24 {
+				bts = append(bts, cmn.EncodeSplatSH(0.0))
+			}
 		}
 	}
 
@@ -294,15 +290,15 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(3)...)                       // 开放的块数据格式 3:sh3
 
-	if len(blockDatas[0].SH3) > 0 {
-		for n := range blockSplatCount {
+	for n := range blockSplatCount {
+		if len(blockDatas[n].SH3) > 0 {
 			for i := range 21 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH3[i]))
 			}
-		}
-	} else {
-		for range blockSplatCount * 21 {
-			bts = append(bts, cmn.EncodeSplatSH(0.0))
+		} else {
+			for range 21 {
+				bts = append(bts, cmn.EncodeSplatSH(0.0))
+			}
 		}
 	}
 

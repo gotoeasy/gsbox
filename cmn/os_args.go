@@ -64,10 +64,37 @@ func ParseArgs(customCmds ...string) *OsArgs {
 			}
 			args.mapParam[args.mapIndexValue[index-1]] = val
 			args.mapParam["\n"+ToLower(args.mapIndexValue[index-1])] = val
+
+			oldVal := args.mapParam["\t"+ToLower(args.mapIndexValue[index-1])]
+			if oldVal != "" {
+				args.mapParam["\t"+ToLower(args.mapIndexValue[index-1])] = oldVal + "\t" + val
+			} else {
+				args.mapParam["\t"+ToLower(args.mapIndexValue[index-1])] = val
+			}
 		}
 	}
 
 	return args
+}
+
+// 取指定参数名对应的值切片，值去重
+func (o *OsArgs) GetArgs(names ...string) []string {
+	for i := 0; i < len(names); i++ {
+		if o.mapParam[names[i]] != "" {
+			return UniqueStrings(Split(o.mapParam["\t"+names[i]], "\t"))
+		}
+	}
+	return []string{}
+}
+
+// 取指定参数名对应的值切片(忽略参数名大小写)，值去重
+func (o *OsArgs) GetArgsIgnorecase(names ...string) []string {
+	for i := 0; i < len(names); i++ {
+		if o.mapParam[names[i]] != "" {
+			return UniqueStrings(Split(o.mapParam[ToLower("\t"+names[i])], "\t"))
+		}
+	}
+	return []string{}
 }
 
 // 取指定参数名对应的值

@@ -27,6 +27,20 @@ const SH_C0 float64 = 0.28209479177387814
 const DEG2RAD = math.Pi / 180
 const RAD2DEG = 180 / math.Pi
 
+// 去重
+func UniqueStrings(slice []string) []string {
+	seen := make(map[string]bool)
+	var result []string
+
+	for _, v := range slice {
+		if !seen[v] {
+			seen[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
+}
+
 // DegToRad :
 func DegToRad(degrees float64) float64 {
 	return degrees * DEG2RAD

@@ -49,6 +49,8 @@ func main() {
 		spz2spx(args)
 	} else if args.HasCmd("z2z", "spz2spz") {
 		spz2spz(args)
+	} else if args.HasCmd("join") {
+		join(args)
 	} else if args.HasCmd("info") {
 		plyInfo(args)
 	} else {
@@ -88,6 +90,7 @@ func usage() {
 	fmt.Println("  z2s, spz2splat            convert spz to splat")
 	fmt.Println("  z2x, spz2spx              convert spz to spx")
 	fmt.Println("  z2z, spz2spz              convert spz to spz")
+	fmt.Println("  join                      join the input files into a single output file")
 	fmt.Println("  info <file>               display the model file information")
 	fmt.Println("  -i,  --input <file>       specify the input file")
 	fmt.Println("  -o,  --output <file>      specify the output file")
@@ -160,6 +163,58 @@ func plyInfo(args *cmn.OsArgs) {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx) format"))
 	}
 
+}
+
+func join(args *cmn.OsArgs) {
+	log.Println("[Info] join the input files into a single output file")
+	startTime := time.Now()
+	inputs := checkInputFilesExists(args)
+	output := createOutputDir(args)
+	isOutPly := cmn.Endwiths(output, ".ply")
+	isOutSplat := cmn.Endwiths(output, ".splat")
+	isOutSpx := cmn.Endwiths(output, ".spx")
+	isOutSpz := cmn.Endwiths(output, ".spz")
+	cmn.ExitOnConditionError(!isOutPly && !isOutSplat && !isOutSpx && !isOutSpz, errors.New("output file must be (ply | splat | spx | spz) format"))
+
+	datas := make([]*gsplat.SplatData, 0)
+	maxFromShDegree := 0
+	for _, file := range inputs {
+		if cmn.Endwiths(file, ".ply") {
+			header, ds := gsplat.ReadPly(file)
+			maxFromShDegree = max(header.MaxShDegree(), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".splat") {
+			ds := gsplat.ReadSplat(file)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spx") {
+			header, ds := gsplat.ReadSpx(file)
+			maxFromShDegree = max(int(header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spz") {
+			header, ds := gsplat.ReadSpz(file, false)
+			maxFromShDegree = max(int(header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		}
+	}
+	gsplat.RstTransformDatas(datas)
+	gsplat.Sort(datas)
+	shDegree := getArgShDegree(maxFromShDegree, args)
+	if isOutPly {
+		comment := args.GetArgIgnorecase("-c", "--comment")
+		gsplat.WritePly(output, datas, comment, shDegree)
+	} else if isOutSplat {
+		gsplat.WriteSplat(output, datas)
+	} else if isOutSpx {
+		comment := args.GetArgIgnorecase("-c", "--comment")
+		flag1 := getArgFlag(0, args, "-f1", "--flag1")
+		flag2 := getArgFlag(0, args, "-f2", "--flag2")
+		flag3 := getArgFlag(0, args, "-f3", "--flag3")
+		gsplat.WriteSpx(output, datas, comment, shDegree, flag1, flag2, flag3)
+	} else if isOutSpz {
+		gsplat.WriteSpz(output, datas, shDegree)
+	}
+	log.Println("[Info]", inputs, " --> ", output)
+	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
 func ply2splat(args *cmn.OsArgs) {
@@ -392,6 +447,15 @@ func spz2spz(args *cmn.OsArgs) {
 	gsplat.WriteSpz(output, datas, shDegree)
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+
+func checkInputFilesExists(args *cmn.OsArgs) []string {
+	inputs := args.GetArgsIgnorecase("-i", "--input")
+	for i := 0; i < len(inputs); i++ {
+		cmn.ExitOnConditionError(inputs[i] == "", errors.New(`please specify the input file`))
+		cmn.ExitOnConditionError(!cmn.IsExistFile(inputs[i]), errors.New("file not found: "+inputs[i]))
+	}
+	return inputs
 }
 
 func checkInputFileExists(args *cmn.OsArgs) string {
