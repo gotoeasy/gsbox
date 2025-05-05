@@ -5,14 +5,7 @@
 
 # gsbox
 
-一个关于 3d gaussian splatting 的小工具盒。<br>
-`.ply`和`.splat`等格式之间的转换有nodejs版本也有python版本，都太重了，故有此一举。<br>
-<br>
-<p align="center">
-写一写，加深理解<br>
-弄一弄，争取实用<br>
-搞搞搞，越做越好
-<p>
+A lightweight command-line tool for 3D Gaussian Splatting, focusing on model format conversion and optimization.
 
 <br>
 
