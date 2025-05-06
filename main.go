@@ -167,7 +167,7 @@ func plyInfo(args *cmn.OsArgs) {
 }
 
 func join(args *cmn.OsArgs) {
-	log.Println("[Info] join the input files into a single output file")
+	log.Println("[Info] join the input model files into a single output file")
 	startTime := time.Now()
 	inputs := checkInputFilesExists(args)
 	output := createOutputDir(args)
