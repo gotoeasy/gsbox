@@ -90,7 +90,7 @@ func usage() {
 	fmt.Println("  z2s, spz2splat            convert spz to splat")
 	fmt.Println("  z2x, spz2spx              convert spz to spx")
 	fmt.Println("  z2z, spz2spz              convert spz to spz")
-	fmt.Println("  join                      join the input files into a single output file")
+	fmt.Println("  join                      join the input model files into a single output file")
 	fmt.Println("  info <file>               display the model file information")
 	fmt.Println("  -i,  --input <file>       specify the input file")
 	fmt.Println("  -o,  --output <file>      specify the output file")
@@ -115,6 +115,7 @@ func usage() {
 	fmt.Println("  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c \"your comment\" -bs 10240")
 	fmt.Println("  gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1")
 	fmt.Println("  gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c \"your comment\"")
+	fmt.Println("  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
 	fmt.Println("")
 }

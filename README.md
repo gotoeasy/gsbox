@@ -19,6 +19,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 - [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz` formats for 3DGS.
 - [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or the number of Gaussian points in `.splat` files.
 - [x] Supports data transformation in RST (Rotation, Scale, Translation) order.
+- [x] Supports merging multiple model files into one.
 
 
 ## `.spz`
@@ -53,6 +54,7 @@ Options:
   z2s, spz2splat            convert spz to splat
   z2x, spz2spx              convert spz to spx
   z2z, spz2spz              convert spz to spz
+  join                      join the input model files into a single output file
   info <file>               display the model file information
   -i,  --input <file>       specify the input file
   -o,  --output <file>      specify the output file
@@ -77,6 +79,7 @@ Examples:
   gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -bs 10240
   gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1
   gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
+  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx
   gsbox info -i /path/to/file.spx
 
 
