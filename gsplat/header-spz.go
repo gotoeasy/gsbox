@@ -8,7 +8,6 @@ import (
 
 const HeaderSizeSpz = 16
 const SPZ_MAGIC = 0x5053474e // NGSP = Niantic gaussian splat
-const MAX_POINTS_TO_READ = 10000000
 
 type SpzHeader struct {
 	/** 1347635022 */
@@ -55,9 +54,6 @@ func ParseSpzHeader(bts []byte) *SpzHeader {
 	}
 	if header.Version != 2 {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: version not supported: " + cmn.Uint32ToString(header.Version)))
-	}
-	if header.Version > MAX_POINTS_TO_READ {
-		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: Too many points: " + cmn.Uint32ToString(header.NumPoints)))
 	}
 	if header.ShDegree > 3 {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: Unsupported SH degree: " + cmn.IntToString(int(header.ShDegree))))
