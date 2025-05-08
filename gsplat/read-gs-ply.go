@@ -61,7 +61,7 @@ func ReadPly(plyFile string, plyTypes ...string) (*PlyHeader, []*SplatData) {
 		if maxShDegree == 1 {
 			shDim = 3
 		} else if maxShDegree == 2 {
-			shDim = 5
+			shDim = 8
 		} else if maxShDegree == 3 {
 			shDim = 15
 		}
