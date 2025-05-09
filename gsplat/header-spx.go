@@ -106,7 +106,7 @@ func ParseSpxHeader(spxFile string) *SpxHeader {
 
 	if bs[0] == 's' && bs[1] == 'p' && bs[2] == 'x' && bs[3] == 1 {
 		header := readSpxHeader(bs)
-		if header.ExclusiveId != 0 {
+		if header.ExclusiveId != 0 && !Args.HasCmd("info") {
 			cmn.ExitOnError(errors.New("unknown exclusive id: " + cmn.Uint32ToString(header.ExclusiveId))) // 内含不识别的专属格式时，退出
 		}
 		return header
