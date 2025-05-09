@@ -17,7 +17,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 
 ## Features
 - [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz` formats for 3DGS.
-- [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or simple info of `.splat`.
+- [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or simple information of `.splat`.
 - [x] Supports data transformation in RST (Rotation, Scale, Translation) order.
 - [x] Supports merging multiple model files into one.
 
