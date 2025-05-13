@@ -112,8 +112,7 @@ func (s *SplatData) Rotate(degreeX, degreeY, degreeZ float32, SHR *SHRotation) {
 	if degreeX != 0 {
 		q.Premultiply(qz)
 	}
-	q.Normalize()
-	s.RotationX, s.RotationY, s.RotationZ, s.RotationW = cmn.EncodeSplatRotation(q.X), cmn.EncodeSplatRotation(q.Y), cmn.EncodeSplatRotation(q.Z), cmn.EncodeSplatRotation(q.W)
+	s.RotationW, s.RotationX, s.RotationY, s.RotationZ = cmn.NormalizeRotations(cmn.EncodeSplatRotation(q.W), cmn.EncodeSplatRotation(q.X), cmn.EncodeSplatRotation(q.Y), cmn.EncodeSplatRotation(q.Z))
 
 	// position
 	q = NewQuaternion(0, 0, 0, 1)
