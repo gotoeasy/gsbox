@@ -32,8 +32,40 @@ type SplatData struct {
 	SH3       []uint8 // sh3 only
 }
 
-func RstTransformDatas(datas []*SplatData) []*SplatData {
-	// 1, 旋转
+func TransformDatas(datas []*SplatData) []*SplatData {
+	order:=cmn.ToLower( Args.GetArgIgnorecase("-to", "--transform-order"))
+	if order == "rts" {
+		transformRotateDatas(datas)
+		transformTranslateDatas(datas)
+		transformScaleDatas(datas)
+	} else if order == "srt" {
+		transformScaleDatas(datas)
+		transformRotateDatas(datas)
+		transformTranslateDatas(datas)
+	} else if order == "str" {
+		transformScaleDatas(datas)
+		transformTranslateDatas(datas)
+		transformRotateDatas(datas)
+	} else if order == "trs" {
+		transformTranslateDatas(datas)
+		transformRotateDatas(datas)
+		transformScaleDatas(datas)
+    } else if order == "tsr" {
+		transformTranslateDatas(datas)
+		transformScaleDatas(datas)
+		transformRotateDatas(datas)
+	} else  {
+		transformRotateDatas(datas)
+		transformScaleDatas(datas)
+		transformTranslateDatas(datas)
+	}
+
+	return datas
+}
+
+
+func transformRotateDatas(datas []*SplatData)  {
+ 	// 1, 旋转
 	hasRotate, degreeX, degreeY, degreeZ := getRotateArgs()
 	if hasRotate {
 		qx := NewQuaternion(0, 0, 0, 1).SetFromAxisAngle(NewVector3(1, 0, 0), cmn.DegToRad(float64(degreeX)))
@@ -59,8 +91,10 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 
 		log.Println("[Info] (Transform) rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
 	}
+}
 
-	// 2, 缩放
+func transformScaleDatas(datas []*SplatData)   {
+ 	// 2, 缩放
 	hasScale, scale := getScaleArgs()
 	if hasScale {
 		for _, data := range datas {
@@ -68,8 +102,10 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		}
 		log.Println("[Info] (Transform) scaling factor:", scale)
 	}
+ }
 
-	// 3, 平移
+func transformTranslateDatas(datas []*SplatData)   {
+ 	// 3, 平移
 	hasTranslate, tx, ty, tz := getTranslateArgs()
 	if hasTranslate {
 		for _, data := range datas {
@@ -77,8 +113,8 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		}
 		log.Println("[Info] (Transform) make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
 	}
-	return datas
-}
+ }
+
 
 func (s *SplatData) Translate(tx, ty, tz float32) {
 	s.PositionX += tx
