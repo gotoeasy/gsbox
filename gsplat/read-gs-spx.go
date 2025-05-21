@@ -51,54 +51,51 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 
 		// 块数据格式
 		i32BlockSplatCount := int32(cmn.BytesToUint32(blockBts[0:4]))
-		blockSplatCount := int(i32BlockSplatCount)   // 数量
+		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		if formatId == 20 {
 			// splat20
-			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
-			for n := range blockSplatCount {
-				splatData := &SplatData{}
-				splatData.PositionX = cmn.DecodeSpxPositionUint24(dataBytes[n*3], dataBytes[n*3+1], dataBytes[n*3+2])
-				splatData.PositionY = cmn.DecodeSpxPositionUint24(dataBytes[blockSplatCount*3+n*3], dataBytes[blockSplatCount*3+n*3+1], dataBytes[blockSplatCount*3+n*3+2])
-				splatData.PositionZ = cmn.DecodeSpxPositionUint24(dataBytes[blockSplatCount*6+n*3], dataBytes[blockSplatCount*6+n*3+1], dataBytes[blockSplatCount*6+n*3+2])
-				splatData.ScaleX = cmn.DecodeSpxScale(dataBytes[blockSplatCount*9+n])
-				splatData.ScaleY = cmn.DecodeSpxScale(dataBytes[blockSplatCount*10+n])
-				splatData.ScaleZ = cmn.DecodeSpxScale(dataBytes[blockSplatCount*11+n])
-				splatData.ColorR = dataBytes[blockSplatCount*12+n]
-				splatData.ColorG = dataBytes[blockSplatCount*13+n]
-				splatData.ColorB = dataBytes[blockSplatCount*14+n]
-				splatData.ColorA = dataBytes[blockSplatCount*15+n]
-				splatData.RotationW = dataBytes[blockSplatCount*16+n]
-				splatData.RotationX = dataBytes[blockSplatCount*17+n]
-				splatData.RotationY = dataBytes[blockSplatCount*18+n]
-				splatData.RotationZ = dataBytes[blockSplatCount*19+n]
-				datas = append(datas, splatData)
+			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blkSplatCnt {
+				data := &SplatData{}
+				data.PositionX = cmn.DecodeSpxPositionUint24(bts[n*3], bts[n*3+1], bts[n*3+2])
+				data.PositionY = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*3+n*3], bts[blkSplatCnt*3+n*3+1], bts[blkSplatCnt*3+n*3+2])
+				data.PositionZ = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*6+n*3], bts[blkSplatCnt*6+n*3+1], bts[blkSplatCnt*6+n*3+2])
+				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
+				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
+				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
+				data.ColorR = bts[blkSplatCnt*12+n]
+				data.ColorG = bts[blkSplatCnt*13+n]
+				data.ColorB = bts[blkSplatCnt*14+n]
+				data.ColorA = bts[blkSplatCnt*15+n]
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n], bts[blkSplatCnt*19+n])
+				datas = append(datas, data)
 			}
 
 		} else if formatId == 1 {
 			// SH1
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
-			for n := range blockSplatCount {
+			for n := range blkSplatCnt {
 				splatData := datas[n1+n]
 				splatData.SH1 = dataBytes[n*9 : n*9+9]
 			}
-			n1 += blockSplatCount
+			n1 += blkSplatCnt
 		} else if formatId == 2 {
 			// SH2
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
-			for n := range blockSplatCount {
+			for n := range blkSplatCnt {
 				splatData := datas[n2+n]
 				splatData.SH2 = dataBytes[n*24 : n*24+24]
 			}
-			n2 += blockSplatCount
+			n2 += blkSplatCnt
 		} else if formatId == 3 {
 			// SH3
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
-			for n := range blockSplatCount {
+			for n := range blkSplatCnt {
 				splatData := datas[n3+n]
 				splatData.SH3 = dataBytes[n*21 : n*21+21]
 			}
-			n3 += blockSplatCount
+			n3 += blkSplatCnt
 		} else {
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
