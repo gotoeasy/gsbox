@@ -44,10 +44,10 @@ func RstTransformDatas(datas []*SplatData) []*SplatData {
 		if degreeX != 0 {
 			q.Premultiply(qx)
 		}
-		if degreeX != 0 {
+		if degreeY != 0 {
 			q.Premultiply(qy)
 		}
-		if degreeX != 0 {
+		if degreeZ != 0 {
 			q.Premultiply(qz)
 		}
 		q.Normalize()
@@ -106,10 +106,10 @@ func (s *SplatData) Rotate(degreeX, degreeY, degreeZ float32, SHR *SHRotation) {
 	if degreeX != 0 {
 		q.Premultiply(qx)
 	}
-	if degreeX != 0 {
+	if degreeY != 0 {
 		q.Premultiply(qy)
 	}
-	if degreeX != 0 {
+	if degreeZ != 0 {
 		q.Premultiply(qz)
 	}
 	q.Normalize()
@@ -120,10 +120,10 @@ func (s *SplatData) Rotate(degreeX, degreeY, degreeZ float32, SHR *SHRotation) {
 	if degreeX != 0 {
 		q.Premultiply(qx)
 	}
-	if degreeX != 0 {
+	if degreeY != 0 {
 		q.Premultiply(qy)
 	}
-	if degreeX != 0 {
+	if degreeZ != 0 {
 		q.Premultiply(qz)
 	}
 	q.Normalize()
