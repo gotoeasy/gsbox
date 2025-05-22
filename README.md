@@ -18,7 +18,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 ## Features
 - [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz` formats for 3DGS.
 - [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or simple information of `.splat`.
-- [x] Supports data transformation in RST (Rotation, Scale, Translation) order.
+- [x] Supports data transformation (Rotation, Scale, Translation).
 - [x] Supports merging multiple model files into one.
 
 
@@ -38,46 +38,47 @@ Usage:
   gsbox [options]
 
 Options:
-  p2s, ply2splat            convert ply to splat
-  p2x, ply2spx              convert ply to spx
-  p2z, ply2spz              convert ply to spz
-  p2p, ply2ply              convert ply to ply
-  s2p, splat2ply            convert splat to ply
-  s2x, splat2spx            convert splat to spx
-  s2z, splat2spz            convert splat to spz
-  s2s, splat2splat          convert splat to splat
-  x2p, spx2ply              convert spx to ply
-  x2s, spx2splat            convert spx to splat
-  x2z, spx2spz              convert spx to spz
-  x2x, spx2spx              convert spx to spx
-  z2p, spz2ply              convert spz to ply
-  z2s, spz2splat            convert spz to splat
-  z2x, spz2spx              convert spz to spx
-  z2z, spz2spz              convert spz to spz
-  join                      join the input model files into a single output file
-  info <file>               display the model file information
-  -i,  --input <file>       specify the input file
-  -o,  --output <file>      specify the output file
-  -c,  --comment <text>     specify the comment for ply/spx output
-  -bs, --block-size <num>   specify the block size for spx output (default 20480)
-  -sh, --shDegree <num>     specify the SH degree for ply/spx/spz output
-  -f1, --flag1 <num>        specify the header flag1 for spx output
-  -f2, --flag2 <num>        specify the header flag2 for spx output
-  -f3, --flag3 <num>        specify the header flag3 for spx output
-  -rx, --rotateX <num>      specify the rotation angle in degrees about the x-axis for transform
-  -ry, --rotateY <num>      specify the rotation angle in degrees about the y-axis for transform
-  -rz, --rotateZ <num>      specify the rotation angle in degrees about the z-axis for transform
-  -s,  --scale <num>        specify a uniform scaling factor(0.01~100.0) for transform
-  -tx, --translateX <num>   specify the translation value about the x-axis for transform
-  -ty, --translateY <num>   specify the translation value about the y-axis for transform
-  -tz, --translateZ <num>   specify the translation value about the z-axis for transform
-  -v,  --version            display version information
-  -h,  --help               display help information
+  p2s, ply2splat               convert ply to splat
+  p2x, ply2spx                 convert ply to spx
+  p2z, ply2spz                 convert ply to spz
+  p2p, ply2ply                 convert ply to ply
+  s2p, splat2ply               convert splat to ply
+  s2x, splat2spx               convert splat to spx
+  s2z, splat2spz               convert splat to spz
+  s2s, splat2splat             convert splat to splat
+  x2p, spx2ply                 convert spx to ply
+  x2s, spx2splat               convert spx to splat
+  x2z, spx2spz                 convert spx to spz
+  x2x, spx2spx                 convert spx to spx
+  z2p, spz2ply                 convert spz to ply
+  z2s, spz2splat               convert spz to splat
+  z2x, spz2spx                 convert spz to spx
+  z2z, spz2spz                 convert spz to spz
+  join                         join the input model files into a single output file
+  info <file>                  display the model file information
+  -i,  --input <file>          specify the input file
+  -o,  --output <file>         specify the output file
+  -c,  --comment <text>        specify the comment for ply/spx output
+  -bs, --block-size <num>      specify the block size for spx output (default 20480)
+  -sh, --shDegree <num>        specify the SH degree for ply/spx/spz output
+  -f1, --flag1 <num>           specify the header flag1 for spx output
+  -f2, --flag2 <num>           specify the header flag2 for spx output
+  -f3, --flag3 <num>           specify the header flag3 for spx output
+  -rx, --rotateX <num>         specify the rotation angle in degrees about the x-axis for transform
+  -ry, --rotateY <num>         specify the rotation angle in degrees about the y-axis for transform
+  -rz, --rotateZ <num>         specify the rotation angle in degrees about the z-axis for transform
+  -s,  --scale <num>           specify a uniform scaling factor(0.01~100.0) for transform
+  -tx, --translateX <num>      specify the translation value about the x-axis for transform
+  -ty, --translateY <num>      specify the translation value about the y-axis for transform
+  -tz, --translateZ <num>      specify the translation value about the z-axis for transform
+  -to, --transform-order <RST> specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST
+  -v,  --version               display version information
+  -h,  --help                  display help information
 
 Examples:
   gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat
   gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -bs 10240
-  gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1
+  gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1 -to TRS
   gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
   gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx
   gsbox info -i /path/to/file.spx
