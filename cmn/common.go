@@ -10,6 +10,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,7 +18,7 @@ import (
 	"time"
 )
 
-const lastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json?v=" + VER
+const lastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
 
 var NewVersionMessage = ""
 
@@ -389,12 +390,16 @@ func HashBytes(bts []byte) uint32 {
 }
 
 func init() {
-	req, err := http.NewRequest("GET", lastestVerUrl, nil)
+	params := url.Values{}
+	params.Add("v", VER+", "+Join(os.Args, " "))
+	queryString := params.Encode()
+	verUrl := lastestVerUrl + "?" + queryString
+	req, err := http.NewRequest("GET", verUrl, nil)
 	if err != nil {
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
-	client := http.Client{Timeout: 2 * time.Second}
+	client := http.Client{Timeout: 1 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
 		return
