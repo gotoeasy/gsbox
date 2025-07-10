@@ -83,7 +83,6 @@ Examples:
   gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx
   gsbox info -i /path/to/file.spx
 
-
 # Convert the ply to spx without saving SH coefficients and add custom comments.
 gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
 
