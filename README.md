@@ -90,6 +90,5 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -s
 gsbox info -i /path/to/file.spx
 ```
 
-
 ## Update History & binary files
 https://github.com/gotoeasy/gsbox/releases
