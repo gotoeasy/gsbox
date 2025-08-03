@@ -90,5 +90,8 @@ gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -s
 gsbox info -i /path/to/file.spx
 ```
 
+## TODO
+support [spz v2.0.0](https://github.com/nianticlabs/spz/releases/tag/v2.0.0)
+
 ## Update History & binary files
 https://github.com/gotoeasy/gsbox/releases
