@@ -35,6 +35,11 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 	colorSize := int(h.NumPoints) * 3
 	scaleSize := int(h.NumPoints) * 3
 	rotationSize := int(h.NumPoints) * 3
+	size := 19
+	if h.Version >= 3 {
+		rotationSize = int(h.NumPoints) * 4
+		size = 20
+	}
 
 	offsetpositions := 0
 	offsetAlphas := offsetpositions + positionSize
@@ -51,7 +56,7 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 	} else if h.ShDegree == 3 {
 		shDim = int(h.NumPoints) * 45
 	}
-	cmn.ExitOnConditionError(len(datas) != int(h.NumPoints)*19+shDim, errors.New("[SPZ ERROR] Invalid spz data"))
+	cmn.ExitOnConditionError(len(datas) != int(h.NumPoints)*size+shDim, errors.New("[SPZ ERROR] Invalid spz data"))
 
 	positions := datas[0:positionSize]
 	scales := datas[offsetScales : offsetScales+scaleSize]
@@ -73,7 +78,11 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 		data.ColorG = cmn.SpzDecodeColor(colors[i*3+1])
 		data.ColorB = cmn.SpzDecodeColor(colors[i*3+2])
 		data.ColorA = alphas[i]
-		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotations(rotations[i*3], rotations[i*3+1], rotations[i*3+2])
+		if h.Version == 2 {
+			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotations(rotations[i*3], rotations[i*3+1], rotations[i*3+2])
+		} else {
+			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotationsV3(rotations[i*4 : i*4+4])
+		}
 		if h.ShDegree == 1 {
 			data.SH1 = shs[i*9 : i*9+9]
 		} else if h.ShDegree == 2 {

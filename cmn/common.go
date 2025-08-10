@@ -28,6 +28,9 @@ const SH_C0 float64 = 0.28209479177387814
 const DEG2RAD = math.Pi / 180
 const RAD2DEG = 180 / math.Pi
 
+var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
+var CMask uint32 = uint32((1 << 9) - 1)
+
 // 去重
 func UniqueStrings(slice []string) []string {
 	seen := make(map[string]bool)
@@ -466,6 +469,69 @@ func SpzDecodeRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint
 	r2 := float64(ry)/127.5 - 1.0
 	r3 := float64(rz)/127.5 - 1.0
 	r0 := math.Sqrt(math.Max(0.0, 1.0-(r1*r1+r2*r2+r3*r3)))
+	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
+}
+
+func SpzEncodeRotationsV3(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
+	r0 := float64(rw)/128.0 - 1.0
+	r1 := float64(rx)/128.0 - 1.0
+	r2 := float64(ry)/128.0 - 1.0
+	r3 := float64(rz)/128.0 - 1.0
+	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+	rotation := []float64{r0 / qlen, r1 / qlen, r2 / qlen, r3 / qlen}
+
+	index := 0
+	for i := 1; i < 4; i++ {
+		if math.Abs(rotation[index]) < math.Abs(rotation[i]) {
+			index = i
+		}
+	}
+	if rotation[index] < 0 {
+		rotation[0], rotation[1], rotation[2], rotation[3] = -rotation[0], -rotation[1], -rotation[2], -rotation[3]
+	}
+
+	remaining := uint32(index)
+	for i := 0; i < 4; i++ {
+		if i != index {
+			signBit := uint32(0)
+			if rotation[i] < 0 {
+				signBit = 1
+			}
+
+			component := math.Abs(rotation[i]) / SQRT1_2
+			magnitude := uint32(int64(float64(CMask)*component + 0.5))
+			remaining = (remaining << 10) | (signBit << 9) | magnitude
+		}
+	}
+
+	return Uint32ToBytes(remaining)
+}
+
+func SpzDecodeRotationsV3(bs []byte) (uint8, uint8, uint8, uint8) {
+	comp := BytesToUint32(bs)
+	index := int(comp >> 30)
+	remaining := comp
+	sumSquares := 0.0
+	rotation := []float64{0.0, 0.0, 0.0, 0.0}
+
+	for i := 3; i >= 0; i-- {
+		if i != index {
+			magnitude := float64(remaining & CMask)
+			negbit := (remaining >> 9) & 0x1
+			remaining = remaining >> 10
+
+			rotation[i] = SQRT1_2 * (magnitude / float64(CMask))
+			if negbit == 1 {
+				rotation[i] = -rotation[i]
+			}
+
+			sumSquares += rotation[i] * rotation[i]
+		}
+	}
+
+	rotation[index] = math.Sqrt(math.Max(1.0-sumSquares, 0))
+
+	r0, r1, r2, r3 := rotation[0], rotation[1], rotation[2], rotation[3]
 	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
 }
 

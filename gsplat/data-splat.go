@@ -33,7 +33,7 @@ type SplatData struct {
 }
 
 func TransformDatas(datas []*SplatData) []*SplatData {
-	order:=cmn.ToLower( Args.GetArgIgnorecase("-to", "--transform-order"))
+	order := cmn.ToLower(Args.GetArgIgnorecase("-to", "--transform-order"))
 	if order == "rts" {
 		transformRotateDatas(datas)
 		transformTranslateDatas(datas)
@@ -50,11 +50,11 @@ func TransformDatas(datas []*SplatData) []*SplatData {
 		transformTranslateDatas(datas)
 		transformRotateDatas(datas)
 		transformScaleDatas(datas)
-    } else if order == "tsr" {
+	} else if order == "tsr" {
 		transformTranslateDatas(datas)
 		transformScaleDatas(datas)
 		transformRotateDatas(datas)
-	} else  {
+	} else {
 		transformRotateDatas(datas)
 		transformScaleDatas(datas)
 		transformTranslateDatas(datas)
@@ -63,9 +63,8 @@ func TransformDatas(datas []*SplatData) []*SplatData {
 	return datas
 }
 
-
-func transformRotateDatas(datas []*SplatData)  {
- 	// 1, 旋转
+func transformRotateDatas(datas []*SplatData) {
+	// 1, 旋转
 	hasRotate, degreeX, degreeY, degreeZ := getRotateArgs()
 	if hasRotate {
 		qx := NewQuaternion(0, 0, 0, 1).SetFromAxisAngle(NewVector3(1, 0, 0), cmn.DegToRad(float64(degreeX)))
@@ -93,8 +92,8 @@ func transformRotateDatas(datas []*SplatData)  {
 	}
 }
 
-func transformScaleDatas(datas []*SplatData)   {
- 	// 2, 缩放
+func transformScaleDatas(datas []*SplatData) {
+	// 2, 缩放
 	hasScale, scale := getScaleArgs()
 	if hasScale {
 		for _, data := range datas {
@@ -102,10 +101,10 @@ func transformScaleDatas(datas []*SplatData)   {
 		}
 		log.Println("[Info] (Transform) scaling factor:", scale)
 	}
- }
+}
 
-func transformTranslateDatas(datas []*SplatData)   {
- 	// 3, 平移
+func transformTranslateDatas(datas []*SplatData) {
+	// 3, 平移
 	hasTranslate, tx, ty, tz := getTranslateArgs()
 	if hasTranslate {
 		for _, data := range datas {
@@ -113,8 +112,7 @@ func transformTranslateDatas(datas []*SplatData)   {
 		}
 		log.Println("[Info] (Transform) make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
 	}
- }
-
+}
 
 func (s *SplatData) Translate(tx, ty, tz float32) {
 	s.PositionX += tx

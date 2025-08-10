@@ -14,10 +14,17 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 
 	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
+	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
+	if ver < 2 || ver > 3 {
+		log.Println("[Warn] Ignore invalid output version:", ver)
+		ver = 2
+	} else {
+		log.Println("[Info] output spz version:", ver)
+	}
 
 	h := &SpzHeader{
 		Magic:          SPZ_MAGIC,
-		Version:        2,
+		Version:        uint32(ver),
 		NumPoints:      uint32(len(rows)),
 		ShDegree:       uint8(shDegree),
 		FractionalBits: 12,
@@ -43,7 +50,11 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 		bts = append(bts, cmn.SpzEncodeScale(rows[i].ScaleX), cmn.SpzEncodeScale(rows[i].ScaleY), cmn.SpzEncodeScale(rows[i].ScaleZ))
 	}
 	for i := range rows {
-		bts = append(bts, cmn.SpzEncodeRotations(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
+		if h.Version >= 3 {
+			bts = append(bts, cmn.SpzEncodeRotationsV3(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
+		} else {
+			bts = append(bts, cmn.SpzEncodeRotations(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
+		}
 	}
 
 	if shDegree == 1 {

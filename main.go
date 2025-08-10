@@ -108,6 +108,7 @@ func usage() {
 	fmt.Println("  -ty, --translateY <num>      specify the translation value about the y-axis for transform")
 	fmt.Println("  -tz, --translateZ <num>      specify the translation value about the z-axis for transform")
 	fmt.Println("  -to, --transform-order <RST> specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST")
+	fmt.Println("  -ov, --output-version <num>  specify the spz output version, default is 2")
 	fmt.Println("  -v,  --version               display version information")
 	fmt.Println("  -h,  --help                  display help information")
 	fmt.Println("")

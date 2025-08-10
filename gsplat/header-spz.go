@@ -52,7 +52,7 @@ func ParseSpzHeader(bts []byte) *SpzHeader {
 	if header.Magic != SPZ_MAGIC {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: header not found"))
 	}
-	if header.Version != 2 {
+	if header.Version < 2 || header.Version > 3 {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: version not supported: " + cmn.Uint32ToString(header.Version)))
 	}
 	if header.ShDegree > 3 {
