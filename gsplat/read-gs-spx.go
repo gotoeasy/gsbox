@@ -71,7 +71,6 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n], bts[blkSplatCnt*19+n])
 				datas = append(datas, data)
 			}
-
 		} else if formatId == 1 {
 			// SH1
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）

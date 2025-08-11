@@ -64,6 +64,7 @@ func version() {
 	fmt.Println("gsbox", cmn.VER)
 	fmt.Println("homepage", "https://github.com/gotoeasy/gsbox")
 }
+
 func usage() {
 	fmt.Println("")
 	fmt.Println("gsbox", cmn.VER)
@@ -121,6 +122,7 @@ func usage() {
 	fmt.Println("  gsbox info -i /path/to/file.spx")
 	fmt.Println("")
 }
+
 func plyInfo(args *cmn.OsArgs) {
 	// info
 	input := args.GetArgIgnorecase("-i", "--input")
@@ -294,6 +296,7 @@ func splat2ply(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func splat2spx(args *cmn.OsArgs) {
 	log.Println("[Info] convert splat to spx.")
 	startTime := time.Now()
@@ -311,6 +314,7 @@ func splat2spx(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func splat2spz(args *cmn.OsArgs) {
 	log.Println("[Info] convert splat to spz.")
 	startTime := time.Now()
@@ -323,6 +327,7 @@ func splat2spz(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func splat2splat(args *cmn.OsArgs) {
 	log.Println("[Info] convert splat to splat.")
 	startTime := time.Now()
@@ -350,6 +355,7 @@ func spx2ply(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func spx2splat(args *cmn.OsArgs) {
 	log.Println("[Info] convert spx to splat.")
 	startTime := time.Now()
@@ -362,6 +368,7 @@ func spx2splat(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func spx2spz(args *cmn.OsArgs) {
 	log.Println("[Info] convert spx to spz.")
 	startTime := time.Now()
@@ -375,6 +382,7 @@ func spx2spz(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func spx2spx(args *cmn.OsArgs) {
 	log.Println("[Info] convert spx to spx.")
 	startTime := time.Now()
@@ -438,6 +446,7 @@ func spz2spx(args *cmn.OsArgs) {
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time conversion:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
+
 func spz2spz(args *cmn.OsArgs) {
 	log.Println("[Info] convert spz to spz.")
 	startTime := time.Now()
