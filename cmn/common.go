@@ -420,7 +420,7 @@ func init() {
 		return
 	}
 
-	if data.Ver != VER {
+	if data.Ver > VER {
 		NewVersionMessage = "\nNotice: the latest version (" + data.Ver + ") is now available.\n"
 	}
 }
