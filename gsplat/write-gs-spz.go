@@ -12,15 +12,14 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 	cmn.ExitOnError(err)
 	defer file.Close()
 
-	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
 	if ver < 2 || ver > 3 {
 		log.Println("[Warn] Ignore invalid output version:", ver)
 		ver = 2
-	} else {
-		log.Println("[Info] output spz version:", ver)
 	}
+	log.Println("[Info] output spz version:", ver)
+	log.Println("[Info] output shDegree:", shDegree)
 
 	h := &SpzHeader{
 		Magic:          SPZ_MAGIC,
