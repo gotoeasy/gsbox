@@ -16,7 +16,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 <p>
 
 ## Features
-- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz` formats for 3DGS.
+- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz(v2,v3)` formats for 3DGS.
 - [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or simple information of `.splat`.
 - [x] Supports data transformation (Rotation, Scale, Translation).
 - [x] Supports merging multiple model files into one.
@@ -72,6 +72,7 @@ Options:
   -ty, --translateY <num>      specify the translation value about the y-axis for transform
   -tz, --translateZ <num>      specify the translation value about the z-axis for transform
   -to, --transform-order <RST> specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST
+  -ov, --output-version <num>  specify the spz output version, default is 2
   -v,  --version               display version information
   -h,  --help                  display help information
 
@@ -86,12 +87,12 @@ Examples:
 # Convert the ply to spx without saving SH coefficients and add custom comments.
 gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
 
+# Convert the ply to spz version 3.
+gsbox p2z -i /path/to/input.ply -o /path/to/output.spz -ov 3
+
 # Inspect the header information of the spx file
 gsbox info -i /path/to/file.spx
 ```
-
-## TODO
-support [spz v2.0.0](https://github.com/nianticlabs/spz/releases/tag/v2.0.0)
 
 ## Update History & binary files
 https://github.com/gotoeasy/gsbox/releases
