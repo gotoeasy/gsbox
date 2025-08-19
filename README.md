@@ -22,6 +22,12 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 - [x] Supports merging multiple model files into one.
 
 
+|  | `.ply` | `.compressed.ply` | `.splat` | `.spx` | `.spz` |
+|----------|------|------|------|------|------|
+| Read  |　&#9745; |　　　&#9745; |　&#9745; |　&#9745; |　&#9745; |
+| Write |　&#9745; |　　　        |　&#9745; |　&#9745; |　&#9745; |
+
+
 ## `.spz`
 - The `.spz` format is an open 3DGS model format. Its encoding algorithm is highly commendable, and combined with gzip compression, it can significantly reduce the size of model files without any noticeable loss in visual quality.
 - The official open-source repository for the `.spz` format is available at [spz](https://github.com/nianticlabs/spz). This format is about 10x smaller than the equivalent PLY format and is offered as open source by Niantic Labs. More details can be found at [scaniverse](https://scaniverse.com/spz)
