@@ -9,15 +9,27 @@ import (
 )
 
 type PlyHeader struct {
-	Declare      string
-	Format       string
-	Comment      string
+	Declare string
+	Format  string
+	Comment string
+	/** 大于0时代表是SuperSplat的 *.compressed.ply 格式 */
+	ChunkCount   int
 	VertexCount  int
 	HeaderLength int
 	RowLength    int
 	text         string
 	mapOffset    map[string]int
 	mapType      map[string]string
+}
+
+// CompressedPly 每个 chunk = 18 个 float32
+type Chunk struct {
+	MinX, MinY, MinZ                float64
+	MaxX, MaxY, MaxZ                float64
+	MinScaleX, MinScaleY, MinScaleZ float64
+	MaxScaleX, MaxScaleY, MaxScaleZ float64
+	MinR, MinG, MinB                float64
+	MaxR, MaxG, MaxB                float64
 }
 
 func ReadPlyHeaderString(plyFile string, readLen int) (string, error) {
@@ -64,6 +76,7 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 	header := cmn.Split(str, "end_header\n")[0] + "end_header\n"
 	lines := cmn.Split(strings.TrimRight(header, "\n"), "\n")
 	vertexCount := -1
+	chunkCount := 0
 	declare := ""
 	format := ""
 	comment := ""
@@ -78,6 +91,9 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 			offset += getTypeSize(ary[1])
 		} else if cmn.Startwiths(lines[i], "format ") {
 			format = cmn.ReplaceAll(lines[i], "format ", "")
+		} else if cmn.Startwiths(lines[i], "element chunk ") {
+			// .compressed.ply
+			chunkCount = cmn.StringToInt(cmn.ReplaceAll(lines[i], "element chunk ", ""), 0)
 		} else if cmn.Startwiths(lines[i], "element vertex ") {
 			vertexCount = cmn.StringToInt(cmn.ReplaceAll(lines[i], "element vertex ", ""))
 		} else if cmn.Startwiths(lines[i], "comment ") {
@@ -90,6 +106,7 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 		Declare:      declare,
 		Format:       format,
 		Comment:      comment,
+		ChunkCount:   chunkCount,
 		VertexCount:  vertexCount,
 		HeaderLength: len(header),
 		RowLength:    offset,
@@ -161,4 +178,19 @@ func (p *PlyHeader) IsOfficialPly() bool {
 		p.mapType["f_dc_0"] != "" && p.mapType["f_dc_1"] != "" && p.mapType["f_dc_2"] != "" &&
 		p.mapType["opacity"] != "" && p.mapType["scale_0"] != "" && p.mapType["scale_1"] != "" && p.mapType["scale_2"] != "" &&
 		p.mapType["rot_0"] != "" && p.mapType["rot_1"] != "" && p.mapType["rot_2"] != "" && p.mapType["rot_3"] != ""
+}
+
+// 是否SuperSplat压缩格式的 .compressed.ply
+func (p *PlyHeader) IsCompressedPly() bool {
+	return p.Declare == "ply" &&
+		p.Format == "binary_little_endian 1.0" &&
+		p.ChunkCount > 0 &&
+		p.VertexCount > 0 &&
+		p.mapType["min_x"] != "" && p.mapType["min_y"] != "" && p.mapType["min_z"] != "" &&
+		p.mapType["max_x"] != "" && p.mapType["max_y"] != "" && p.mapType["max_z"] != "" &&
+		p.mapType["min_scale_x"] != "" && p.mapType["min_scale_y"] != "" && p.mapType["min_scale_z"] != "" &&
+		p.mapType["max_scale_x"] != "" && p.mapType["max_scale_y"] != "" && p.mapType["max_scale_z"] != "" &&
+		p.mapType["min_r"] != "" && p.mapType["min_g"] != "" && p.mapType["min_b"] != "" &&
+		p.mapType["max_r"] != "" && p.mapType["max_g"] != "" && p.mapType["max_b"] != "" &&
+		p.mapType["packed_position"] != "" && p.mapType["packed_rotation"] != "" && p.mapType["packed_scale"] != "" && p.mapType["packed_color"] != ""
 }
