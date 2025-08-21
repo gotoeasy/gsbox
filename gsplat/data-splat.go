@@ -5,6 +5,7 @@ import (
 	"gsbox/cmn"
 	"log"
 	"math"
+	"os"
 	"sort"
 )
 
@@ -371,4 +372,24 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 	v.Z = iz*qw + iw*-qz + ix*-qy - iy*-qx
 
 	return v
+}
+
+func CompressionInfo(filePath string, num int) string {
+	if cmn.Endwiths(filePath, ".ply", true) {
+		return fmt.Sprintf("splat count: %v", num)
+	}
+
+	file, err := os.Open(filePath)
+	cmn.ExitOnError(err)
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	cmn.ExitOnError(err)
+	fileSize := fileInfo.Size()
+
+	plySize := 1500 + num*248
+	compressionRatio := float64(plySize) / float64(fileSize)
+	sizeReduction := (1 - float64(fileSize)/float64(plySize)) * 100
+
+	return fmt.Sprintf("splat count: %v, %.2fx compressed (%.2f%% size reduction compared to ply)", num, compressionRatio, sizeReduction)
 }
