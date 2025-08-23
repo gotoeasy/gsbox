@@ -56,7 +56,8 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 		}
 	}
 
-	if shDegree == 1 {
+	switch shDegree {
+	case 1:
 		for i := range rows {
 			if len(rows[i].SH1) > 0 {
 				for n := range 9 {
@@ -72,7 +73,7 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 				}
 			}
 		}
-	} else if shDegree == 2 {
+	case 2:
 		for i := range rows {
 			if len(rows[i].SH1) > 0 {
 				for n := range 9 {
@@ -94,7 +95,7 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 				}
 			}
 		}
-	} else if shDegree == 3 {
+	case 3:
 		for i := range rows {
 			if len(rows[i].SH3) > 0 {
 				for j := range 9 {

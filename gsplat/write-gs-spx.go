@@ -44,15 +44,16 @@ func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int, f
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
 
-	if shDegree == 1 {
+	switch shDegree {
+	case 1:
 		for i := range blockDatasList {
 			writeSpxBlockSH1(writer, blockDatasList[i])
 		}
-	} else if shDegree == 2 {
+	case 2:
 		for i := range blockDatasList {
 			writeSpxBlockSH2(writer, blockDatasList[i])
 		}
-	} else if shDegree == 3 {
+	case 3:
 		for i := range blockDatasList {
 			writeSpxBlockSH2(writer, blockDatasList[i])
 			writeSpxBlockSH3(writer, blockDatasList[i])

@@ -53,7 +53,8 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 		i32BlockSplatCount := int32(cmn.BytesToUint32(blockBts[0:4]))
 		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
-		if formatId == 20 {
+		switch formatId {
+		case 20:
 			// splat20
 			bts := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -71,7 +72,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n], bts[blkSplatCnt*19+n])
 				datas = append(datas, data)
 			}
-		} else if formatId == 1 {
+		case 1:
 			// SH1
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -79,7 +80,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				splatData.SH1 = dataBytes[n*9 : n*9+9]
 			}
 			n1 += blkSplatCnt
-		} else if formatId == 2 {
+		case 2:
 			// SH2
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -87,7 +88,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				splatData.SH2 = dataBytes[n*24 : n*24+24]
 			}
 			n2 += blkSplatCnt
-		} else if formatId == 3 {
+		case 3:
 			// SH3
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -95,7 +96,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 				splatData.SH3 = dataBytes[n*21 : n*21+21]
 			}
 			n3 += blkSplatCnt
-		} else {
+		default:
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
 		}

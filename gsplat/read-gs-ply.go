@@ -58,11 +58,12 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 
 			shDim := 0
 			maxShDegree := header.MaxShDegree()
-			if maxShDegree == 1 {
+			switch maxShDegree {
+			case 1:
 				shDim = 3
-			} else if maxShDegree == 2 {
+			case 2:
 				shDim = 8
-			} else if maxShDegree == 3 {
+			case 3:
 				shDim = 15
 			}
 
@@ -78,12 +79,13 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 				shs[n] = cmn.EncodeSplatSH(0)
 			}
 
-			if maxShDegree == 3 {
+			switch maxShDegree {
+			case 3:
 				data.SH2 = shs[:24]
 				data.SH3 = shs[24:]
-			} else if maxShDegree == 2 {
+			case 2:
 				data.SH2 = shs[:24]
-			} else if maxShDegree == 1 {
+			case 1:
 				data.SH1 = shs[:9]
 			}
 		}
@@ -98,31 +100,32 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 
 func readValue(header *PlyHeader, property string, splatDataBytes []byte) float64 {
 	offset, typename := header.Property(property)
-	if typename == "float" {
+	switch typename {
+	case "float":
 		var v float32
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+4]), binary.LittleEndian, &v))
 		return float64(v)
-	} else if typename == "double" {
+	case "double":
 		var v float64
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+8]), binary.LittleEndian, &v))
 		return v
-	} else if typename == "int" {
+	case "int":
 		var v int32
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+4]), binary.LittleEndian, &v))
 		return float64(v)
-	} else if typename == "uint" {
+	case "uint":
 		var v uint32
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+4]), binary.LittleEndian, &v))
 		return float64(v)
-	} else if typename == "short" {
+	case "short":
 		var v int16
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+2]), binary.LittleEndian, &v))
 		return float64(v)
-	} else if typename == "ushort" {
+	case "ushort":
 		var v uint16
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+2]), binary.LittleEndian, &v))
 		return float64(v)
-	} else if typename == "uchar" {
+	case "uchar":
 		var v uint8
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+1]), binary.LittleEndian, &v))
 		return float64(v)

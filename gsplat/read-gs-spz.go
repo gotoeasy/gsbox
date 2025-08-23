@@ -49,11 +49,12 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 	offsetShs := offsetRotations + rotationSize
 
 	shDim := 0
-	if h.ShDegree == 1 {
+	switch h.ShDegree {
+	case 1:
 		shDim = int(h.NumPoints) * 9
-	} else if h.ShDegree == 2 {
+	case 2:
 		shDim = int(h.NumPoints) * 24
-	} else if h.ShDegree == 3 {
+	case 3:
 		shDim = int(h.NumPoints) * 45
 	}
 	cmn.ExitOnConditionError(len(datas) != int(h.NumPoints)*size+shDim, errors.New("[SPZ ERROR] Invalid spz data"))
@@ -83,11 +84,12 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 		} else {
 			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotationsV3(rotations[i*4 : i*4+4])
 		}
-		if h.ShDegree == 1 {
+		switch h.ShDegree {
+		case 1:
 			data.SH1 = shs[i*9 : i*9+9]
-		} else if h.ShDegree == 2 {
+		case 2:
 			data.SH2 = shs[i*24 : i*24+24]
-		} else if h.ShDegree == 3 {
+		case 3:
 			data.SH2 = shs[i*45 : i*45+24]
 			data.SH3 = shs[i*45+24 : i*45+45]
 		}

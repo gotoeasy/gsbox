@@ -38,21 +38,22 @@ func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 	if shDegree > 0 {
 		shDim := 0
 		var shs []byte
-		if shDegree == 1 {
+		switch shDegree {
+		case 1:
 			shDim = 3
 			if len(splatData.SH1) > 0 {
 				shs = append(shs, splatData.SH1...)
 			} else if len(splatData.SH2) > 0 {
 				shs = append(shs, splatData.SH2[:9]...)
 			}
-		} else if shDegree == 2 {
+		case 2:
 			shDim = 8
 			if len(splatData.SH1) > 0 {
 				shs = append(shs, splatData.SH1...)
 			} else if len(splatData.SH2) > 0 {
 				shs = append(shs, splatData.SH2...)
 			}
-		} else if shDegree == 3 {
+		case 3:
 			shDim = 15
 			if len(splatData.SH3) > 0 {
 				shs = append(shs, splatData.SH2...)
@@ -105,15 +106,16 @@ func genPlyHeader(count int, comment string, shDegree int) string {
 	lines = append(lines, "property float f_dc_0")
 	lines = append(lines, "property float f_dc_1")
 	lines = append(lines, "property float f_dc_2")
-	if shDegree == 1 {
+	switch shDegree {
+	case 1:
 		for i := range 9 {
 			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
 		}
-	} else if shDegree == 2 {
+	case 2:
 		for i := range 24 {
 			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
 		}
-	} else if shDegree == 3 {
+	case 3:
 		for i := range 45 {
 			lines = append(lines, "property float f_rest_"+cmn.IntToString(i))
 		}

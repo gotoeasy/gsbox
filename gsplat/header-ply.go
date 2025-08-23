@@ -117,19 +117,20 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 }
 
 func getTypeSize(name string) int {
-	if name == "float" {
+	switch name {
+	case "float":
 		return 4
-	} else if name == "double" {
+	case "double":
 		return 8
-	} else if name == "int" {
+	case "int":
 		return 4
-	} else if name == "uint" {
+	case "uint":
 		return 4
-	} else if name == "short" {
+	case "short":
 		return 2
-	} else if name == "ushort" {
+	case "ushort":
 		return 2
-	} else if name == "uchar" {
+	case "uchar":
 		return 1
 	}
 

@@ -35,27 +35,28 @@ type SplatData struct {
 
 func TransformDatas(datas []*SplatData) []*SplatData {
 	order := cmn.ToLower(Args.GetArgIgnorecase("-to", "--transform-order"))
-	if order == "rts" {
+	switch order {
+	case "rts":
 		transformRotateDatas(datas)
 		transformTranslateDatas(datas)
 		transformScaleDatas(datas)
-	} else if order == "srt" {
+	case "srt":
 		transformScaleDatas(datas)
 		transformRotateDatas(datas)
 		transformTranslateDatas(datas)
-	} else if order == "str" {
+	case "str":
 		transformScaleDatas(datas)
 		transformTranslateDatas(datas)
 		transformRotateDatas(datas)
-	} else if order == "trs" {
+	case "trs":
 		transformTranslateDatas(datas)
 		transformRotateDatas(datas)
 		transformScaleDatas(datas)
-	} else if order == "tsr" {
+	case "tsr":
 		transformTranslateDatas(datas)
 		transformScaleDatas(datas)
 		transformRotateDatas(datas)
-	} else {
+	default:
 		transformRotateDatas(datas)
 		transformScaleDatas(datas)
 		transformTranslateDatas(datas)
