@@ -31,6 +31,13 @@ const RAD2DEG = 180 / math.Pi
 var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
 
+func FormatFloat32(f float32) string {
+	formatted := fmt.Sprintf("%.10f", f)
+	formatted = strings.TrimRight(formatted, "0")
+	formatted = strings.TrimRight(formatted, ".")
+	return formatted
+}
+
 // 去重
 func UniqueStrings(slice []string) []string {
 	seen := make(map[string]bool)
@@ -365,6 +372,10 @@ func BytesToUint32(bs []byte) uint32 {
 	return binary.LittleEndian.Uint32(bs)
 }
 
+func BytesToUint16(bs []byte) uint16 {
+	return binary.LittleEndian.Uint16(bs)
+}
+
 func Int32ToBytes(intNum int32) []byte {
 	bytebuf := bytes.NewBuffer([]byte{})
 	binary.Write(bytebuf, binary.LittleEndian, intNum)
@@ -379,6 +390,46 @@ func Uint32ToBytes(intNum uint32) []byte {
 	bytebuf := bytes.NewBuffer([]byte{})
 	binary.Write(bytebuf, binary.LittleEndian, intNum)
 	return bytebuf.Bytes()
+}
+
+// Convert a float16 stored as a uint16 number back to a float32
+func DecodeFloat16(encoded uint16) float32 {
+	signBit := (encoded >> 15) & 1
+	exponent := (encoded >> 10) & 0x1f
+	mantissa := encoded & 0x3ff
+
+	if exponent == 0 {
+		if mantissa == 0 {
+			return 0.0
+		}
+		// Denormalized number
+		m := uint32(mantissa)
+		exp := -14
+		for (m & 0x400) == 0 {
+			m <<= 1
+			exp--
+		}
+		m &= 0x3ff
+		finalExp := uint32(exp + 127)
+		finalMantissa := m << 13
+		bits := (uint32(signBit) << 31) | (finalExp << 23) | finalMantissa
+		return math.Float32frombits(bits)
+	}
+
+	if exponent == 0x1f {
+		if mantissa == 0 {
+			if signBit == 1 {
+				return -math.MaxFloat32
+			}
+			return math.MaxFloat32
+		}
+		return float32(math.NaN())
+	}
+
+	finalExp := uint32(exponent - 15 + 127)
+	finalMantissa := uint32(mantissa) << 13
+	bits := (uint32(signBit) << 31) | (finalExp << 23) | finalMantissa
+	return math.Float32frombits(bits)
 }
 
 /*
