@@ -22,10 +22,10 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 - [x] Supports merging multiple model files into one.
 
 
-|  | `.ply` | `.compressed.ply` | `.splat` | `.spx` | `.spz` |
-|----------|------|------|------|------|------|
-| Read  |　&#9745; |　　　&#9745; |　&#9745; |　&#9745; |　&#9745; |
-| Write |　&#9745; |　　　        |　&#9745; |　&#9745; |　&#9745; |
+|  | `.ply` | `.compressed.ply` | `.splat` | `.spx` | `.spz` | `.ksplat` |
+|----------|------|------|------|------|------|------|
+| Read  |　&#9745; |　　　&#9745; |　&#9745; |　&#9745; |　&#9745; |　&#9745; |
+| Write |　&#9745; |　　　        |　&#9745; |　&#9745; |　&#9745; |　        |
 
 
 ## `.spz`
