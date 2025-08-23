@@ -17,15 +17,15 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 
 ## Features
 - [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, and `.spz(v2,v3)` formats for 3DGS.
-- [x] Viewing file header information for `.ply`, `.spx`, and `.spz` files, or simple information of `.splat`.
+- [x] Viewing file header information for `.ply`, `.spx`, `.spz`, and `.ksplat` files, or simple information of `.splat`.
 - [x] Supports data transformation (Rotation, Scale, Translation).
 - [x] Supports merging multiple model files into one.
 
 
-|  | `.ply` | `.compressed.ply` | `.splat` | `.spx` | `.spz` | `.ksplat` |
-|----------|------|------|------|------|------|------|
-| Read  |　&#9745; |　　　&#9745; |　&#9745; |　&#9745; |　&#9745; |　&#9745; |
-| Write |　&#9745; |　　　        |　&#9745; |　&#9745; |　&#9745; |　        |
+|       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` |
+|-------|----------|-------------------|----------|----------|---------|-----------|
+| Read  |　&#9745; |　　　&#9745;      |　&#9745; |　&#9745; |　&#9745; |　&#9745; |
+| Write |　&#9745; |　　　             |　&#9745; |　&#9745; |　&#9745; |　        |
 
 
 ## `.spz`
