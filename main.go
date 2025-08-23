@@ -105,7 +105,7 @@ func usage() {
 	fmt.Println("  k2s, ksplat2splat            convert ksplat to splat")
 	fmt.Println("  k2x, ksplat2spx              convert ksplat to spx")
 	fmt.Println("  k2z, ksplat2spx              convert ksplat to spz")
-	fmt.Println("  ps,  printsplat              print data to a text file according to the splat layout")
+	fmt.Println("  ps,  printsplat              print data to text file in splat format layout")
 	fmt.Println("  join                         join the input model files into a single output file")
 	fmt.Println("  info <file>                  display the model file information")
 	fmt.Println("  -i,  --input <file>          specify the input file")
@@ -192,7 +192,7 @@ func plyInfo(args *cmn.OsArgs) {
 }
 
 func printSplat(args *cmn.OsArgs) {
-	log.Println("[Info] print splat data to file.")
+	log.Println("[Info] print data to text file in splat format layout.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
