@@ -26,6 +26,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 |-------|----------|-------------------|----------|----------|---------|-----------|
 | Read  |　&#9745; |　　　&#9745;      |　&#9745; |　&#9745; |　&#9745; |　&#9745; |
 | Write |　&#9745; |　　　             |　&#9745; |　&#9745; |　&#9745; |　        |
+| Ref   |　<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |　　　<a href="https://github.com/playcanvas/supersplat">Link</a> |　<a href="https://github.com/antimatter15/splat">Link</a> |　<a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> |　<a href="https://github.com/nianticlabs/spz">Link</a> |　<a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> |
 
 
 ## `.spz`
