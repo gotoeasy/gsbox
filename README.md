@@ -60,6 +60,11 @@ Options:
   z2s, spz2splat               convert spz to splat
   z2x, spz2spx                 convert spz to spx
   z2z, spz2spz                 convert spz to spz
+  k2p, ksplat2ply              convert ksplat to ply
+  k2s, ksplat2splat            convert ksplat to splat
+  k2x, ksplat2spx              convert ksplat to spx
+  k2z, ksplat2spx              convert ksplat to spz
+  ps,  printsplat              print data to a text file according to the splat layout
   join                         join the input model files into a single output file
   info <file>                  display the model file information
   -i,  --input <file>          specify the input file
@@ -87,7 +92,9 @@ Examples:
   gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -bs 10240
   gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1 -to TRS
   gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
-  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx
+  gsbox k2s -i /path/to/input.ksplat -o /path/to/output.splat
+  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -o output.spx
+  gsbox ps -i /path/to/input.spx -o /path/to/input.txt
   gsbox info -i /path/to/file.spx
 
 # Convert the ply to spx without saving SH coefficients and add custom comments.
