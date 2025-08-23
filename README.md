@@ -95,7 +95,7 @@ Examples:
   gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
   gsbox k2s -i /path/to/input.ksplat -o /path/to/output.splat
   gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -o output.spx
-  gsbox ps -i /path/to/input.spx -o /path/to/input.txt
+  gsbox ps -i /path/to/input.spx -o /path/to/output.txt
   gsbox info -i /path/to/file.spx
 
 # Convert the ply to spx without saving SH coefficients and add custom comments.
