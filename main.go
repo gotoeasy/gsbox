@@ -105,7 +105,7 @@ func usage() {
 	fmt.Println("  k2s, ksplat2splat            convert ksplat to splat")
 	fmt.Println("  k2x, ksplat2spx              convert ksplat to spx")
 	fmt.Println("  k2z, ksplat2spx              convert ksplat to spz")
-	fmt.Println("  ps,  printsplat              print data to text file in splat format layout")
+	fmt.Println("  ps,  printsplat              print data to text file like splat format layout")
 	fmt.Println("  join                         join the input model files into a single output file")
 	fmt.Println("  info <file>                  display the model file information")
 	fmt.Println("  -i,  --input <file>          specify the input file")
@@ -192,27 +192,40 @@ func plyInfo(args *cmn.OsArgs) {
 }
 
 func printSplat(args *cmn.OsArgs) {
-	log.Println("[Info] print data to text file in splat format layout.")
+	log.Println("[Info] print data to text file like splat format layout.")
 	startTime := time.Now()
 	input := checkInputFileExists(args)
 	output := createOutputDir(args)
 
 	var datas []*gsplat.SplatData
+	shDegree := 0
 	if cmn.Endwiths(input, ".ply", true) {
-		_, datas = gsplat.ReadPly(input)
+		header, ds := gsplat.ReadPly(input)
+		datas = ds
+		shDegree = max(header.MaxShDegree(), shDegree)
 	} else if cmn.Endwiths(input, ".splat", true) {
 		datas = gsplat.ReadSplat(input)
 	} else if cmn.Endwiths(input, ".spx", true) {
-		_, datas = gsplat.ReadSpx(input)
+		header, ds := gsplat.ReadSpx(input)
+		datas = ds
+		shDegree = max(int(header.ShDegree), shDegree)
 	} else if cmn.Endwiths(input, ".spz", true) {
-		_, datas = gsplat.ReadSpz(input, false)
+		header, ds := gsplat.ReadSpz(input, false)
+		datas = ds
+		shDegree = max(int(header.ShDegree), shDegree)
 	} else if cmn.Endwiths(input, ".ksplat", true) {
-		_, _, datas = gsplat.ReadKsplat(input, false)
+		_, header, ds := gsplat.ReadKsplat(input, false)
+		datas = ds
+		shDegree = max(int(header.ShDegree), shDegree)
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat) format"))
 	}
+	sh := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), -1)
+	if sh >= 0 && sh <= 3 {
+		shDegree = min(shDegree, sh)
+	}
 
-	gsplat.PrintSplat(output, datas)
+	gsplat.PrintSplat(output, datas, shDegree)
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }

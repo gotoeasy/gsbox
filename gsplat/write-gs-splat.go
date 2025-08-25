@@ -31,7 +31,7 @@ func WriteSplat(splatFile string, rows []*SplatData) {
 	cmn.ExitOnError(err)
 }
 
-func PrintSplat(splatFile string, rows []*SplatData) {
+func PrintSplat(splatFile string, rows []*SplatData, shDegree int) {
 	file, err := os.Create(splatFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -39,14 +39,69 @@ func PrintSplat(splatFile string, rows []*SplatData) {
 	writer := bufio.NewWriter(file)
 
 	for i := range rows {
-		line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v\r\n",
-			cmn.FormatFloat32(rows[i].PositionX), cmn.FormatFloat32(rows[i].PositionY), cmn.FormatFloat32(rows[i].PositionZ),
-			cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleX)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleY)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleZ)),
-			rows[i].ColorR, rows[i].ColorG, rows[i].ColorB, rows[i].ColorA,
-			rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ,
-		)
-		_, err = writer.WriteString(line)
-		cmn.ExitOnError(err)
+		shs := []uint8{128, 128, 128, 128, 128, 128, 128, 128, 128,
+			128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
+			128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128}
+		if len(rows[i].SH1) > 0 {
+			for j := range 9 {
+				shs[j] = rows[i].SH1[j]
+			}
+		}
+		if len(rows[i].SH2) > 0 {
+			for j := range 24 {
+				shs[j] = rows[i].SH2[j]
+			}
+		}
+		if len(rows[i].SH3) > 0 {
+			for j := range 21 {
+				shs[24+j] = rows[i].SH3[j]
+			}
+		}
+
+		switch shDegree {
+		case 1:
+			line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v\r\n",
+				cmn.FormatFloat32(rows[i].PositionX), cmn.FormatFloat32(rows[i].PositionY), cmn.FormatFloat32(rows[i].PositionZ),
+				cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleX)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleY)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleZ)),
+				rows[i].ColorR, rows[i].ColorG, rows[i].ColorB, rows[i].ColorA,
+				rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ,
+				shs[0], shs[1], shs[2], shs[3], shs[4], shs[5], shs[6], shs[7], shs[8],
+			)
+			_, err = writer.WriteString(line)
+			cmn.ExitOnError(err)
+		case 2:
+			line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v\r\n",
+				cmn.FormatFloat32(rows[i].PositionX), cmn.FormatFloat32(rows[i].PositionY), cmn.FormatFloat32(rows[i].PositionZ),
+				cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleX)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleY)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleZ)),
+				rows[i].ColorR, rows[i].ColorG, rows[i].ColorB, rows[i].ColorA,
+				rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ,
+				shs[0], shs[1], shs[2], shs[3], shs[4], shs[5], shs[6], shs[7], shs[8],
+				shs[9], shs[10], shs[11], shs[12], shs[13], shs[14], shs[15], shs[16], shs[17], shs[18], shs[19], shs[20], shs[21], shs[22], shs[23],
+			)
+			_, err = writer.WriteString(line)
+			cmn.ExitOnError(err)
+		case 3:
+			line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v,%v\r\n",
+				cmn.FormatFloat32(rows[i].PositionX), cmn.FormatFloat32(rows[i].PositionY), cmn.FormatFloat32(rows[i].PositionZ),
+				cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleX)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleY)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleZ)),
+				rows[i].ColorR, rows[i].ColorG, rows[i].ColorB, rows[i].ColorA,
+				rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ,
+				shs[0], shs[1], shs[2], shs[3], shs[4], shs[5], shs[6], shs[7], shs[8],
+				shs[9], shs[10], shs[11], shs[12], shs[13], shs[14], shs[15], shs[16], shs[17], shs[18], shs[19], shs[20], shs[21], shs[22], shs[23],
+				shs[24], shs[25], shs[26], shs[27], shs[28], shs[29], shs[30], shs[31], shs[32], shs[33], shs[34], shs[35], shs[36], shs[37], shs[38], shs[39], shs[40], shs[41], shs[42], shs[43], shs[44],
+			)
+			_, err = writer.WriteString(line)
+			cmn.ExitOnError(err)
+		default:
+			line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v\r\n",
+				cmn.FormatFloat32(rows[i].PositionX), cmn.FormatFloat32(rows[i].PositionY), cmn.FormatFloat32(rows[i].PositionZ),
+				cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleX)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleY)), cmn.FormatFloat32(cmn.EncodeSplatScale(rows[i].ScaleZ)),
+				rows[i].ColorR, rows[i].ColorG, rows[i].ColorB, rows[i].ColorA,
+				rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ,
+			)
+			_, err = writer.WriteString(line)
+			cmn.ExitOnError(err)
+		}
 	}
 	err = writer.Flush()
 	cmn.ExitOnError(err)
