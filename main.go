@@ -222,7 +222,7 @@ func printSplat(args *cmn.OsArgs) {
 	}
 	sh := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), -1)
 	if sh >= 0 && sh <= 3 {
-		shDegree = min(shDegree, sh)
+		shDegree = sh // 优先按参数要求级别，未指定时按数据实际级别输出
 	}
 
 	gsplat.PrintSplat(output, datas, shDegree)
