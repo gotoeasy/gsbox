@@ -238,6 +238,13 @@ func Sort(rows []*SplatData) {
 	})
 }
 
+func SortMorton3(rows []*SplatData) {
+	mm := ComputeXyzMinMax(rows)
+	sort.Slice(rows, func(i, j int) bool {
+		return EncodeMorton3(rows[i].PositionX, rows[i].PositionY, rows[i].PositionZ, mm) < EncodeMorton3(rows[j].PositionX, rows[j].PositionY, rows[j].PositionZ, mm)
+	})
+}
+
 func getRotateArgs() (bool, float32, float32, float32) {
 	has := Args.HasArgIgnorecase("-rx", "--rotateX", "-ry", "--rotateY", "-rz", "--rotateZ")
 	var rx, ry, rz float32
