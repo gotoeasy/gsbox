@@ -119,7 +119,7 @@ func usage() {
 	fmt.Println("  -rx, --rotateX <num>         specify the rotation angle in degrees about the x-axis for transform")
 	fmt.Println("  -ry, --rotateY <num>         specify the rotation angle in degrees about the y-axis for transform")
 	fmt.Println("  -rz, --rotateZ <num>         specify the rotation angle in degrees about the z-axis for transform")
-	fmt.Println("  -s,  --scale <num>           specify a uniform scaling factor(0.01~100.0) for transform")
+	fmt.Println("  -s,  --scale <num>           specify a uniform scaling factor(0.001~1000) for transform")
 	fmt.Println("  -tx, --translateX <num>      specify the translation value about the x-axis for transform")
 	fmt.Println("  -ty, --translateY <num>      specify the translation value about the y-axis for transform")
 	fmt.Println("  -tz, --translateZ <num>      specify the translation value about the z-axis for transform")

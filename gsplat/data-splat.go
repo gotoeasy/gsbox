@@ -260,7 +260,7 @@ func getScaleArgs() (bool, float32) {
 	has := Args.HasArgIgnorecase("-s", "--scale")
 	var scale float32 = 1.0
 	if has {
-		scale = min(max(cmn.StringToFloat32(Args.GetArgIgnorecase("-s", "--scale"), 1.0), 0.01), 100.0)
+		scale = min(max(cmn.StringToFloat32(Args.GetArgIgnorecase("-s", "--scale"), 1.0), 0.001), 1000.0)
 	}
 	return has, scale
 }

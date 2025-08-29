@@ -24,9 +24,9 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 
 |       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` |
 |-------|----------|-------------------|----------|----------|---------|-----------|
-| Read  |¡¡&#9745; |¡¡¡¡¡¡&#9745;      |¡¡&#9745; |¡¡&#9745; |¡¡&#9745; |¡¡&#9745; |
-| Write |¡¡&#9745; |¡¡¡¡¡¡             |¡¡&#9745; |¡¡&#9745; |¡¡&#9745; |¡¡        |
-| Ref   |¡¡<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |¡¡¡¡¡¡<a href="https://github.com/playcanvas/supersplat">Link</a> |¡¡<a href="https://github.com/antimatter15/splat">Link</a> |¡¡<a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> |¡¡<a href="https://github.com/nianticlabs/spz">Link</a> |¡¡<a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> |
+| Read  |ï¿½ï¿½&#9745; |ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½&#9745;      |ï¿½ï¿½&#9745; |ï¿½ï¿½&#9745; |ï¿½ï¿½&#9745; |ï¿½ï¿½&#9745; |
+| Write |ï¿½ï¿½&#9745; |ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½             |ï¿½ï¿½&#9745; |ï¿½ï¿½&#9745; |ï¿½ï¿½&#9745; |ï¿½ï¿½        |
+| Ref   |ï¿½ï¿½<a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½<a href="https://github.com/playcanvas/supersplat">Link</a> |ï¿½ï¿½<a href="https://github.com/antimatter15/splat">Link</a> |ï¿½ï¿½<a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> |ï¿½ï¿½<a href="https://github.com/nianticlabs/spz">Link</a> |ï¿½ï¿½<a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> |
 
 
 ## `.spz`
@@ -79,7 +79,7 @@ Options:
   -rx, --rotateX <num>         specify the rotation angle in degrees about the x-axis for transform
   -ry, --rotateY <num>         specify the rotation angle in degrees about the y-axis for transform
   -rz, --rotateZ <num>         specify the rotation angle in degrees about the z-axis for transform
-  -s,  --scale <num>           specify a uniform scaling factor(0.01~100.0) for transform
+  -s,  --scale <num>           specify a uniform scaling factor(0.001~1000) for transform
   -tx, --translateX <num>      specify the translation value about the x-axis for transform
   -ty, --translateY <num>      specify the translation value about the y-axis for transform
   -tz, --translateZ <num>      specify the translation value about the z-axis for transform
