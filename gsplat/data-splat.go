@@ -231,6 +231,15 @@ func (s *SplatData) ToString() string {
 }
 
 func Sort(rows []*SplatData) {
+	// PLY没有压缩，忽略排序
+	if IsOutputSplat() {
+		SortSplat(rows) // 仅编码，按原作排序
+	} else if IsOutputSpx() || IsOutputSpz() {
+		SortMorton(rows) // 莫顿码排序，提高压缩率
+	}
+}
+
+func SortSplat(rows []*SplatData) {
 	// from https://github.com/antimatter15/splat/blob/main/convert.py
 	sort.Slice(rows, func(i, j int) bool {
 		return math.Exp(float64(cmn.EncodeSplatScale(rows[i].ScaleX)+cmn.EncodeSplatScale(rows[i].ScaleY)+cmn.EncodeSplatScale(rows[i].ScaleZ)))/(1.0+math.Exp(float64(rows[i].ColorA))) <
@@ -238,10 +247,28 @@ func Sort(rows []*SplatData) {
 	})
 }
 
-func SortMorton3(rows []*SplatData) {
+func SortMorton(rows []*SplatData) {
 	mm := ComputeXyzMinMax(rows)
 	sort.Slice(rows, func(i, j int) bool {
 		return EncodeMorton3(rows[i].PositionX, rows[i].PositionY, rows[i].PositionZ, mm) < EncodeMorton3(rows[j].PositionX, rows[j].PositionY, rows[j].PositionZ, mm)
+	})
+}
+
+func SortBlockDatas4Compress(rows []*SplatData) {
+	sort.Slice(rows, func(i, j int) bool {
+		if rows[i].PositionY < rows[j].PositionY {
+			return true
+		}
+		if rows[i].PositionY > rows[j].PositionY {
+			return false
+		}
+		if rows[i].PositionX < rows[j].PositionX {
+			return true
+		}
+		if rows[i].PositionX > rows[j].PositionX {
+			return false
+		}
+		return rows[i].PositionZ < rows[j].PositionZ
 	})
 }
 
@@ -383,7 +410,7 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 }
 
 func CompressionInfo(filePath string, num int) string {
-	if cmn.Endwiths(filePath, ".ply", true) {
+	if cmn.Endwiths(filePath, ".ply", true) && !cmn.Endwiths(filePath, ".compressed.ply", true) {
 		return fmt.Sprintf("splat count: %v", num)
 	}
 

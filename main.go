@@ -62,7 +62,7 @@ func main() {
 	} else if args.HasCmd("join") {
 		join(args)
 	} else if args.HasCmd("info") {
-		plyInfo(args)
+		info(args)
 	} else {
 		usage()
 	}
@@ -85,48 +85,49 @@ func usage() {
 	fmt.Println("  gsbox [options]")
 	fmt.Println("")
 	fmt.Println("Options:")
-	fmt.Println("  p2s, ply2splat               convert ply to splat")
-	fmt.Println("  p2x, ply2spx                 convert ply to spx")
-	fmt.Println("  p2z, ply2spz                 convert ply to spz")
-	fmt.Println("  p2p, ply2ply                 convert ply to ply")
-	fmt.Println("  s2p, splat2ply               convert splat to ply")
-	fmt.Println("  s2x, splat2spx               convert splat to spx")
-	fmt.Println("  s2z, splat2spz               convert splat to spz")
-	fmt.Println("  s2s, splat2splat             convert splat to splat")
-	fmt.Println("  x2p, spx2ply                 convert spx to ply")
-	fmt.Println("  x2s, spx2splat               convert spx to splat")
-	fmt.Println("  x2z, spx2spz                 convert spx to spz")
-	fmt.Println("  x2x, spx2spx                 convert spx to spx")
-	fmt.Println("  z2p, spz2ply                 convert spz to ply")
-	fmt.Println("  z2s, spz2splat               convert spz to splat")
-	fmt.Println("  z2x, spz2spx                 convert spz to spx")
-	fmt.Println("  z2z, spz2spz                 convert spz to spz")
-	fmt.Println("  k2p, ksplat2ply              convert ksplat to ply")
-	fmt.Println("  k2s, ksplat2splat            convert ksplat to splat")
-	fmt.Println("  k2x, ksplat2spx              convert ksplat to spx")
-	fmt.Println("  k2z, ksplat2spx              convert ksplat to spz")
-	fmt.Println("  ps,  printsplat              print data to text file like splat format layout")
-	fmt.Println("  join                         join the input model files into a single output file")
-	fmt.Println("  info <file>                  display the model file information")
-	fmt.Println("  -i,  --input <file>          specify the input file")
-	fmt.Println("  -o,  --output <file>         specify the output file")
-	fmt.Println("  -c,  --comment <text>        specify the comment for ply/spx output")
-	fmt.Println("  -bs, --block-size <num>      specify the block size for spx output (default 20480)")
-	fmt.Println("  -sh, --shDegree <num>        specify the SH degree(0~3) for output")
-	fmt.Println("  -f1, --flag1 <num>           specify the header flag1 for spx output")
-	fmt.Println("  -f2, --flag2 <num>           specify the header flag2 for spx output")
-	fmt.Println("  -f3, --flag3 <num>           specify the header flag3 for spx output")
-	fmt.Println("  -rx, --rotateX <num>         specify the rotation angle in degrees about the x-axis for transform")
-	fmt.Println("  -ry, --rotateY <num>         specify the rotation angle in degrees about the y-axis for transform")
-	fmt.Println("  -rz, --rotateZ <num>         specify the rotation angle in degrees about the z-axis for transform")
-	fmt.Println("  -s,  --scale <num>           specify a uniform scaling factor(0.001~1000) for transform")
-	fmt.Println("  -tx, --translateX <num>      specify the translation value about the x-axis for transform")
-	fmt.Println("  -ty, --translateY <num>      specify the translation value about the y-axis for transform")
-	fmt.Println("  -tz, --translateZ <num>      specify the translation value about the z-axis for transform")
-	fmt.Println("  -to, --transform-order <RST> specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST")
-	fmt.Println("  -ov, --output-version <num>  specify the spz output version(2~3), default is 2")
-	fmt.Println("  -v,  --version               display version information")
-	fmt.Println("  -h,  --help                  display help information")
+	fmt.Println("  p2s, ply2splat                convert ply to splat")
+	fmt.Println("  p2x, ply2spx                  convert ply to spx")
+	fmt.Println("  p2z, ply2spz                  convert ply to spz")
+	fmt.Println("  p2p, ply2ply                  convert ply to ply")
+	fmt.Println("  s2p, splat2ply                convert splat to ply")
+	fmt.Println("  s2x, splat2spx                convert splat to spx")
+	fmt.Println("  s2z, splat2spz                convert splat to spz")
+	fmt.Println("  s2s, splat2splat              convert splat to splat")
+	fmt.Println("  x2p, spx2ply                  convert spx to ply")
+	fmt.Println("  x2s, spx2splat                convert spx to splat")
+	fmt.Println("  x2z, spx2spz                  convert spx to spz")
+	fmt.Println("  x2x, spx2spx                  convert spx to spx")
+	fmt.Println("  z2p, spz2ply                  convert spz to ply")
+	fmt.Println("  z2s, spz2splat                convert spz to splat")
+	fmt.Println("  z2x, spz2spx                  convert spz to spx")
+	fmt.Println("  z2z, spz2spz                  convert spz to spz")
+	fmt.Println("  k2p, ksplat2ply               convert ksplat to ply")
+	fmt.Println("  k2s, ksplat2splat             convert ksplat to splat")
+	fmt.Println("  k2x, ksplat2spx               convert ksplat to spx")
+	fmt.Println("  k2z, ksplat2spx               convert ksplat to spz")
+	fmt.Println("  ps,  printsplat               print data to text file like splat format layout")
+	fmt.Println("  join                          join the input model files into a single output file")
+	fmt.Println("  info <file>                   display the model file information")
+	fmt.Println("  -i,  --input <file>           specify the input file")
+	fmt.Println("  -o,  --output <file>          specify the output file")
+	fmt.Println("  -c,  --comment <text>         specify the comment for ply/spx output")
+	fmt.Println("  -ct, --compress-type <gzip>   specify the compress type(gzip) for spx output, default is gzip")
+	fmt.Println("  -bs, --block-size <num>       specify the block size for spx output (default 20480)")
+	fmt.Println("  -sh, --shDegree <num>         specify the SH degree(0~3) for output")
+	fmt.Println("  -f1, --flag1 <num>            specify the header flag1 for spx output")
+	fmt.Println("  -f2, --flag2 <num>            specify the header flag2 for spx output")
+	fmt.Println("  -f3, --flag3 <num>            specify the header flag3 for spx output")
+	fmt.Println("  -rx, --rotateX <num>          specify the rotation angle in degrees about the x-axis for transform")
+	fmt.Println("  -ry, --rotateY <num>          specify the rotation angle in degrees about the y-axis for transform")
+	fmt.Println("  -rz, --rotateZ <num>          specify the rotation angle in degrees about the z-axis for transform")
+	fmt.Println("  -s,  --scale <num>            specify a uniform scaling factor(0.001~1000) for transform")
+	fmt.Println("  -tx, --translateX <num>       specify the translation value about the x-axis for transform")
+	fmt.Println("  -ty, --translateY <num>       specify the translation value about the y-axis for transform")
+	fmt.Println("  -tz, --translateZ <num>       specify the translation value about the z-axis for transform")
+	fmt.Println("  -to, --transform-order <RST>  specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST")
+	fmt.Println("  -ov, --output-version <num>   specify the spz output version(2~3), default is 2")
+	fmt.Println("  -v,  --version                display version information")
+	fmt.Println("  -h,  --help                   display help information")
 	fmt.Println("")
 	fmt.Println("Examples:")
 	fmt.Println("  gsbox ply2splat -i /path/to/input.ply -o /path/to/output.splat")
@@ -139,7 +140,7 @@ func usage() {
 	fmt.Println("")
 }
 
-func plyInfo(args *cmn.OsArgs) {
+func info(args *cmn.OsArgs) {
 	// info
 	input := args.GetArgIgnorecase("-i", "--input")
 	if args.ArgCount == 3 {
@@ -161,22 +162,30 @@ func plyInfo(args *cmn.OsArgs) {
 	isSplat := cmn.Endwiths(input, ".splat", true)
 	isSpz := cmn.Endwiths(input, ".spz", true)
 	isKsplat := cmn.Endwiths(input, ".ksplat", true)
+	count := 0
 
 	if isPly {
-		header, err := gsplat.ReadPlyHeaderString(input, 1024)
+		headerString, err := gsplat.ReadPlyHeaderString(input, 1024)
 		cmn.ExitOnError(err)
-		fmt.Print(header)
+		fmt.Print(headerString)
+		header, err := gsplat.ReadPlyHeader(input)
+		if err == nil && header.ChunkCount > 0 {
+			count = header.VertexCount
+		}
 	} else if isSpx {
 		header := gsplat.ParseSpxHeader(input)
 		fmt.Println(header.ToStringSpx())
+		count = int(header.SplatCount)
 	} else if isSpz {
 		header, _ := gsplat.ReadSpz(input, true)
 		fmt.Println(header.ToString())
+		count = int(header.NumPoints)
 	} else if isKsplat {
 		secHeader, mainHeader, _ := gsplat.ReadKsplat(input, true)
 		fmt.Println(mainHeader.ToString())
 		fmt.Println("[Section 0]")
 		fmt.Println(secHeader.ToString())
+		count = mainHeader.SplatCount
 	} else if isSplat {
 		fileInfo, err := os.Stat(input)
 		cmn.ExitOnError(err)
@@ -184,10 +193,15 @@ func plyInfo(args *cmn.OsArgs) {
 		if (fileSize)%32 > 0 {
 			cmn.ExitOnError(errors.New("invalid splat format"))
 		} else {
+			count = int(fileSize / 32)
 			fmt.Println("SplatCount :", fileSize/32)
 		}
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat) format"))
+	}
+
+	if count > 0 {
+		fmt.Println("\n[Info]", gsplat.CompressionInfo(input, count))
 	}
 }
 
