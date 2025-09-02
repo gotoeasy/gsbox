@@ -80,24 +80,21 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 }
 
 func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader {
-	var f1 uint8 = 0 // 是否大场景
-	var f2 uint8 = 0 // 是否Y轴倒立模型
+	var f1 uint8 = 0 // 是否Y轴倒立模型
+	var f8 uint8 = 0 // 是否大场景
 
 	if !Args.HasCmd("join") && inputSpxHeader != nil && inputSpxHeader.Version == 2 {
-		if inputSpxHeader.IsLargeScene() {
-			f1 = 1 << 7
-		}
 		if inputSpxHeader.IsInverted() {
-			f2 = 1 << 6
+			f1 = 1 << 7
 		}
 	}
 
-	if Args.HasArgIgnorecase("-f2", "--is-inverted") {
-		strF2 := Args.GetArgIgnorecase("-f2", "--is-inverted")
-		if cmn.EqualsIngoreCase(strF2, "true") || cmn.EqualsIngoreCase(strF2, "yes") || cmn.EqualsIngoreCase(strF2, "y") || cmn.EqualsIngoreCase(strF2, "1") {
-			f2 = 1 << 6
+	if Args.HasArgIgnorecase("-f1", "--is-inverted") {
+		F1 := Args.GetArgIgnorecase("-f1", "--is-inverted")
+		if cmn.EqualsIngoreCase(F1, "true") || cmn.EqualsIngoreCase(F1, "yes") || cmn.EqualsIngoreCase(F1, "y") || cmn.EqualsIngoreCase(F1, "1") {
+			f1 = 1 << 7
 		} else {
-			f2 = 0
+			f1 = 0
 		}
 	}
 
@@ -110,7 +107,7 @@ func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader
 	header.CreaterId = ID1202056903                 // 0:官方默认识别号，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
 	header.ExclusiveId = 0                          // 0:官方开放格式的识别号
 	header.ShDegree = uint8(shDegree)               // 0,1,2,3
-	header.Flag = f1 & f2                           // v2
+	header.Flag = f1 | f8                           // v2
 	header.MaxFlagValue = 0                         // v2
 	header.Reserve1 = 0
 	header.Reserve2 = 0

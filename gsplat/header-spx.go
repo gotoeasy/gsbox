@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gsbox/cmn"
+	"log"
 	"os"
 	"strings"
 )
@@ -71,14 +72,14 @@ func (h *SpxHeader) IsValid() bool {
 	return h.checkHash
 }
 
-/** 是否优化的大场景模型(v2) */
-func (h *SpxHeader) IsLargeScene() bool {
+/** 是否倒立的模型(v2) */
+func (h *SpxHeader) IsInverted() bool {
 	return (h.Flag & 0b10000000) > 0
 }
 
-/** 是否倒立的模型(v2) */
-func (h *SpxHeader) IsInverted() bool {
-	return (h.Flag & 0b01000000) > 0
+/** 是否优化的大场景模型(v2) */
+func (h *SpxHeader) IsLargeScene() bool {
+	return (h.Flag & 0b1) > 0
 }
 
 func (h *SpxHeader) ToBytes() []byte {
@@ -107,6 +108,7 @@ func (h *SpxHeader) ToBytes() []byte {
 		// v2
 		bts = append(bts, h.Flag)
 		bts = append(bts, cmn.Uint16ToBytes(h.MaxFlagValue)...)
+		log.Println("ssssssssssssssssssss", h.Flag)
 	}
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve1)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve2)...)
@@ -186,6 +188,6 @@ func (h *SpxHeader) ToStringSpx() string {
 	}
 
 	// v2
-	return fmt.Sprintf("3DGS model format spx\nSpx version  : 2\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsLargeScene : %v\nIsInverted   : %v\nMaxFlagValue : %v\nComment      : %v\nHash         : %v (%v)",
-		h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsLargeScene(), h.IsInverted(), h.MaxFlagValue, h.Comment, h.Hash, h.checkHash)
+	return fmt.Sprintf("3DGS model format spx\nSpx version  : 2\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsInverted   : %v\nIsLargeScene : %v\nMaxFlagValue : %v\nComment      : %v\nHash         : %v (%v)",
+		h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsInverted(), h.IsLargeScene(), h.MaxFlagValue, h.Comment, h.Hash, h.checkHash)
 }
