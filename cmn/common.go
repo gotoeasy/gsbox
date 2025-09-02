@@ -382,6 +382,12 @@ func Int32ToBytes(intNum int32) []byte {
 	return bytebuf.Bytes()
 }
 
+func Uint16ToBytes(value uint16) []byte {
+	bs := make([]byte, 2)
+	binary.LittleEndian.PutUint16(bs, value)
+	return bs
+}
+
 func StringToBytes(s string) []byte {
 	return []byte(s)
 }

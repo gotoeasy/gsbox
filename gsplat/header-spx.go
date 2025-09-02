@@ -59,11 +59,26 @@ type SpxHeader struct {
 	/** Hash */
 	Hash uint32
 
+	/** v2 */
+	Flag uint8
+	/** v2 */
+	MaxFlagValue uint16
+
 	checkHash bool
 }
 
 func (h *SpxHeader) IsValid() bool {
 	return h.checkHash
+}
+
+/** 是否优化的大场景模型(v2) */
+func (h *SpxHeader) IsLargeScene() bool {
+	return (h.Flag & 0b10000000) > 0
+}
+
+/** 是否倒立的模型(v2) */
+func (h *SpxHeader) IsInverted() bool {
+	return (h.Flag & 0b01000000) > 0
 }
 
 func (h *SpxHeader) ToBytes() []byte {
@@ -83,9 +98,16 @@ func (h *SpxHeader) ToBytes() []byte {
 	bts = append(bts, cmn.Uint32ToBytes(h.CreaterId)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.ExclusiveId)...)
 	bts = append(bts, h.ShDegree)
-	bts = append(bts, h.Flag1)
-	bts = append(bts, h.Flag2)
-	bts = append(bts, h.Flag3)
+	if h.Version == 1 {
+		// v1
+		bts = append(bts, h.Flag1)
+		bts = append(bts, h.Flag2)
+		bts = append(bts, h.Flag3)
+	} else {
+		// v2
+		bts = append(bts, h.Flag)
+		bts = append(bts, cmn.Uint16ToBytes(h.MaxFlagValue)...)
+	}
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve1)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve2)...)
 	bts = append(bts, cmn.StringToBytes(cmn.Left(cmn.Trim(h.Comment)+strings.Repeat(" ", 60), 60))...) // 右边补足空格取60个accsii字符
@@ -118,28 +140,30 @@ func ParseSpxHeader(spxFile string) *SpxHeader {
 
 func readSpxHeader(bts []byte) *SpxHeader {
 	header := &SpxHeader{
-		Fixed:       "spx",
-		Version:     bts[3],
-		SplatCount:  cmn.BytesToInt32(bts[4:8]),
-		MinX:        cmn.BytesToFloat32(bts[8:12]),
-		MaxX:        cmn.BytesToFloat32(bts[12:16]),
-		MinY:        cmn.BytesToFloat32(bts[16:20]),
-		MaxY:        cmn.BytesToFloat32(bts[20:24]),
-		MinZ:        cmn.BytesToFloat32(bts[24:28]),
-		MaxZ:        cmn.BytesToFloat32(bts[28:32]),
-		MinTopY:     cmn.BytesToFloat32(bts[32:36]),
-		MaxTopY:     cmn.BytesToFloat32(bts[36:40]),
-		CreateDate:  cmn.BytesToUint32(bts[40:44]),
-		CreaterId:   cmn.BytesToUint32(bts[44:48]),
-		ExclusiveId: cmn.BytesToUint32(bts[48:52]),
-		ShDegree:    bts[52],
-		Flag1:       bts[53],
-		Flag2:       bts[54],
-		Flag3:       bts[55],
-		Reserve1:    cmn.BytesToUint32(bts[56:60]),
-		Reserve2:    cmn.BytesToUint32(bts[60:64]),
-		Hash:        cmn.BytesToUint32(bts[124:128]),
-		checkHash:   cmn.HashBytes(bts[0:124]) == cmn.BytesToUint32(bts[124:128]),
+		Fixed:        "spx",
+		Version:      bts[3],
+		SplatCount:   cmn.BytesToInt32(bts[4:8]),
+		MinX:         cmn.BytesToFloat32(bts[8:12]),
+		MaxX:         cmn.BytesToFloat32(bts[12:16]),
+		MinY:         cmn.BytesToFloat32(bts[16:20]),
+		MaxY:         cmn.BytesToFloat32(bts[20:24]),
+		MinZ:         cmn.BytesToFloat32(bts[24:28]),
+		MaxZ:         cmn.BytesToFloat32(bts[28:32]),
+		MinTopY:      cmn.BytesToFloat32(bts[32:36]),
+		MaxTopY:      cmn.BytesToFloat32(bts[36:40]),
+		CreateDate:   cmn.BytesToUint32(bts[40:44]),
+		CreaterId:    cmn.BytesToUint32(bts[44:48]),
+		ExclusiveId:  cmn.BytesToUint32(bts[48:52]),
+		ShDegree:     bts[52],
+		Flag1:        bts[53],                       // v1
+		Flag2:        bts[54],                       // v1
+		Flag3:        bts[55],                       // v1
+		Flag:         bts[53],                       // v2
+		MaxFlagValue: cmn.BytesToUint16(bts[54:56]), // v2
+		Reserve1:     cmn.BytesToUint32(bts[56:60]),
+		Reserve2:     cmn.BytesToUint32(bts[60:64]),
+		Hash:         cmn.BytesToUint32(bts[124:128]),
+		checkHash:    cmn.HashBytes(bts[0:124]) == cmn.BytesToUint32(bts[124:128]),
 	}
 	if header.ShDegree != 1 && header.ShDegree != 2 && header.ShDegree != 3 {
 		header.ShDegree = 0
@@ -155,6 +179,13 @@ func readSpxHeader(bts []byte) *SpxHeader {
 }
 
 func (h *SpxHeader) ToStringSpx() string {
-	return fmt.Sprintf("3DGS model format spx\nSpx version : %v\nSplatCount  : %v\nMinX, MaxX  : %v, %v\nMinY, MaxY  : %v, %v\nMinZ, MaxZ  : %v, %v\nMinTopY     : %v\nMaxTopY     : %v\nCreateDate  : %v\nCreaterId   : %v\nExclusiveId : %v\nShDegree    : %v\nFlag1       : %v\nFlag2       : %v\nFlag3       : %v\nComment     : %v\nHash        : %v (%v)",
-		h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.Flag1, h.Flag2, h.Flag3, h.Comment, h.Hash, h.checkHash)
+	if h.Version == 1 {
+		// v1
+		return fmt.Sprintf("3DGS model format spx\nSpx version  : 1\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nFlag1        : %v\nFlag2        : %v\nFlag3        : %v\nComment      : %v\nHash         : %v (%v)",
+			h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.Flag1, h.Flag2, h.Flag3, h.Comment, h.Hash, h.checkHash)
+	}
+
+	// v2
+	return fmt.Sprintf("3DGS model format spx\nSpx version  : 2\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsLargeScene : %v\nIsInverted   : %v\nMaxFlagValue : %v\nComment      : %v\nHash         : %v (%v)",
+		h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsLargeScene(), h.IsInverted(), h.MaxFlagValue, h.Comment, h.Hash, h.checkHash)
 }
