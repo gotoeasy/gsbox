@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"gsbox/cmn"
-	"log"
 	"os"
 	"strings"
 )
@@ -108,7 +107,6 @@ func (h *SpxHeader) ToBytes() []byte {
 		// v2
 		bts = append(bts, h.Flag)
 		bts = append(bts, cmn.Uint16ToBytes(h.MaxFlagValue)...)
-		log.Println("ssssssssssssssssssss", h.Flag)
 	}
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve1)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve2)...)

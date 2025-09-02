@@ -634,14 +634,3 @@ func getArgShDegree(dataShDegree int, args *cmn.OsArgs) int {
 	}
 	return shDegree
 }
-
-func getArgFlag(defaultFlag uint8, args *cmn.OsArgs, arg1 string, arg2 string) uint8 {
-	flag := defaultFlag
-	if args.HasArg(arg1, arg2) {
-		val := cmn.StringToInt(args.GetArgIgnorecase(arg1, arg2), -1)
-		if val >= 0 && val < 256 {
-			flag = uint8(val)
-		}
-	}
-	return flag
-}
