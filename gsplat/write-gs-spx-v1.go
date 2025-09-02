@@ -9,7 +9,8 @@ import (
 	"sort"
 )
 
-func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) {
+// Deprecated
+func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -22,11 +23,11 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int,
 		blockSize = len(rows) // 所有数据放到一个块
 	} else if blockSize < MinCompressBlockSize {
 		blockSize = MinCompressBlockSize // 最小
-	} else if blockSize > 512000 {
-		blockSize = 512000 // 最大512000
+	} else if blockSize > MaxBlockSize {
+		blockSize = MaxBlockSize
 	}
 
-	header := genSpxHeader(rows, comment, shDegree, flag1, flag2, flag3)
+	header := genSpxHeader(rows, comment, shDegree, 0, 0, 0)
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 

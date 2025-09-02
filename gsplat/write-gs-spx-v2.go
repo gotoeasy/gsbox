@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) {
+func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -21,11 +21,11 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int,
 		blockSize = len(rows) // 所有数据放到一个块
 	} else if blockSize < MinCompressBlockSize {
 		blockSize = MinCompressBlockSize // 最小
-	} else if blockSize > 1024000 {
-		blockSize = 1024000 // 最大1024000
+	} else if blockSize > MaxBlockSize {
+		blockSize = MaxBlockSize
 	}
 
-	header := genSpxHeaderV2(rows, comment, shDegree, flag1, flag2, flag3)
+	header := genSpxHeaderV2(rows, comment, shDegree)
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
@@ -79,7 +79,13 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int,
 	cmn.ExitOnError(err)
 }
 
-func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) *SpxHeader {
+func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader {
+	var f1 uint8 = 0 // 是否大场景
+	var f2 uint8 = 0 // 是否Y轴倒立模型
+	strF2 := Args.GetArgIgnorecase("-f2", "--is-inverted")
+	if cmn.EqualsIngoreCase(strF2, "true") || cmn.EqualsIngoreCase(strF2, "yes") || cmn.EqualsIngoreCase(strF2, "y") || cmn.EqualsIngoreCase(strF2, "1") {
+		f2 = 1 << 6
+	}
 
 	header := new(SpxHeader)
 	header.Fixed = "spx"
@@ -89,10 +95,9 @@ func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int, flag1 uint
 	header.CreateDate = cmn.GetSystemDateYYYYMMDD() // 创建日期
 	header.CreaterId = ID1202056903                 // 0:官方默认识别号，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
 	header.ExclusiveId = 0                          // 0:官方开放格式的识别号
-	header.ShDegree = uint8(shDegree)
-	header.Flag1 = flag1
-	header.Flag2 = flag2
-	header.Flag3 = flag3
+	header.ShDegree = uint8(shDegree)               // 0,1,2,3
+	header.Flag = f1 & f2                           // v2
+	header.MaxFlagValue = 0                         // v2
 	header.Reserve1 = 0
 	header.Reserve2 = 0
 	del, comment := cmn.RemoveNonASCII(comment)
