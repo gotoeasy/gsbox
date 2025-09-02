@@ -166,6 +166,25 @@ func ExitOnConditionError(condition bool, err error) {
 	}
 }
 
+func EncodeSpxPositionUint16(val float32, min float32, max float32) []byte {
+	return Uint16ToBytes(Float32EncodeUint16(val, min, max))
+}
+func DecodeSpxPositionUint16(n uint16, min float32, max float32) float32 {
+	return Uint16DecodeFloat32(n, min, max)
+}
+
+func Float32EncodeUint16(val float32, min float32, max float32) uint16 {
+	f64 := math.Round(float64((val - min) / (max - min) * 65535.0))
+	if f64 > 65535 {
+		f64 = 65535
+	}
+	return uint16(f64)
+}
+
+func Uint16DecodeFloat32(n uint16, min float32, max float32) float32 {
+	return float32(n)*(max-min)/65535.0 + min
+}
+
 // float32 转 []byte
 func Float32ToBytes(f float32) []byte {
 	b := make([]byte, 4)

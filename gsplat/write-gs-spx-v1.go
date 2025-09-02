@@ -144,7 +144,7 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
-	bts = append(bts, cmn.Uint32ToBytes(20)...)                      // 开放的块数据格式 20:splat20重排
+	bts = append(bts, cmn.Uint32ToBytes(20)...)                      // 开放的块数据格式 20
 
 	for n := range blockSplatCount {
 		bts = append(bts, cmn.EncodeSpxPositionUint24(blockDatas[n].PositionX)...)

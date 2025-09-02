@@ -54,6 +54,35 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
+		case 16:
+			// splat16
+			minX := cmn.BytesToFloat32(blockBts[8:12])
+			maxX := cmn.BytesToFloat32(blockBts[12:16])
+			minY := cmn.BytesToFloat32(blockBts[16:20])
+			maxY := cmn.BytesToFloat32(blockBts[20:24])
+			minZ := cmn.BytesToFloat32(blockBts[24:28])
+			maxZ := cmn.BytesToFloat32(blockBts[28:32])
+
+			bts := blockBts[32:] // 除去前32字节（数量，格式，包围盒）
+			for n := range blkSplatCnt {
+				data := &SplatData{}
+				x := cmn.BytesToUint16([]byte{bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n]})
+				y := cmn.BytesToUint16([]byte{bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n]})
+				z := cmn.BytesToUint16([]byte{bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n]})
+
+				data.PositionX = cmn.DecodeSpxPositionUint16(x, minX, maxX)
+				data.PositionY = cmn.DecodeSpxPositionUint16(y, minY, maxY)
+				data.PositionZ = cmn.DecodeSpxPositionUint16(z, minZ, maxZ)
+				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*6+n])
+				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*7+n])
+				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*8+n])
+				data.ColorR = bts[blkSplatCnt*9+n]
+				data.ColorG = bts[blkSplatCnt*10+n]
+				data.ColorB = bts[blkSplatCnt*11+n]
+				data.ColorA = bts[blkSplatCnt*12+n]
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(bts[blkSplatCnt*13+n], bts[blkSplatCnt*14+n], bts[blkSplatCnt*15+n])
+				datas = append(datas, data)
+			}
 		case 19:
 			// splat19
 			bts := blockBts[8:] // 除去前8字节（数量，格式）
