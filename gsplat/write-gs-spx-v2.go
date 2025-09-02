@@ -83,7 +83,7 @@ func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader
 	var f1 uint8 = 0 // 是否Y轴倒立模型
 	var f8 uint8 = 0 // 是否大场景
 
-	if !Args.HasCmd("join") && inputSpxHeader != nil && inputSpxHeader.Version == 2 {
+	if !Args.HasCmd("join") && inputSpxHeader != nil && inputSpxHeader.Version > 1 {
 		if inputSpxHeader.IsInverted() {
 			f1 = 1 << 7
 		}
