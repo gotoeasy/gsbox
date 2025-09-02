@@ -82,9 +82,23 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader {
 	var f1 uint8 = 0 // 是否大场景
 	var f2 uint8 = 0 // 是否Y轴倒立模型
-	strF2 := Args.GetArgIgnorecase("-f2", "--is-inverted")
-	if cmn.EqualsIngoreCase(strF2, "true") || cmn.EqualsIngoreCase(strF2, "yes") || cmn.EqualsIngoreCase(strF2, "y") || cmn.EqualsIngoreCase(strF2, "1") {
-		f2 = 1 << 6
+
+	if !Args.HasCmd("join") && inputSpxHeader != nil && inputSpxHeader.Version == 2 {
+		if inputSpxHeader.IsLargeScene() {
+			f1 = 1 << 7
+		}
+		if inputSpxHeader.IsInverted() {
+			f2 = 1 << 6
+		}
+	}
+
+	if Args.HasArgIgnorecase("-f2", "--is-inverted") {
+		strF2 := Args.GetArgIgnorecase("-f2", "--is-inverted")
+		if cmn.EqualsIngoreCase(strF2, "true") || cmn.EqualsIngoreCase(strF2, "yes") || cmn.EqualsIngoreCase(strF2, "y") || cmn.EqualsIngoreCase(strF2, "1") {
+			f2 = 1 << 6
+		} else {
+			f2 = 0
+		}
 	}
 
 	header := new(SpxHeader)

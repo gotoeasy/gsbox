@@ -72,6 +72,24 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n])
 				datas = append(datas, data)
 			}
+		case 20:
+			// splat20
+			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blkSplatCnt {
+				data := &SplatData{}
+				data.PositionX = cmn.DecodeSpxPositionUint24(bts[n*3], bts[n*3+1], bts[n*3+2])
+				data.PositionY = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*3+n*3], bts[blkSplatCnt*3+n*3+1], bts[blkSplatCnt*3+n*3+2])
+				data.PositionZ = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*6+n*3], bts[blkSplatCnt*6+n*3+1], bts[blkSplatCnt*6+n*3+2])
+				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
+				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
+				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
+				data.ColorR = bts[blkSplatCnt*12+n]
+				data.ColorG = bts[blkSplatCnt*13+n]
+				data.ColorB = bts[blkSplatCnt*14+n]
+				data.ColorA = bts[blkSplatCnt*15+n]
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n], bts[blkSplatCnt*19+n])
+				datas = append(datas, data)
+			}
 		case 1:
 			// SH1
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
