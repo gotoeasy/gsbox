@@ -21,8 +21,8 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int,
 		blockSize = len(rows) // 所有数据放到一个块
 	} else if blockSize < MinCompressBlockSize {
 		blockSize = MinCompressBlockSize // 最小
-	} else if blockSize > 512000 {
-		blockSize = 512000 // 最大512000
+	} else if blockSize > 1024000 {
+		blockSize = 1024000 // 最大1024000
 	}
 
 	header := genSpxHeaderV2(rows, comment, shDegree, flag1, flag2, flag3)
@@ -35,6 +35,13 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int,
 		compressType = 0
 	}
 
+	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), 19)
+	if bf != 20 {
+		bf = 19 // 默认splat19格式
+	}
+	log.Println("[Info] output data block format:", bf)
+	log.Println("[Info] output block size:", blockSize)
+
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
 	for i := range blockCnt {
@@ -43,7 +50,12 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int,
 		for n := i * blockSize; n < max; n++ {
 			blockDatas = append(blockDatas, rows[n])
 		}
-		writeSpxBlockSplat19(writer, blockDatas, len(blockDatas), compressType)
+		if bf == 20 {
+			writeSpxBlockSplat20(writer, blockDatas, len(blockDatas))
+		} else {
+			// 默认splat19格式
+			writeSpxBlockSplat19(writer, blockDatas, len(blockDatas), compressType)
+		}
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
 
