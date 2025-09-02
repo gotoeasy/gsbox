@@ -111,7 +111,6 @@ func usage() {
 	fmt.Println("  -i,  --input <file>           specify the input file")
 	fmt.Println("  -o,  --output <file>          specify the output file")
 	fmt.Println("  -c,  --comment <text>         specify the comment for ply/spx output")
-	fmt.Println("  -ct, --compress-type <gzip>   specify the compress type(gzip) for spx output, default is gzip")
 	fmt.Println("  -bs, --block-size <num>       specify the block size for spx output (default 20480)")
 	fmt.Println("  -bf, --block-format <num>     specify the block data format for spx output (default 19)")
 	fmt.Println("  -sh, --shDegree <num>         specify the SH degree(0~3) for output")

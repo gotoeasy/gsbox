@@ -28,3 +28,17 @@ func Test_cmn(t *testing.T) {
 	decodedValue = DecodeBytes3ToFloat32(encodedBytes)
 	fmt.Printf("Decoded value: %f\n", decodedValue)
 }
+
+// func Test_zstd(t *testing.T) {
+// 	var bts []byte
+// 	for i := range 200 {
+// 		bts = append(bts, uint8(i))
+// 	}
+
+// 	bs, err := ZstdCompress(bts)
+// 	log.Println("bs length", len(bs), err)
+
+// 	bs2, err := ZstdDecompress(bs)
+// 	log.Println("bs2 length", len(bs2), bs2, err)
+
+// }

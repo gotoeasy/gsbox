@@ -37,15 +37,14 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	log.Println("[Info] output block size:", blockSize)
 
 	var compressType uint8 = 0 // 默认gzip
-	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
-	if cmn.EqualsIngoreCase(ct, "zstd") {
-		// TODO
-		log.Println("[Info] block compress type: gzip")
-		// compressType = 1
-		// log.Println("[Info] block compress type: zstd")
-	} else {
-		log.Println("[Info] block compress type: gzip")
-	}
+	// 试验下来 zstd 比 gzip 的压缩率更差，暂不支持
+	// ct := Args.GetArgIgnorecase("-ct", "--compress-type")
+	// if cmn.EqualsIngoreCase(ct, "zstd") {
+	// 	compressType = 1
+	// 	log.Println("[Info] block compress type: zstd")
+	// } else {
+	// 	log.Println("[Info] block compress type: gzip")
+	// }
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
@@ -238,7 +237,16 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		if compressType == 0 {
+		switch compressType {
+		case 0:
+			bts, err := cmn.GzipBytes(bts)
+			cmn.ExitOnError(err)
+			blockByteLength := -int32(len(bts))
+			_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
+			cmn.ExitOnError(err)
+			_, err = writer.Write(bts)
+			cmn.ExitOnError(err)
+		case 1:
 			bts, err := cmn.GzipBytes(bts)
 			cmn.ExitOnError(err)
 			blockByteLength := -int32(len(bts))
