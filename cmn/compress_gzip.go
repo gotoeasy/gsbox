@@ -10,6 +10,10 @@ import (
 func GzipBytes(bts []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
+	// gz, err := gzip.NewWriterLevel(&buf, gzip.BestCompression) // 差异极小
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	if _, err := gz.Write(bts); err != nil {
 		return nil, err
