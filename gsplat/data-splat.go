@@ -256,16 +256,16 @@ func SortMorton(rows []*SplatData) {
 
 func SortBlockDatas4Compress(rows []*SplatData) {
 	sort.Slice(rows, func(i, j int) bool {
-		if rows[i].PositionY < rows[j].PositionY {
-			return true
-		}
-		if rows[i].PositionY > rows[j].PositionY {
-			return false
-		}
 		if rows[i].PositionX < rows[j].PositionX {
 			return true
 		}
 		if rows[i].PositionX > rows[j].PositionX {
+			return false
+		}
+		if rows[i].PositionY < rows[j].PositionY {
+			return true
+		}
+		if rows[i].PositionY > rows[j].PositionY {
 			return false
 		}
 		return rows[i].PositionZ < rows[j].PositionZ
