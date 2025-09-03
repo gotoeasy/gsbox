@@ -4,6 +4,7 @@ import "log"
 
 const MaxBlockSize = 1024000
 const MinCompressBlockSize = 64
+const DefaultBlockSize = 102400
 
 func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	ver := Args.GetArgIgnorecase("-ov", "--output-version")

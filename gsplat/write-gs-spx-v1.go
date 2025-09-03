@@ -18,7 +18,7 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int)
 	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
-	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), MaxBlockSize)
+	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), DefaultBlockSize)
 	if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
 		blockSize = MaxBlockSize // 默认及超出范围都按最大看待
 	}

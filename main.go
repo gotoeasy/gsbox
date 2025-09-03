@@ -111,7 +111,7 @@ func usage() {
 	fmt.Println("  -i,  --input <file>           specify the input file")
 	fmt.Println("  -o,  --output <file>          specify the output file")
 	fmt.Println("  -c,  --comment <text>         specify the comment for ply/spx output")
-	fmt.Println("  -bs, --block-size <num>       specify the block size for spx output (default 20480)")
+	fmt.Println("  -bs, --block-size <num>       specify the block size(64~1024000) for spx output (default 102400)")
 	fmt.Println("  -bf, --block-format <num>     specify the block data format for spx output (default 19)")
 	fmt.Println("  -sh, --shDegree <num>         specify the SH degree(0~3) for output")
 	fmt.Println("  -f2, --is-inverted <bool>     specify the header flag2(IsInverted) for spx output, default is false")
