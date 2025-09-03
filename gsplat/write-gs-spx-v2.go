@@ -16,13 +16,9 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
-	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), 20480)
-	if blockSize <= 0 {
-		blockSize = len(rows) // 所有数据放到一个块
-	} else if blockSize < MinCompressBlockSize {
-		blockSize = MinCompressBlockSize // 最小
-	} else if blockSize > MaxBlockSize {
-		blockSize = MaxBlockSize
+	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), MaxBlockSize)
+	if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
+		blockSize = MaxBlockSize // 超出范围按最大看待
 	}
 
 	header := genSpxHeaderV2(rows, comment, shDegree)
