@@ -409,7 +409,7 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 	return v
 }
 
-func CompressionInfo(filePath string, num int) string {
+func CompressionInfo(filePath string, num int, shDegree int) string {
 	if cmn.Endwiths(filePath, ".ply", true) && !cmn.Endwiths(filePath, ".compressed.ply", true) {
 		return fmt.Sprintf("splat count: %v", num)
 	}
@@ -426,5 +426,5 @@ func CompressionInfo(filePath string, num int) string {
 	compressionRatio := float64(plySize) / float64(fileSize)
 	sizeReduction := (1 - float64(fileSize)/float64(plySize)) * 100
 
-	return fmt.Sprintf("splat count: %v, %.2fx compressed (%.2f%% size reduction compared to ply)", num, compressionRatio, sizeReduction)
+	return fmt.Sprintf("splat count: %v, %.2fx compression with sh%v (%.2f%% smaller than 3dgs ply)", num, compressionRatio, shDegree, sizeReduction)
 }

@@ -18,7 +18,7 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 
 	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), MaxBlockSize)
 	if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
-		blockSize = MaxBlockSize // 超出范围按最大看待
+		blockSize = MaxBlockSize // 默认及超出范围都按最大看待
 	}
 
 	header := genSpxHeaderV2(rows, comment, shDegree)
@@ -29,8 +29,8 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	if bf != 20 && bf != 16 {
 		bf = 19 // 默认splat19格式
 	}
-	log.Println("[Info] output data block format:", bf)
-	log.Println("[Info] output block size:", blockSize)
+	log.Println("[Info] (Parameter) data block format:", bf)
+	log.Println("[Info] (Parameter) block size:", blockSize)
 
 	// var compressType uint8 = 0 // 默认gzip
 	// 试验下来 zstd 比 gzip 的压缩率更差，暂不支持

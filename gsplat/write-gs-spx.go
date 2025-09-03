@@ -2,7 +2,7 @@ package gsplat
 
 import "log"
 
-const MaxBlockSize = 5120000
+const MaxBlockSize = 1024000
 const MinCompressBlockSize = 64
 
 func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
