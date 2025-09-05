@@ -1,7 +1,9 @@
 package gsplat
 
 import (
+	"fmt"
 	"gsbox/cmn"
+	"log"
 )
 
 func IsOutputSpx() bool {
@@ -42,4 +44,62 @@ func IsOutputSplat() bool {
 		return true
 	}
 	return false
+}
+
+func FilterDatas(datas []*SplatData) []*SplatData {
+
+	dataLen := len(datas)
+	if dataLen == 0 || !Args.HasArgIgnorecase("-a", "--alpha") {
+		return datas
+	}
+
+	inputAlpha := cmn.StringToInt(Args.GetArgIgnorecase("-a", "--alpha"), 0)
+	if inputAlpha <= 0 {
+		return datas // 无可过滤
+	}
+
+	if inputAlpha > 255 {
+		inputAlpha = 255
+	}
+
+	// 最后要兜底检查，不能大到无数据
+	alphas := []int{} // 长度256，使最后位的值为0便于比较计算
+	for i := 0; i <= 256; i++ {
+		alphas = append(alphas, 0)
+	}
+	for i := 0; i < dataLen; i++ {
+		alphas[datas[i].ColorA] = alphas[datas[i].ColorA] + 1
+	}
+	for i := 255; i >= 0; i-- {
+		alphas[i] = alphas[i] + alphas[i+1]
+	}
+	var maxAlpha uint8 // 兜底的alpha
+	for i := 255; i >= 0; i-- {
+		if alphas[i] > 0 {
+			maxAlpha = uint8(i)
+			break
+		}
+	}
+
+	var alpha uint8 = uint8(inputAlpha)
+	if alpha > maxAlpha {
+		alpha = maxAlpha
+	}
+
+	// 过滤数据
+	rs := []*SplatData{}
+	for i := range dataLen {
+		if datas[i].ColorA >= alpha {
+			rs = append(rs, datas[i])
+		}
+	}
+
+	// 日志
+	if dataLen-len(rs) > 0 {
+		removed := cmn.IntToString(dataLen-len(rs)) + "/" + cmn.IntToString(dataLen)
+		rate := fmt.Sprintf("(%.1f%%)", float64(dataLen-len(rs))/float64(dataLen)*100)
+		log.Println("[Info] filter splats by alpha:", alpha, ", removed"+rate+":", removed)
+	}
+
+	return rs
 }

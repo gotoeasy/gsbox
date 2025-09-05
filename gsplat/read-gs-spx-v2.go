@@ -40,7 +40,7 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		var blockBts []byte
 		if isCompress {
 			if compressType == 0 {
-				blockBts, err = cmn.UnGzipBytes(blockBytes)
+				blockBts, err = cmn.DecompressGzip(blockBytes)
 				cmn.ExitOnError(err)
 			} else {
 				cmn.ExitOnError(errors.New("unsupported compress type"))

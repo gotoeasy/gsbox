@@ -8,6 +8,7 @@ require (
 )
 
 require (
+	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/kyroy/priority-queue v0.0.0-20180327160706-6e21825e7e0c // indirect
 	golang.org/x/image v0.24.0 // indirect
 )

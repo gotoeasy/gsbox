@@ -7,7 +7,7 @@ import (
 )
 
 // 用gzip压缩字节数组
-func GzipBytes(bts []byte) ([]byte, error) {
+func CompressGzip(bts []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	gz := gzip.NewWriter(&buf)
 	// gz, err := gzip.NewWriterLevel(&buf, gzip.BestCompression) // 差异极小
@@ -27,7 +27,7 @@ func GzipBytes(bts []byte) ([]byte, error) {
 }
 
 // 解压gzip字节数组
-func UnGzipBytes(gzipBytes []byte) ([]byte, error) {
+func DecompressGzip(gzipBytes []byte) ([]byte, error) {
 	r, err := gzip.NewReader(bytes.NewReader(gzipBytes))
 	if err != nil {
 		return nil, err

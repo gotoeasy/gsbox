@@ -9,7 +9,7 @@ import (
 	"github.com/HugoSmits86/nativewebp"
 )
 
-func WebpEncode(bts []byte) ([]byte, error) {
+func CompressWebp(bts []byte) ([]byte, error) {
 
 	length := len(bts)
 	width, height := computeWidthHeight(length)
@@ -21,7 +21,7 @@ func WebpEncode(bts []byte) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-func WebpDecode(webpBytes []byte) ([]byte, error) {
+func DecompressWebp(webpBytes []byte) ([]byte, error) {
 	reader := bytes.NewReader(webpBytes)
 	decodedImg, err := nativewebp.Decode(reader)
 	if err != nil {

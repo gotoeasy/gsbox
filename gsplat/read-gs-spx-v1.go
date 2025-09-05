@@ -36,7 +36,7 @@ func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		// 块数据解压
 		var blockBts []byte
 		if isGzip {
-			blockBts, err = cmn.UnGzipBytes(blockBytes)
+			blockBts, err = cmn.DecompressGzip(blockBytes)
 			cmn.ExitOnError(err)
 		} else {
 			blockBts = blockBytes

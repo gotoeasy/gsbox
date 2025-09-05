@@ -16,7 +16,7 @@ func ReadSpz(spzFile string, readHeadOnly bool) (*SpzHeader, []*SplatData) {
 	gzipDatas, err := io.ReadAll(file)
 	cmn.ExitOnConditionError(err != nil, errors.New("[SPZ ERROR] File read failed"))
 
-	ungzipDatas, err := cmn.UnGzipBytes(gzipDatas)
+	ungzipDatas, err := cmn.DecompressGzip(gzipDatas)
 	cmn.ExitOnConditionError(err != nil, errors.New("[SPZ ERROR] UnGzip failed"))
 	cmn.ExitOnConditionError(len(ungzipDatas) < HeaderSizeSpz, errors.New("[SPZ ERROR] Invalid spz header"))
 

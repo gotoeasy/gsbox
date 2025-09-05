@@ -132,7 +132,7 @@ func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
 		}
 	}
 
-	gzipDatas, err := cmn.GzipBytes(bts)
+	gzipDatas, err := cmn.CompressGzip(bts)
 	cmn.ExitOnError(err)
 
 	_, err = writer.Write(gzipDatas)

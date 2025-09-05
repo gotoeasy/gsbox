@@ -238,7 +238,7 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.GzipBytes(bts)
+		bts, err := cmn.CompressGzip(bts)
 		cmn.ExitOnError(err)
 		blockByteLength := -int32(len(bts))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
@@ -323,7 +323,7 @@ func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.GzipBytes(bts)
+		bts, err := cmn.CompressGzip(bts)
 		cmn.ExitOnError(err)
 		blockByteLength := -int32(len(bts))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
