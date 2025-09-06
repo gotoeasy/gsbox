@@ -32,15 +32,14 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	log.Println("[Info] (Parameter) data block format:", bf)
 	log.Println("[Info] (Parameter) block size:", blockSize)
 
-	// var compressType uint8 = 0 // 默认gzip
-	// 试验下来 zstd 比 gzip 的压缩率更差，暂不支持
-	// ct := Args.GetArgIgnorecase("-ct", "--compress-type")
-	// if cmn.EqualsIngoreCase(ct, "zstd") {
-	// 	compressType = 1
-	// 	log.Println("[Info] block compress type: zstd")
-	// } else {
-	// 	log.Println("[Info] block compress type: gzip")
-	// }
+	var compressType uint8 = 0 // 默认gzip
+	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
+	if cmn.EqualsIngoreCase(ct, "xz") || ct == "1" {
+		compressType = 1
+		log.Println("[Info] block compress type: xz")
+	} else {
+		log.Println("[Info] block compress type: gzip")
+	}
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
@@ -53,13 +52,13 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 		switch bf {
 		case 20:
 			// splat20 格式，优势不够突出，spx v1版本使用
-			writeSpxBlockSplat20(writer, blockDatas, len(blockDatas))
+			writeSpxBlockSplat20(writer, blockDatas, len(blockDatas), compressType)
 		case 16:
 			// splat16 格式，压缩率较好，有些情况误差较大，但若肉眼可接受可能换取更高的压缩率，供手动选用
-			writeSpxBlockSplat16(writer, blockDatas, len(blockDatas))
+			writeSpxBlockSplat16(writer, blockDatas, len(blockDatas), compressType)
 		default:
 			// splat19 格式，压缩率等综合表现比较优秀，默认使用
-			writeSpxBlockSplat19(writer, blockDatas, len(blockDatas))
+			writeSpxBlockSplat19(writer, blockDatas, len(blockDatas), compressType)
 		}
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
@@ -67,16 +66,16 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	switch shDegree {
 	case 1:
 		for i := range blockDatasList {
-			writeSpxBlockSH1(writer, blockDatasList[i])
+			writeSpxBlockSH1(writer, blockDatasList[i], compressType)
 		}
 	case 2:
 		for i := range blockDatasList {
-			writeSpxBlockSH2(writer, blockDatasList[i])
+			writeSpxBlockSH2(writer, blockDatasList[i], compressType)
 		}
 	case 3:
 		for i := range blockDatasList {
-			writeSpxBlockSH2(writer, blockDatasList[i])
-			writeSpxBlockSH3(writer, blockDatasList[i])
+			writeSpxBlockSH2(writer, blockDatasList[i], compressType)
+			writeSpxBlockSH3(writer, blockDatasList[i], compressType)
 		}
 	}
 
@@ -171,7 +170,7 @@ func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader
 	return header
 }
 
-func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
+func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
@@ -238,9 +237,14 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)
@@ -254,7 +258,7 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 }
 
-func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
+func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
 	mm := ComputeXyzMinMax(blockDatas)
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
@@ -323,9 +327,14 @@ func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)

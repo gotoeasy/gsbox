@@ -38,23 +38,23 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int)
 		for n := i * blockSize; n < max; n++ {
 			blockDatas = append(blockDatas, rows[n])
 		}
-		writeSpxBlockSplat20(writer, blockDatas, len(blockDatas))
+		writeSpxBlockSplat20(writer, blockDatas, len(blockDatas), 0)
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
 
 	switch shDegree {
 	case 1:
 		for i := range blockDatasList {
-			writeSpxBlockSH1(writer, blockDatasList[i])
+			writeSpxBlockSH1(writer, blockDatasList[i], 0)
 		}
 	case 2:
 		for i := range blockDatasList {
-			writeSpxBlockSH2(writer, blockDatasList[i])
+			writeSpxBlockSH2(writer, blockDatasList[i], 0)
 		}
 	case 3:
 		for i := range blockDatasList {
-			writeSpxBlockSH2(writer, blockDatasList[i])
-			writeSpxBlockSH3(writer, blockDatasList[i])
+			writeSpxBlockSH2(writer, blockDatasList[i], 0)
+			writeSpxBlockSH3(writer, blockDatasList[i], 0)
 		}
 	}
 
@@ -133,7 +133,7 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8,
 	return header
 }
 
-func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
+func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
 	sort.Slice(blockDatas, func(i, j int) bool {
 		return blockDatas[i].PositionY < blockDatas[j].PositionY // 坐标分别占3字节，按其中任一排序以更利于压缩
 	})
@@ -186,9 +186,14 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)
@@ -202,7 +207,7 @@ func writeSpxBlockSplat20(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 }
 
-func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
+func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData, compressType uint8) {
 	blockSplatCount := len(blockDatas)
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
@@ -225,9 +230,14 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)
@@ -241,7 +251,7 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData) {
 	}
 }
 
-func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
+func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData, compressType uint8) {
 	blockSplatCount := len(blockDatas)
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
@@ -267,9 +277,14 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)
@@ -283,7 +298,7 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData) {
 	}
 }
 
-func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
+func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressType uint8) {
 	blockSplatCount := len(blockDatas)
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
@@ -302,9 +317,14 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData) {
 	}
 
 	if blockSplatCount >= MinCompressBlockSize {
-		bts, err := cmn.CompressGzip(bts)
+		var err error
+		if compressType == 1 {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
 		cmn.ExitOnError(err)
-		blockByteLength := -int32(len(bts))
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
 		_, err = writer.Write(bts)
