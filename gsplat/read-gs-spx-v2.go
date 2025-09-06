@@ -3,7 +3,6 @@ package gsplat
 import (
 	"errors"
 	"gsbox/cmn"
-	"log"
 	"math"
 	"os"
 )
@@ -29,7 +28,6 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		u32 := uint32(math.Abs(float64(i32)))
 		compressType := uint8((u32 << 1) >> 29)
 		blockSize := int64((u32 << 4) >> 4)
-		log.Println(i32, compressType, blockSize)
 
 		// 块数据读取
 		offset += 4
@@ -49,7 +47,7 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				blockBts, err = cmn.DecompressXZ(blockBytes)
 				cmn.ExitOnError(err)
 			default:
-				cmn.ExitOnError(errors.New("unsupported compress type"))
+				cmn.ExitOnError(errors.New("unsupported compression type"))
 			}
 		} else {
 			blockBts = blockBytes
