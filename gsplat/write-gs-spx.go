@@ -2,9 +2,9 @@ package gsplat
 
 import "log"
 
-const MaxBlockSize = 1024000
+const MaxBlockSize = 1048576
 const MinCompressBlockSize = 64
-const DefaultBlockSize = 102400
+const DefaultBlockSize = 65536
 
 func WriteSpx(spxFile string, rows []*SplatData, comment string, shDegree int) {
 	ver := Args.GetArgIgnorecase("-ov", "--output-version")

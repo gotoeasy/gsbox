@@ -116,7 +116,7 @@ func usage() {
 	fmt.Println("  -bs, --block-size <num>         specify the block size(64~1024000) for spx output (default 102400)")
 	fmt.Println("  -bf, --block-format <num>       specify the block data format for spx output (default 19)")
 	fmt.Println("  -sh, --shDegree <num>           specify the SH degree(0~3) for output")
-	fmt.Println("  -f2, --is-inverted <bool>       specify the header flag2(IsInverted) for spx output, default is false")
+	fmt.Println("  -f1, --is-inverted <bool>       specify the header flag1(IsInverted) for spx output, default is false")
 	fmt.Println("  -rx, --rotateX <num>            specify the rotation angle in degrees about the x-axis for transform")
 	fmt.Println("  -ry, --rotateY <num>            specify the rotation angle in degrees about the y-axis for transform")
 	fmt.Println("  -rz, --rotateZ <num>            specify the rotation angle in degrees about the z-axis for transform")

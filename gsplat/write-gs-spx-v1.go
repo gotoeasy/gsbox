@@ -18,9 +18,12 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int)
 	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
-	blockSize := cmn.StringToInt(Args.GetArgIgnorecase("-bs", "--block-size"), DefaultBlockSize)
-	if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
-		blockSize = MaxBlockSize // 默认及超出范围都按最大看待
+	inputBlockSize := Args.GetArgIgnorecase("-bs", "--block-size")
+	blockSize := cmn.StringToInt(inputBlockSize, DefaultBlockSize)
+	if cmn.EqualsIngoreCase(inputBlockSize, "max") {
+		blockSize = MaxBlockSize // 支持 -bs max 写法
+	} else if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
+		blockSize = DefaultBlockSize // 超出范围按默认看待
 	}
 
 	header := genSpxHeader(rows, comment, shDegree, 0, 0, 0)
