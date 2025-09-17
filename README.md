@@ -29,11 +29,6 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 | Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://github.com/playcanvas/splat-transform">Link</a> |
 
 
-## `.spz`
-- The `.spz` format is an open 3DGS model format. Its encoding algorithm is highly commendable, and combined with gzip compression, it can significantly reduce the size of model files without any noticeable loss in visual quality.
-- The official open-source repository for the `.spz` format is available at [spz](https://github.com/nianticlabs/spz). This format is about 10x smaller than the equivalent PLY format and is offered as open source by Niantic Labs. More details can be found at [scaniverse](https://scaniverse.com/spz)
-- For rendering and viewing `.spz` format models, you can refer to [GaussianSplats3D](https://github.com/mkkellogg/GaussianSplats3D) or [Reall3dViewer](https://github.com/reall3d-com/Reall3dViewer)
-
 ## `.spx`
 - The `.spx` format is flexible, expandable, and supports proprietary data protection. It incorporates encoding methods from both `.splat` and `.spz` formats and adds block compression processing. It supports progressive loading and is suitable for large file models.
 - For detailed information about the `.spx` format, please refer to [SPX Specification](https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md)
