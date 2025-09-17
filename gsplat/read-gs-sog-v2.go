@@ -89,7 +89,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, int) {
 			sh1 := make([]float32, 9)
 			sh2 := make([]float32, 15)
 			sh3 := make([]float32, 21)
-			for d := 0; d < 3; d++ {
+			for d := range 3 {
 				for k := range 3 {
 					sh1[k*3+d] = meta.ShN.Codebook[centroids[(offset+k)*4+d]]
 				}
