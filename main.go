@@ -170,9 +170,12 @@ func info(args *cmn.OsArgs) {
 	isSplat := cmn.Endwiths(input, ".splat", true)
 	isSpz := cmn.Endwiths(input, ".spz", true)
 	isKsplat := cmn.Endwiths(input, ".ksplat", true)
+	isSog := cmn.Endwiths(input, ".sog", true)
+	isMetaJson := cmn.FileName(input) == "meta.json"
 	count := 0
 
 	shDegree := 0
+	var sogFileSize int64
 	if isPly {
 		headerString, err := gsplat.ReadPlyHeaderString(input, 1024)
 		cmn.ExitOnError(err)
@@ -209,12 +212,20 @@ func info(args *cmn.OsArgs) {
 			count = int(fileSize / 32)
 			fmt.Println("SplatCount :", fileSize/32)
 		}
+	} else if isSog || isMetaJson {
+		version, cnt, degree, fileSize := gsplat.ReadSogInfo(input)
+		count = cnt
+		shDegree = degree
+		sogFileSize = fileSize
+		fmt.Println("Sog Version :", version)
+		fmt.Println("Splat Count :", count)
+		fmt.Println("SH Degree   :", shDegree)
 	} else {
-		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat) format"))
+		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
 
 	if count > 0 {
-		fmt.Println("\n[Info]", gsplat.CompressionInfo(input, count, shDegree))
+		fmt.Println("\n[Info]", gsplat.CompressionInfo(input, count, shDegree, sogFileSize))
 	}
 }
 
@@ -244,8 +255,12 @@ func printSplat(args *cmn.OsArgs) {
 		_, header, ds := gsplat.ReadKsplat(input, false)
 		datas = ds
 		shDegree = max(int(header.ShDegree), shDegree)
+	} else if cmn.Endwiths(input, ".sog", true) || cmn.FileName(input) == "meta.json" {
+		ds, degree := gsplat.ReadSog(input)
+		datas = ds
+		shDegree = max(degree, shDegree)
 	} else {
-		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat) format"))
+		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
 	sh := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), -1)
 	if sh >= 0 && sh <= 3 {
@@ -289,6 +304,10 @@ func join(args *cmn.OsArgs) {
 		} else if cmn.Endwiths(file, ".ksplat", true) {
 			_, header, ds := gsplat.ReadKsplat(file, false)
 			maxFromShDegree = max(header.ShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" {
+			ds, degree := gsplat.ReadSog(file)
+			maxFromShDegree = max(degree, maxFromShDegree)
 			datas = append(datas, ds...)
 		}
 	}

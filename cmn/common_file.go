@@ -205,3 +205,13 @@ func GetFiles(dir string, suffix string) ([]string, error) {
 
 	return paths, nil
 }
+
+func GetFileSize(filePath string) int64 {
+	file, err := os.Open(filePath)
+	ExitOnError(err)
+	defer file.Close()
+
+	fileInfo, err := file.Stat()
+	ExitOnError(err)
+	return fileInfo.Size()
+}

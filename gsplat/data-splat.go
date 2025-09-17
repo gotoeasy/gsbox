@@ -5,7 +5,6 @@ import (
 	"gsbox/cmn"
 	"log"
 	"math"
-	"os"
 	"sort"
 )
 
@@ -409,18 +408,15 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 	return v
 }
 
-func CompressionInfo(filePath string, num int, shDegree int) string {
+func CompressionInfo(filePath string, num int, shDegree int, inFileSize ...int64) string {
 	if cmn.Endwiths(filePath, ".ply", true) && !cmn.Endwiths(filePath, ".compressed.ply", true) {
 		return fmt.Sprintf("splat count: %v", num)
 	}
 
-	file, err := os.Open(filePath)
-	cmn.ExitOnError(err)
-	defer file.Close()
-
-	fileInfo, err := file.Stat()
-	cmn.ExitOnError(err)
-	fileSize := fileInfo.Size()
+	fileSize := cmn.GetFileSize(filePath)
+	if cmn.FileName(filePath) == "meta.json" && len(inFileSize) > 0 {
+		fileSize = inFileSize[0] // sog 索引文件时，使用参数传入的文件大小值
+	}
 
 	plySize := 1500 + num*248
 	compressionRatio := float64(plySize) / float64(fileSize)
