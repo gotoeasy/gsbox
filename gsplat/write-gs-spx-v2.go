@@ -32,7 +32,11 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	if bf != 20 && bf != 16 {
 		bf = 19 // 默认splat19格式
 	}
-	log.Println("[Info] (Parameter) data block format:", bf)
+	if bf == 16 {
+		log.Println("[Warn] (Parameter) data block format:", bf, "[Just For Test]")
+	} else {
+		log.Println("[Info] (Parameter) data block format:", bf)
+	}
 	log.Println("[Info] (Parameter) block size:", blockSize)
 
 	var compressType uint8 = 0 // 默认gzip
@@ -57,6 +61,7 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 			// splat20 格式，优势不够突出，spx v1版本使用
 			writeSpxBlockSplat20(writer, blockDatas, len(blockDatas), compressType)
 		case 16:
+			// TODO 需要空间分块等方式减少误差，仅测试实验用
 			// splat16 格式，压缩率较好，有些情况误差较大，但若肉眼可接受可能换取更高的压缩率，供手动选用
 			writeSpxBlockSplat16(writer, blockDatas, len(blockDatas), compressType)
 		default:
@@ -261,6 +266,7 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 }
 
+// TODO 需要空间分块等方式减少误差，仅测试实验用
 func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
 	mm := ComputeXyzMinMax(blockDatas)
 	SortBlockDatas4Compress(blockDatas)

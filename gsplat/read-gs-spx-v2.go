@@ -59,6 +59,7 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
 		case 16:
+			// TODO 需要空间分块等方式减少误差，仅测试实验用
 			// splat16
 			minX := cmn.BytesToFloat32(blockBts[8:12])
 			maxX := cmn.BytesToFloat32(blockBts[12:16])
