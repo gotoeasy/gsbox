@@ -137,7 +137,7 @@ func usage() {
 	fmt.Println("  -ty, --translateY <num>         specify the translation value about the y-axis for transform")
 	fmt.Println("  -tz, --translateZ <num>         specify the translation value about the z-axis for transform")
 	fmt.Println("  -to, --transform-order <RST>    specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST")
-	fmt.Println("  -ov, --output-version <num>     specify the spz output version(2~3), default is 2")
+	fmt.Println("  -ov, --output-version <num>     specify the output versions for spx(1-2, default is 2) and spz(2-3, default is 2)")
 	fmt.Println("  -v,  --version                  display version information")
 	fmt.Println("  -h,  --help                     display help information")
 	fmt.Println("")
@@ -149,7 +149,7 @@ func usage() {
 	fmt.Println("  gsbox k2z -i /path/to/input.ksplat -o /path/to/output.spz -ov 3")
 	fmt.Println("  gsbox g2x -i /path/to/input.sog -o /path/to/output.spx")
 	fmt.Println("  gsbox g2x -i /path/to/meta.json -o /path/to/output.spx")
-	fmt.Println("  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -o output.spx")
+	fmt.Println("  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
 	fmt.Println("")
 }
