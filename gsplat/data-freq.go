@@ -60,6 +60,26 @@ func (fc *FrequencyCounter) GetTopN(topCnt int) []*DataFreq {
 		return freqs[i].Count > freqs[j].Count
 	})
 
+	// mapByte := make(map[byte]bool)
+	// var dict []byte
+	// for _, v := range freqs {
+	// 	if !mapByte[v.Bytes3[0]] {
+	// 		mapByte[v.Bytes3[0]] = true
+	// 		dict = append(dict, v.Bytes3[0])
+	// 	}
+	// 	if !mapByte[v.Bytes3[1]] {
+	// 		mapByte[v.Bytes3[1]] = true
+	// 		dict = append(dict, v.Bytes3[1])
+	// 	}
+	// 	if !mapByte[v.Bytes3[2]] {
+	// 		mapByte[v.Bytes3[2]] = true
+	// 		dict = append(dict, v.Bytes3[2])
+	// 	}
+	// 	if len(dict) == 256 {
+	// 		break
+	// 	}
+	// }
+
 	// 取前N个
 	if len(freqs) > topCnt {
 		freqs = freqs[:topCnt]

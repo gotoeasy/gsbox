@@ -67,7 +67,7 @@ func FilterDatas(datas []*SplatData) []*SplatData {
 	for i := 0; i <= 256; i++ {
 		alphas = append(alphas, 0)
 	}
-	for i := 0; i < dataLen; i++ {
+	for i := range dataLen {
 		alphas[datas[i].ColorA] = alphas[datas[i].ColorA] + 1
 	}
 	for i := 255; i >= 0; i-- {

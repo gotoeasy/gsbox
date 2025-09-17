@@ -36,9 +36,6 @@ type SogMeans struct {
 	Maxs []float32 `json:"maxs,omitempty"`
 	/** v2 */
 	Files []string `json:"files,omitempty"`
-
-	RgbaL []byte `json:"-"`
-	RgbaU []byte `json:"-"`
 }
 
 // 定义了 scales 字段的结构
@@ -51,8 +48,6 @@ type SogScales struct {
 	Codebook []float32 `json:"codebook,omitempty"`
 	/** v2 */
 	Files []string `json:"files,omitempty"`
-
-	Rgba []byte `json:"-"`
 }
 
 // 定义了 quats 字段的结构
@@ -62,8 +57,6 @@ type SogQuats struct {
 	Encoding string `json:"encoding,omitempty"`
 	/** v2 */
 	Files []string `json:"files,omitempty"`
-
-	Rgba []byte `json:"-"`
 }
 
 // 定义了 sh0 字段的结构
@@ -76,8 +69,6 @@ type SogSh0 struct {
 	Codebook []float32 `json:"codebook,omitempty"`
 	/** v2 */
 	Files []string `json:"files,omitempty"`
-
-	Rgba []byte `json:"-"`
 }
 
 // 定义了 shN 字段的结构
@@ -91,7 +82,4 @@ type SogShN struct {
 	Codebook []float32 `json:"codebook,omitempty"`
 	/** v2 */
 	Files []string `json:"files,omitempty"`
-
-	RgbaCentroids []byte `json:"-"`
-	RgbaLabels    []byte `json:"-"`
 }

@@ -9,17 +9,17 @@ import (
 const SQRT2 = float32(1.4142135623730951) // math.Sqrt(2.0)
 
 func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, int) {
-	meansl, _ := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
-	meansu, _ := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
-	scales, _ := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
-	quats, _ := webpRgba(filepath.Join(dir, meta.Quats.Files[0]))
-	sh0, _ := webpRgba(filepath.Join(dir, meta.Sh0.Files[0]))
+	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
+	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
+	scales := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
+	quats := webpRgba(filepath.Join(dir, meta.Quats.Files[0]))
+	sh0 := webpRgba(filepath.Join(dir, meta.Sh0.Files[0]))
 	var centroids []byte
 	var labels []byte
 	var width int
 	if meta.ShN != nil {
-		centroids, width = webpRgba(filepath.Join(dir, meta.ShN.Files[0]))
-		labels, _ = webpRgba(filepath.Join(dir, meta.ShN.Files[1]))
+		centroids, width = webpRgbaWidth(filepath.Join(dir, meta.ShN.Files[0]))
+		labels = webpRgba(filepath.Join(dir, meta.ShN.Files[1]))
 	}
 
 	count := meta.Means.Shape[0]
@@ -146,7 +146,12 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, int) {
 	return datas, shDegree
 }
 
-func webpRgba(fileWebp string) ([]byte, int) {
+func webpRgba(fileWebp string) []byte {
+	rgba, _ := webpRgbaWidth(fileWebp)
+	return rgba
+}
+
+func webpRgbaWidth(fileWebp string) ([]byte, int) {
 	webpMeansl, err := cmn.ReadFileBytes(fileWebp)
 	cmn.ExitOnError(err)
 	rgba, width, _, err := cmn.DecompressWebpMore(webpMeansl)
