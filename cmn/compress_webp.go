@@ -22,17 +22,22 @@ func CompressWebp(bts []byte) ([]byte, error) {
 }
 
 func DecompressWebp(webpBytes []byte) ([]byte, error) {
+	bs, _, _, err := DecompressWebpMore(webpBytes)
+	return bs, err
+}
+
+func DecompressWebpMore(webpBytes []byte) ([]byte, int, int, error) {
 	reader := bytes.NewReader(webpBytes)
 	decodedImg, err := nativewebp.Decode(reader)
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, err
 	}
 
 	nrgba, ok := decodedImg.(*image.NRGBA)
 	if !ok {
-		return nil, errors.New("decoded image is not *image.NRGBA")
+		return nil, 0, 0, errors.New("decoded image is not *image.NRGBA")
 	}
-	return nrgba.Pix, nil
+	return nrgba.Pix, nrgba.Bounds().Size().X, nrgba.Bounds().Size().Y, nil
 }
 
 func computeWidthHeight(length int) (int, int) {

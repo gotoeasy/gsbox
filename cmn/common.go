@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"math"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -294,32 +293,16 @@ func ToFloat32Bytes(f float64) []byte {
 	return Float32ToBytes(ToFloat32(f))
 }
 
-// 判断文件是否存在
-func IsExistFile(file string) bool {
-	defer func() {
-		if err := recover(); err != nil {
-			ExitOnError(errors.New("invalid file path: " + file))
-		}
-	}()
-
-	s, err := os.Stat(file)
-	if err == nil {
-		return !s.IsDir()
+// 随机半角英数字符串
+func RandomString(length int) string {
+	str := "0Aa1Bb2Cc3Dd4Ee5Ff6Gg7Hh8Ii9JjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
+	bytes := []byte(str)
+	var result []byte
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for range length {
+		result = append(result, bytes[r.Intn(len(bytes))])
 	}
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !s.IsDir()
-}
-
-// 返回目录，同filepath.Dir(path)
-func Dir(file string) string {
-	return filepath.Dir(file)
-}
-
-// 创建多级目录（存在时不报错）
-func MkdirAll(dir string) error {
-	return os.MkdirAll(dir, os.ModePerm)
+	return BytesToString(result)
 }
 
 // 获取时间信息
@@ -466,6 +449,11 @@ func HashBytes(bts []byte) uint32 {
 		rs = (rs * 33) ^ uint32(bts[i])
 	}
 	return rs
+}
+
+// 哈希码 string
+func HashString(str string) string {
+	return Uint32ToString(HashBytes([]byte(str)))
 }
 
 func init() {
@@ -709,6 +697,10 @@ func NormalizeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (byte, byte, byt
 	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
 }
 
+func NormalizeRotations4(r0 float32, r1 float32, r2 float32, r3 float32) (byte, byte, byte, byte) {
+	return ClipUint8(float64(r0)*128.0 + 128.0), ClipUint8(float64(r1)*128.0 + 128.0), ClipUint8(float64(r2)*128.0 + 128.0), ClipUint8(float64(r3)*128.0 + 128.0)
+}
+
 func NormalizeRotations3(rx uint8, ry uint8, rz uint8, rw uint8) (byte, byte, byte, byte) {
 	r0 := float64(rx)/128.0 - 1.0
 	r1 := float64(ry)/128.0 - 1.0
@@ -727,4 +719,20 @@ func DecodeSpxRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint
 	r3 := float64(rz)/128.0 - 1.0
 	r0 := math.Sqrt(math.Max(0.0, 1.0-(r1*r1+r2*r2+r3*r3)))
 	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
+}
+
+func EncodeXyz(val float32) float32 {
+	if val >= 0 {
+		return ClipFloat32(math.Log(float64(val) + 1.0))
+	} else {
+		return ClipFloat32(-math.Log(1.0 - float64(val)))
+	}
+}
+
+func DecodeXyz(val float32) float32 {
+	if val >= 0 {
+		return ClipFloat32(math.Exp(float64(val)) - 1.0)
+	} else {
+		return ClipFloat32(-(math.Exp(-float64(val)) - 1.0))
+	}
 }

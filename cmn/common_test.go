@@ -2,6 +2,7 @@ package cmn
 
 import (
 	"fmt"
+	"log"
 	"testing"
 )
 
@@ -29,16 +30,10 @@ func Test_cmn(t *testing.T) {
 	fmt.Printf("Decoded value: %f\n", decodedValue)
 }
 
-// func Test_zstd(t *testing.T) {
-// 	var bts []byte
-// 	for i := range 200 {
-// 		bts = append(bts, uint8(i))
-// 	}
+func Test_xyz(t *testing.T) {
+	value := float32(1000.12345678987654321)
+	encodeValue := EncodeXyz(value)
+	decodeValue := DecodeXyz(encodeValue)
+	log.Println(value, encodeValue, decodeValue)
 
-// 	bs, err := ZstdCompress(bts)
-// 	log.Println("bs length", len(bs), err)
-
-// 	bs2, err := ZstdDecompress(bs)
-// 	log.Println("bs2 length", len(bs2), bs2, err)
-
-// }
+}

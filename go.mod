@@ -1,6 +1,6 @@
 module gsbox
 
-go 1.24.3
+go 1.25.1
 
 require (
 	github.com/HugoSmits86/nativewebp v1.2.0
