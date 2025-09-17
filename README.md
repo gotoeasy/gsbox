@@ -60,10 +60,10 @@ Options:
   k2s, ksplat2splat               convert ksplat to splat
   k2x, ksplat2spx                 convert ksplat to spx
   k2z, ksplat2spx                 convert ksplat to spz
-  g2p, ksplat2ply                 convert sog to ply
-  g2s, ksplat2splat               convert sog to splat
-  g2x, ksplat2spx                 convert sog to spx
-  g2z, ksplat2spx                 convert sog to spz
+  g2p, sog2ply                    convert sog to ply
+  g2s, sog2splat                  convert sog to splat
+  g2x, sog2spx                    convert sog to spx
+  g2z, sog2spx                    convert sog to spz
   ps,  printsplat                 print data to text file like splat format layout
   join                            join the input model files into a single output file
   info <file>                     display the model file information
