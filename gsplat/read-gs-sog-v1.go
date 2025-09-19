@@ -154,7 +154,7 @@ func webpRgba(fileWebp string) []byte {
 func webpRgbaWidth(fileWebp string) ([]byte, int) {
 	webpMeansl, err := cmn.ReadFileBytes(fileWebp)
 	cmn.ExitOnError(err)
-	rgba, width, _, err := cmn.DecompressWebpMore(webpMeansl)
+	rgba, width, _, err := cmn.DecompressWebp(webpMeansl)
 	cmn.ExitOnError(err)
 	return rgba, width
 }
