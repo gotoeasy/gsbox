@@ -73,27 +73,8 @@ func main() {
 		info(args)
 	} else {
 		usage()
-
-		ssss("means_l")
-		ssss("means_u")
-		ssss("quats")
-		ssss("scales")
-		ssss("sh0")
-		ssss("shN_centroids")
-		ssss("shN_labels")
 	}
 	fmt.Print(cmn.NewVersionMessage)
-}
-
-func ssss(f string) {
-	bts, err := cmn.ReadFileBytes("E:\\models\\sog-v2\\" + f + ".webp")
-	cmn.ExitOnError(err)
-	rgba, w, h, err := cmn.DecompressWebp(bts)
-	cmn.ExitOnError(err)
-	enRgba, err := cmn.CompressWebp(rgba, w, h)
-	cmn.ExitOnError(err)
-	cmn.WriteFileBytes("E:\\models\\sog-v2\\"+f+".webp.webp", enRgba)
-
 }
 
 func version() {
