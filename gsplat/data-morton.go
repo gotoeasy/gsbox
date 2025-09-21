@@ -3,15 +3,18 @@ package gsplat
 import "math"
 
 type V3MinMax struct {
-	MinX float32
-	MinY float32
-	MinZ float32
-	MaxX float32
-	MaxY float32
-	MaxZ float32
-	LenX float32
-	LenY float32
-	LenZ float32
+	MinX    float32
+	MinY    float32
+	MinZ    float32
+	MaxX    float32
+	MaxY    float32
+	MaxZ    float32
+	LenX    float32
+	LenY    float32
+	LenZ    float32
+	CenterX float32
+	CenterY float32
+	CenterZ float32
 }
 
 func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
@@ -36,6 +39,9 @@ func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
 	xyzRange.LenX = xyzRange.MaxX - xyzRange.MinX
 	xyzRange.LenY = xyzRange.MaxY - xyzRange.MinY
 	xyzRange.LenZ = xyzRange.MaxZ - xyzRange.MinZ
+	xyzRange.CenterX = (xyzRange.MaxX + xyzRange.MinX) / 2.0
+	xyzRange.CenterY = (xyzRange.MaxY + xyzRange.MinY) / 2.0
+	xyzRange.CenterZ = (xyzRange.MaxZ + xyzRange.MinZ) / 2.0
 
 	return xyzRange
 }

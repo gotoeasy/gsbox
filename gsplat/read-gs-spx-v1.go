@@ -47,7 +47,7 @@ func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
-		case 20:
+		case BF_SPLAT20:
 			// splat20
 			bts := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -65,7 +65,7 @@ func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n], bts[blkSplatCnt*19+n])
 				datas = append(datas, data)
 			}
-		case 1:
+		case BF_SH1:
 			// SH1
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -73,7 +73,7 @@ func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				splatData.SH1 = dataBytes[n*9 : n*9+9]
 			}
 			n1 += blkSplatCnt
-		case 2:
+		case BF_SH2:
 			// SH2
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
@@ -81,7 +81,7 @@ func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				splatData.SH2 = dataBytes[n*24 : n*24+24]
 			}
 			n2 += blkSplatCnt
-		case 3:
+		case BF_SH3:
 			// SH3
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
