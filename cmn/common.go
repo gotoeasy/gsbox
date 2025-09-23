@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -29,6 +30,48 @@ const RAD2DEG = 180 / math.Pi
 
 var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
+
+// 下载文件，自定义headers格式为 K:V
+func HttpDownload(url, saveAsPathFile string, wg *sync.WaitGroup, headers ...string) error {
+	defer func() {
+		if wg != nil {
+			wg.Done()
+		}
+	}()
+
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return err
+	}
+
+	// 请求头
+	for i, max := 0, len(headers); i < max; i++ {
+		strs := Split(headers[i], ":")
+		if len(strs) > 1 {
+			req.Header.Set(Trim(strs[0]), Trim(Join(strs[1:], ":")))
+		}
+	}
+
+	response, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	MkdirAll(Dir(saveAsPathFile))
+	file, err := os.Create(saveAsPathFile)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = io.Copy(file, response.Body)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func FormatFloat32(f float32) string {
 	formatted := fmt.Sprintf("%.10f", f)

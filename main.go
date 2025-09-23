@@ -165,12 +165,8 @@ func info(args *cmn.OsArgs) {
 		}
 	}
 
-	if input == "" {
-		cmn.ExitOnError(errors.New("please specify the input ply file"))
-	}
-	if !cmn.IsExistFile(input) {
-		cmn.ExitOnError(errors.New("file not found: " + input))
-	}
+	cmn.ExitOnConditionError(input == "", errors.New("please specify the input file"))
+	cmn.ExitOnConditionError(!cmn.IsExistFile(input), errors.New("file not found: "+input))
 
 	isPly := cmn.Endwiths(input, ".ply", true)
 	isSpx := cmn.Endwiths(input, ".spx", true)
@@ -312,7 +308,7 @@ func join(args *cmn.OsArgs) {
 			_, header, ds := gsplat.ReadKsplat(file, false)
 			maxFromShDegree = max(header.ShDegree, maxFromShDegree)
 			datas = append(datas, ds...)
-		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" {
+		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" || (cmn.Startwiths(file, "http") && cmn.Endwiths(file, "/meta.json")) {
 			ds, degree := gsplat.ReadSog(file)
 			maxFromShDegree = max(degree, maxFromShDegree)
 			datas = append(datas, ds...)
@@ -724,7 +720,9 @@ func checkInputFilesExists(args *cmn.OsArgs) []string {
 	inputs := args.GetArgsIgnorecase("-i", "--input")
 	for i := 0; i < len(inputs); i++ {
 		cmn.ExitOnConditionError(inputs[i] == "", errors.New(`please specify the input file`))
-		cmn.ExitOnConditionError(!cmn.IsExistFile(inputs[i]), errors.New("file not found: "+inputs[i]))
+		if !cmn.Startwiths(inputs[i], "http://") && !cmn.Startwiths(inputs[i], "https://") {
+			cmn.ExitOnConditionError(!cmn.IsExistFile(inputs[i]), errors.New("file not found: "+inputs[i]))
+		}
 	}
 	return inputs
 }
@@ -732,7 +730,9 @@ func checkInputFilesExists(args *cmn.OsArgs) []string {
 func checkInputFileExists(args *cmn.OsArgs) string {
 	input := args.GetArgIgnorecase("-i", "--input")
 	cmn.ExitOnConditionError(input == "", errors.New(`please specify the input file`))
-	cmn.ExitOnConditionError(!cmn.IsExistFile(input), errors.New("file not found: "+input))
+	if !cmn.Startwiths(input, "http://") && !cmn.Startwiths(input, "https://") {
+		cmn.ExitOnConditionError(!cmn.IsExistFile(input), errors.New("file not found: "+input))
+	}
 	return input
 }
 

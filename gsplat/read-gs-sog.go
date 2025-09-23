@@ -3,10 +3,15 @@ package gsplat
 import (
 	"errors"
 	"gsbox/cmn"
+	"log"
 	"path/filepath"
+	"sync"
 )
 
 func ReadSog(fileSogMeta string) ([]*SplatData, int) {
+	if cmn.Startwiths(fileSogMeta, "http") && cmn.Endwiths(fileSogMeta, "/meta.json") {
+		return readHttpSog(fileSogMeta)
+	}
 
 	dir := cmn.Dir(fileSogMeta)
 	if cmn.Endwiths(fileSogMeta, ".sog", true) {
@@ -103,4 +108,67 @@ func ReadSogInfo(fileSogMeta string) (version, count, shDegree int, totalFileSiz
 	}
 
 	return
+}
+
+func readHttpSog(urlMetaJson string) ([]*SplatData, int) {
+
+	dir, err := cmn.CreateTempDir()
+	cmn.ExitOnError(err)
+	defer func() {
+		cmn.RemoveAllFile(dir)
+	}()
+
+	fileMeta := filepath.Join(dir, "meta.json")
+	cmn.HttpDownload(urlMetaJson, filepath.Join(dir, "meta.json"), nil)
+	strMeta, err := cmn.ReadFileString(fileMeta)
+	cmn.ExitOnError(err)
+
+	meta, err := ParseSogMeta(strMeta)
+	cmn.ExitOnError(err)
+
+	var wg sync.WaitGroup
+	log.Println("[Info]", "Download start")
+	ary := cmn.Split(urlMetaJson, "/")
+	log.Println("[Info]", meta.Means.Files[0])
+	ary[len(ary)-1] = meta.Means.Files[0]
+	wg.Add(1)
+	go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.Means.Files[0]), &wg)
+	log.Println("[Info]", meta.Means.Files[1])
+	ary[len(ary)-1] = meta.Means.Files[1]
+	wg.Add(1)
+	go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.Means.Files[1]), &wg)
+	log.Println("[Info]", meta.Scales.Files[0])
+	ary[len(ary)-1] = meta.Scales.Files[0]
+	wg.Add(1)
+	go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.Scales.Files[0]), &wg)
+	log.Println("[Info]", meta.Quats.Files[0])
+	ary[len(ary)-1] = meta.Quats.Files[0]
+	wg.Add(1)
+	go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.Quats.Files[0]), &wg)
+	log.Println("[Info]", meta.Sh0.Files[0])
+	ary[len(ary)-1] = meta.Sh0.Files[0]
+	wg.Add(1)
+	go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.Sh0.Files[0]), &wg)
+	if meta.ShN != nil {
+		log.Println("[Info]", meta.ShN.Files[0])
+		ary[len(ary)-1] = meta.ShN.Files[0]
+		wg.Add(1)
+		go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.ShN.Files[0]), &wg)
+		log.Println("[Info]", meta.ShN.Files[1])
+		ary[len(ary)-1] = meta.ShN.Files[1]
+		wg.Add(1)
+		go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.ShN.Files[1]), &wg)
+	}
+	wg.Wait() // 阻塞直到所有下载完成
+	log.Println("[Info]", "Download finish")
+
+	switch meta.Version {
+	case 0:
+		return ReadSogV1(meta, dir)
+	case 2:
+		return ReadSogV2(meta, dir)
+	default:
+		cmn.ExitOnError(errors.New("unsupported sog version"))
+	}
+	return nil, 0
 }
