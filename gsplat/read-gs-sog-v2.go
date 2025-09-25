@@ -77,8 +77,8 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, int) {
 		r := float64(meta.Sh0.Codebook[sh0[i*4+0]])
 		g := float64(meta.Sh0.Codebook[sh0[i*4+1]])
 		b := float64(meta.Sh0.Codebook[sh0[i*4+2]])
-		a := float64(meta.Sh0.Codebook[sh0[i*4+3]])
-		splatData.ColorR, splatData.ColorG, splatData.ColorB, splatData.ColorA = cmn.EncodeSplatColor(r), cmn.EncodeSplatColor(g), cmn.EncodeSplatColor(b), cmn.EncodeSplatOpacity(a)
+		a := sh0[i*4+3]
+		splatData.ColorR, splatData.ColorG, splatData.ColorB, splatData.ColorA = cmn.EncodeSplatColor(r), cmn.EncodeSplatColor(g), cmn.EncodeSplatColor(b), a
 
 		if shDegree > 0 {
 			label := int(labels[i*4+0]) + (int(labels[i*4+1]) << 8)
