@@ -421,6 +421,7 @@ func CompressionInfo(filePath string, num int, shDegree int, inFileSize ...int64
 	plySize := 1500 + num*248
 	compressionRatio := float64(plySize) / float64(fileSize)
 	sizeReduction := (1 - float64(fileSize)/float64(plySize)) * 100
+	fileSizeM := float64(fileSize) / 1024.0 / 1024.0
 
-	return fmt.Sprintf("splat count: %v, %.2fx compression with sh%v (%.2f%% smaller than 3dgs ply)", num, compressionRatio, shDegree, sizeReduction)
+	return fmt.Sprintf("splat count: %v, %.1fM, %.2fx compression with sh%v (%.2f%% smaller than 3dgs ply)", num, fileSizeM, compressionRatio, shDegree, sizeReduction)
 }
