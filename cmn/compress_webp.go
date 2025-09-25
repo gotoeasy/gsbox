@@ -10,35 +10,34 @@ import (
 )
 
 func CompressWebp(bts []byte) ([]byte, error) {
+	datas := bts
 	width, height := ComputeWidthHeight(len(bts))
-	if len(bts) == width*height {
-		return webpComp.Compress(bts, width, height)
-	}
-
-	// 数据少的没必要webp编码压缩，只考虑最终图片至少32*32以上大小的场景
-	datas := bts[:]
-	fullRows := len(bts) / width
-	partRowLen := len(bts) % width
-	dataRows := fullRows
-	if partRowLen > 0 {
-		dataRows++
-	}
-	if partRowLen > 0 {
-		// 不足一行的，取上行同列填充
-		start := fullRows*width - width + partRowLen
-		addPartRow := bts[start : start+width-partRowLen]
-		datas = append(datas, addPartRow...)
-	}
-
-	addFullRowCnt := height - dataRows // max 3
-	for i := range addFullRowCnt {
-		// 空行的，倒序逐行取整行填充
-		srcRow := dataRows - 1 - i
+	if len(bts) != width*height {
+		// 数据少的没必要webp编码压缩，只考虑最终图片至少32*32以上大小的场景
+		datas = bts[:]
+		fullRows := len(bts) / width
+		partRowLen := len(bts) % width
+		dataRows := fullRows
 		if partRowLen > 0 {
-			srcRow--
+			dataRows++
 		}
-		addFullRow := bts[(srcRow-1)*width : srcRow*width]
-		datas = append(datas, addFullRow...)
+		if partRowLen > 0 {
+			// 不足一行的，取上行同列填充
+			start := fullRows*width - width + partRowLen
+			addPartRow := bts[start : start+width-partRowLen]
+			datas = append(datas, addPartRow...)
+		}
+
+		addFullRowCnt := height - dataRows // max 3
+		for i := range addFullRowCnt {
+			// 空行的，倒序逐行取整行填充
+			srcRow := dataRows - 1 - i
+			if partRowLen > 0 {
+				srcRow--
+			}
+			addFullRow := bts[(srcRow-1)*width : srcRow*width]
+			datas = append(datas, addFullRow...)
+		}
 	}
 
 	return webpComp.Compress(datas, width, height)
@@ -67,5 +66,5 @@ func ComputeWidthHeight(length int) (width int, height int) {
 var webpComp webpCompressor
 
 type webpCompressor interface {
-	Compress(data []byte, widthHeight ...int) ([]byte, error)
+	Compress(data []byte, width int, height int) ([]byte, error)
 }

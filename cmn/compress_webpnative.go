@@ -9,20 +9,16 @@ import (
 	"github.com/HugoSmits86/nativewebp"
 )
 
-func (c *nativeCompressor) Compress(data []byte, widthHeight ...int) ([]byte, error) {
-	var width, height int
-	if len(widthHeight) == 2 {
-		width = widthHeight[0]
-		height = widthHeight[1]
-	} else {
-		width, height = ComputeWidthHeight(len(data))
-	}
+func (c *nativeCompressor) Compress(data []byte, width int, height int) ([]byte, error) {
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	copy(img.Pix, data)
 
 	var buf bytes.Buffer
 	err := nativewebp.Encode(&buf, img, nil)
-	return buf.Bytes(), err
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 type nativeCompressor struct{}
