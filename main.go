@@ -116,7 +116,7 @@ func usage() {
 	fmt.Println("  g2p, sog2ply                    convert sog to ply")
 	fmt.Println("  g2s, sog2splat                  convert sog to splat")
 	fmt.Println("  g2x, sog2spx                    convert sog to spx")
-	fmt.Println("  g2z, sog2spx                    convert sog to spz")
+	fmt.Println("  g2z, sog2spz                    convert sog to spz")
 	fmt.Println("  ps,  printsplat                 print data to text file like splat format layout")
 	fmt.Println("  join                            join the input model files into a single output file")
 	fmt.Println("  info <file>                     display the model file information")
