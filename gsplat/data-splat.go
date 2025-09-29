@@ -101,6 +101,11 @@ func transformScaleDatas(datas []*SplatData) {
 			data.Scale(scale)
 		}
 		log.Println("[Info] (Transform) scaling factor:", scale)
+		if scale < 0.05 {
+			log.Println("[Warn] ATTENTION: VERY SMALL SCALING FACTOR MAY CAUSE PRECISION LOSS! PROCEED WITH CAUTION!")
+		} else if scale > 20 {
+			log.Println("[Warn] ATTENTION: VERY BIG SCALING FACTOR MAY CAUSE PRECISION LOSS! PROCEED WITH CAUTION!")
+		}
 	}
 }
 
