@@ -123,6 +123,7 @@ func usage() {
 	fmt.Println("  -i,  --input <file>             specify the input file")
 	fmt.Println("  -o,  --output <file>            specify the output file")
 	fmt.Println("  -ct, --compression-type <type>  specify the compression type(0:gzip,1:xz) for spx output, default is gzip")
+	fmt.Println("  -l,  --log-times <num>          specify the log encoding times (0~9), default is 1")
 	fmt.Println("  -c,  --comment <text>           specify the comment for ply/spx output")
 	fmt.Println("  -a,  --alpha <num>              specify the minimum alpha(0~255) to filter the output splat data")
 	fmt.Println("  -bs, --block-size <num>         specify the block size(64~1048576) for spx output (default is 65536)")
