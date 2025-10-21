@@ -8,7 +8,7 @@ import (
 
 const SQRT2 = float32(1.4142135623730951) // math.Sqrt(2.0)
 
-func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, int) {
+func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
 	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
 	scales := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
@@ -24,7 +24,7 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, int) {
 
 	count := meta.Means.Shape[0]
 	datas := make([]*SplatData, count)
-	shDegree := 0
+	shDegree := uint8(0)
 	if meta.ShN != nil {
 		switch meta.ShN.Shape[1] {
 		case 45, 15:

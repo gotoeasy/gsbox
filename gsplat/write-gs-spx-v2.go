@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int) {
+func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -107,7 +107,7 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree int)
 	cmn.ExitOnError(err)
 }
 
-func genSpxHeaderV2(datas []*SplatData, comment string, shDegree int) *SpxHeader {
+func genSpxHeaderV2(datas []*SplatData, comment string, shDegree uint8) *SpxHeader {
 	var f1 uint8 = 0 // 是否Y轴倒立模型
 	var f8 uint8 = 0 // 是否大场景
 

@@ -7,11 +7,12 @@ import (
 	"os"
 )
 
-func WriteSpz(spzFile string, rows []*SplatData, shDegree int) {
+func WriteSpz(spzFile string, rows []*SplatData) {
 	file, err := os.Create(spzFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
+	shDegree := GetArgShDegree()
 	writer := bufio.NewWriter(file)
 	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
 	if ver < 2 || ver > 3 {

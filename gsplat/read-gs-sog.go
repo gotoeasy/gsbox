@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-func ReadSog(fileSogMeta string) ([]*SplatData, int) {
+func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
 	if cmn.Startwiths(fileSogMeta, "http") && cmn.Endwiths(fileSogMeta, "/meta.json") {
 		return readHttpSog(fileSogMeta)
 	}
@@ -44,7 +44,7 @@ func ReadSog(fileSogMeta string) ([]*SplatData, int) {
 	return nil, 0
 }
 
-func ReadSogInfo(fileSogMeta string) (version, count, shDegree int, totalFileSize int64) {
+func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalFileSize int64) {
 
 	dir := cmn.Dir(fileSogMeta)
 	isSog := cmn.Endwiths(fileSogMeta, ".sog", true)
@@ -110,7 +110,7 @@ func ReadSogInfo(fileSogMeta string) (version, count, shDegree int, totalFileSiz
 	return
 }
 
-func readHttpSog(urlMetaJson string) ([]*SplatData, int) {
+func readHttpSog(urlMetaJson string) ([]*SplatData, uint8) {
 
 	dir, err := cmn.CreateTempDir()
 	cmn.ExitOnError(err)

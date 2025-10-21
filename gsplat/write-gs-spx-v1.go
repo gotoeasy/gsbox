@@ -10,7 +10,7 @@ import (
 )
 
 // Deprecated
-func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int) {
+func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -65,7 +65,7 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree int)
 	cmn.ExitOnError(err)
 }
 
-func genSpxHeader(datas []*SplatData, comment string, shDegree int, flag1 uint8, flag2 uint8, flag3 uint8) *SpxHeader {
+func genSpxHeader(datas []*SplatData, comment string, shDegree uint8, flag1 uint8, flag2 uint8, flag3 uint8) *SpxHeader {
 
 	header := new(SpxHeader)
 	header.Fixed = "spx"
@@ -344,7 +344,7 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 	}
 }
 
-func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegree int) {
+func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8) {
 	blockSplatCount := len(blockDatas)
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数

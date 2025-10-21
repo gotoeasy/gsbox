@@ -25,7 +25,7 @@ type KsplatHeader struct {
 	/** 球谐函数的最大值，默认为 1.5 */
 	MaxHarmonicsValue float32
 
-	ShDegree int
+	ShDegree uint8
 }
 
 func (h *KsplatHeader) ToString() string {
@@ -54,7 +54,7 @@ type SectionHeader struct {
 	/** 未满桶的数量 */
 	PartialBucketCount uint32
 	/** 球谐函数的级别 */
-	ShDegree uint16
+	ShDegree uint8
 }
 
 func (h *SectionHeader) ToString() string {
@@ -171,7 +171,7 @@ func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHe
 			QuantizationRange:    cmn.BytesToUint32(bs[24:28]),
 			FullBucketCount:      cmn.BytesToUint32(bs[32:36]),
 			PartialBucketCount:   cmn.BytesToUint32(bs[36:40]),
-			ShDegree:             cmn.BytesToUint16(bs[40:42]),
+			ShDegree:             uint8(cmn.BytesToUint16(bs[40:42])),
 		}
 		if h.QuantizationRange == 0 {
 			h.QuantizationRange = cc.scaleQuantRange
@@ -179,8 +179,8 @@ func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHe
 		secHeaders[i] = h
 
 		// 球谐系数通过遍历分段头取最大值求得
-		if mainHeader.ShDegree < int(h.ShDegree) {
-			mainHeader.ShDegree = int(h.ShDegree)
+		if mainHeader.ShDegree < h.ShDegree {
+			mainHeader.ShDegree = h.ShDegree
 		}
 	}
 

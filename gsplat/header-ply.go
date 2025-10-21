@@ -143,7 +143,7 @@ func (p *PlyHeader) Property(property string) (int, string) {
 	return p.mapOffset[property], p.mapType[property]
 }
 
-func (p *PlyHeader) MaxShDegree() int {
+func (p *PlyHeader) MaxShDegree() uint8 {
 	if p.mapType["f_rest_44"] != "" {
 		return 3
 	} else if p.mapType["f_rest_23"] != "" {

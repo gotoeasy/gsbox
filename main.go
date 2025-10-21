@@ -18,57 +18,57 @@ func main() {
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
 		usage()
 	} else if args.HasCmd("p2s", "ply2splat") {
-		ply2splat(args)
+		ply2splat()
 	} else if args.HasCmd("p2x", "ply2spx") {
-		ply2spx(args)
+		ply2spx()
 	} else if args.HasCmd("p2z", "ply2spz") {
-		ply2spz(args)
+		ply2spz()
 	} else if args.HasCmd("p2p", "ply2ply") {
-		ply2ply(args)
+		ply2ply()
 	} else if args.HasCmd("s2p", "splat2ply") {
-		splat2ply(args)
+		splat2ply()
 	} else if args.HasCmd("s2x", "splat2spx") {
-		splat2spx(args)
+		splat2spx()
 	} else if args.HasCmd("s2z", "splat2spz") {
-		splat2spz(args)
+		splat2spz()
 	} else if args.HasCmd("s2s", "splat2splat") {
-		splat2splat(args)
+		splat2splat()
 	} else if args.HasCmd("x2p", "spx2ply") {
-		spx2ply(args)
+		spx2ply()
 	} else if args.HasCmd("x2s", "spx2splat") {
-		spx2splat(args)
+		spx2splat()
 	} else if args.HasCmd("x2z", "spx2spz") {
-		spx2spz(args)
+		spx2spz()
 	} else if args.HasCmd("x2x", "spx2spx") {
-		spx2spx(args)
+		spx2spx()
 	} else if args.HasCmd("z2p", "spz2ply") {
-		spz2ply(args)
+		spz2ply()
 	} else if args.HasCmd("z2s", "spz2splat") {
-		spz2splat(args)
+		spz2splat()
 	} else if args.HasCmd("z2x", "spz2spx") {
-		spz2spx(args)
+		spz2spx()
 	} else if args.HasCmd("z2z", "spz2spz") {
-		spz2spz(args)
+		spz2spz()
 	} else if args.HasCmd("k2p", "ksplat2ply") {
-		ksplat2ply(args)
+		ksplat2ply()
 	} else if args.HasCmd("k2s", "ksplat2splat") {
-		ksplat2splat(args)
+		ksplat2splat()
 	} else if args.HasCmd("k2x", "ksplat2spx") {
-		ksplat2spx(args)
+		ksplat2spx()
 	} else if args.HasCmd("k2z", "ksplat2spx") {
-		ksplat2spz(args)
+		ksplat2spz()
 	} else if args.HasCmd("g2p", "sog2ply") {
-		sog2ply(args)
+		sog2ply()
 	} else if args.HasCmd("g2s", "sog2splat") {
-		sog2splat(args)
+		sog2splat()
 	} else if args.HasCmd("g2x", "sog2spx") {
-		sog2spx(args)
+		sog2spx()
 	} else if args.HasCmd("g2z", "sog2spz") {
-		sog2spz(args)
+		sog2spz()
 	} else if args.HasCmd("ps", "printSplat") {
-		printSplat(args)
+		printSplat()
 	} else if args.HasCmd("join") {
-		join(args)
+		join()
 	} else if args.HasCmd("info") {
 		info(args)
 	} else {
@@ -177,7 +177,7 @@ func info(args *cmn.OsArgs) {
 	isMetaJson := cmn.FileName(input) == "meta.json"
 	count := 0
 
-	shDegree := 0
+	shDegree := uint8(0)
 	var sogFileSize int64
 	if isPly {
 		headerString, err := gsplat.ReadPlyHeaderString(input, 1024)
@@ -192,19 +192,19 @@ func info(args *cmn.OsArgs) {
 		header := gsplat.ParseSpxHeader(input)
 		fmt.Println(header.ToStringSpx())
 		count = int(header.SplatCount)
-		shDegree = int(header.ShDegree)
+		shDegree = header.ShDegree
 	} else if isSpz {
 		header, _ := gsplat.ReadSpz(input, true)
 		fmt.Println(header.ToString())
 		count = int(header.NumPoints)
-		shDegree = int(header.ShDegree)
+		shDegree = header.ShDegree
 	} else if isKsplat {
 		secHeader, mainHeader, _ := gsplat.ReadKsplat(input, true)
 		fmt.Println(mainHeader.ToString())
 		fmt.Println("[Section 0]")
 		fmt.Println(secHeader.ToString())
 		count = mainHeader.SplatCount
-		shDegree = int(mainHeader.ShDegree)
+		shDegree = mainHeader.ShDegree
 	} else if isSplat {
 		fileInfo, err := os.Stat(input)
 		cmn.ExitOnError(err)
@@ -226,20 +226,21 @@ func info(args *cmn.OsArgs) {
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
+	gsplat.SetShDegreeFrom(shDegree)
 
 	if count > 0 {
-		fmt.Println("\n[Info]", gsplat.CompressionInfo(input, count, shDegree, sogFileSize))
+		fmt.Println("\n[Info]", gsplat.CompressionInfo(input, count, sogFileSize))
 	}
 }
 
-func printSplat(args *cmn.OsArgs) {
+func printSplat() {
 	log.Println("[Info] print data to text file like splat format layout.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 
 	var datas []*gsplat.SplatData
-	shDegree := 0
+	shDegree := uint8(0)
 	if cmn.Endwiths(input, ".ply", true) {
 		header, ds := gsplat.ReadPly(input)
 		datas = ds
@@ -249,15 +250,15 @@ func printSplat(args *cmn.OsArgs) {
 	} else if cmn.Endwiths(input, ".spx", true) {
 		header, ds := gsplat.ReadSpx(input)
 		datas = ds
-		shDegree = max(int(header.ShDegree), shDegree)
+		shDegree = max(header.ShDegree, shDegree)
 	} else if cmn.Endwiths(input, ".spz", true) {
 		header, ds := gsplat.ReadSpz(input, false)
 		datas = ds
-		shDegree = max(int(header.ShDegree), shDegree)
+		shDegree = max(header.ShDegree, shDegree)
 	} else if cmn.Endwiths(input, ".ksplat", true) {
 		_, header, ds := gsplat.ReadKsplat(input, false)
 		datas = ds
-		shDegree = max(int(header.ShDegree), shDegree)
+		shDegree = max(header.ShDegree, shDegree)
 	} else if cmn.Endwiths(input, ".sog", true) || cmn.FileName(input) == "meta.json" {
 		ds, degree := gsplat.ReadSog(input)
 		datas = ds
@@ -265,21 +266,18 @@ func printSplat(args *cmn.OsArgs) {
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
-	sh := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), -1)
-	if sh >= 0 && sh <= 3 {
-		shDegree = sh // 优先按参数要求级别，未指定时按数据实际级别输出
-	}
+	gsplat.SetShDegreeFrom(shDegree)
 
-	gsplat.PrintSplat(output, datas, shDegree)
+	gsplat.PrintSplat(output, datas)
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func join(args *cmn.OsArgs) {
+func join() {
 	log.Println("[Info] join the input model files into a single output file")
 	startTime := time.Now()
-	inputs := checkInputFilesExists(args)
-	output := createOutputDir(args)
+	inputs := gsplat.GetAndCheckInputFiles()
+	output := gsplat.CreateOutputDir()
 	isOutPly := cmn.Endwiths(output, ".ply", true)
 	isOutSplat := cmn.Endwiths(output, ".splat", true)
 	isOutSpx := cmn.Endwiths(output, ".spx", true)
@@ -287,59 +285,58 @@ func join(args *cmn.OsArgs) {
 	cmn.ExitOnConditionError(!isOutPly && !isOutSplat && !isOutSpx && !isOutSpz, errors.New("output file must be (ply | splat | spx | spz) format"))
 
 	datas := make([]*gsplat.SplatData, 0)
-	maxFromShDegree := 0
+	var maxFromShDegree uint8
 	for _, file := range inputs {
 		if cmn.Endwiths(file, ".ply", true) {
 			header, ds := gsplat.ReadPly(file)
-			maxFromShDegree = max(header.MaxShDegree(), maxFromShDegree)
+			maxFromShDegree = max(uint8(header.MaxShDegree()), maxFromShDegree)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".splat", true) {
 			ds := gsplat.ReadSplat(file)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".spx", true) {
 			header, ds := gsplat.ReadSpx(file)
-			maxFromShDegree = max(int(header.ShDegree), maxFromShDegree)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".spz", true) {
 			header, ds := gsplat.ReadSpz(file, false)
-			maxFromShDegree = max(int(header.ShDegree), maxFromShDegree)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".ksplat", true) {
 			_, header, ds := gsplat.ReadKsplat(file, false)
-			maxFromShDegree = max(header.ShDegree, maxFromShDegree)
+			maxFromShDegree = max(uint8(header.ShDegree), maxFromShDegree)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" || (cmn.Startwiths(file, "http") && cmn.Endwiths(file, "/meta.json")) {
 			ds, degree := gsplat.ReadSog(file)
-			maxFromShDegree = max(degree, maxFromShDegree)
+			maxFromShDegree = max(uint8(degree), maxFromShDegree)
 			datas = append(datas, ds...)
 		}
 	}
+	gsplat.SetShDegreeFrom(maxFromShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree := getArgShDegree(maxFromShDegree, args)
 	if isOutPly {
-		comment := args.GetArgIgnorecase("-c", "--comment")
-		gsplat.WritePly(output, datas, comment, shDegree)
+		gsplat.WritePly(output, datas)
 	} else if isOutSplat {
 		gsplat.WriteSplat(output, datas)
 	} else if isOutSpx {
-		comment := args.GetArgIgnorecase("-c", "--comment")
-		gsplat.WriteSpx(output, datas, comment, shDegree)
+		gsplat.WriteSpx(output, datas)
 	} else if isOutSpz {
-		gsplat.WriteSpz(output, datas, shDegree)
+		gsplat.WriteSpz(output, datas)
 	}
 	log.Println("[Info]", inputs, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ply2splat(args *cmn.OsArgs) {
+func ply2splat() {
 	log.Println("[Info] convert ply to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
-	_, datas := gsplat.ReadPly(input)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	header, datas := gsplat.ReadPly(input)
+	gsplat.SetShDegreeFrom(header.MaxShDegree())
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -349,110 +346,107 @@ func ply2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ply2spx(args *cmn.OsArgs) {
+func ply2spx() {
 	log.Println("[Info] convert ply to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadPly(input)
+	gsplat.SetShDegreeFrom(header.MaxShDegree())
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(header.MaxShDegree(), args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ply2spz(args *cmn.OsArgs) {
+func ply2spz() {
 	log.Println("[Info] convert ply to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadPly(input)
+	gsplat.SetShDegreeFrom(header.MaxShDegree())
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree := getArgShDegree(header.MaxShDegree(), args)
-	gsplat.WriteSpz(output, datas, shDegree)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ply2ply(args *cmn.OsArgs) {
+func ply2ply() {
 	log.Println("[Info] convert ply to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadPly(input)
+	gsplat.SetShDegreeFrom(header.MaxShDegree())
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(header.MaxShDegree(), args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func splat2ply(args *cmn.OsArgs) {
+func splat2ply() {
 	log.Println("[Info] convert splat to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas := gsplat.ReadSplat(input)
+	gsplat.SetShDegreeFrom(0)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(0, args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func splat2spx(args *cmn.OsArgs) {
+func splat2spx() {
 	log.Println("[Info] convert splat to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas := gsplat.ReadSplat(input)
+	gsplat.SetShDegreeFrom(0)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(0, args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func splat2spz(args *cmn.OsArgs) {
+func splat2spz() {
 	log.Println("[Info] convert splat to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas := gsplat.ReadSplat(input)
+	gsplat.SetShDegreeFrom(0)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	gsplat.WriteSpz(output, datas, 0)
-	shDegree := getArgShDegree(0, args)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func splat2splat(args *cmn.OsArgs) {
+func splat2splat() {
 	log.Println("[Info] convert splat to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas := gsplat.ReadSplat(input)
+	gsplat.SetShDegreeFrom(0)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -462,28 +456,28 @@ func splat2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spx2ply(args *cmn.OsArgs) {
+func spx2ply() {
 	log.Println("[Info] convert spx to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpx(input)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spx2splat(args *cmn.OsArgs) {
+func spx2splat() {
 	log.Println("[Info] convert spx to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
-	_, datas := gsplat.ReadSpx(input)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	header, datas := gsplat.ReadSpx(input)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -493,61 +487,60 @@ func spx2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spx2spz(args *cmn.OsArgs) {
+func spx2spz() {
 	log.Println("[Info] convert spx to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpx(input)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WriteSpz(output, datas, shDegree)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spx2spx(args *cmn.OsArgs) {
+func spx2spx() {
 	log.Println("[Info] convert spx to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpx(input)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spz2ply(args *cmn.OsArgs) {
+func spz2ply() {
 	log.Println("[Info] convert spz to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpz(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spz2splat(args *cmn.OsArgs) {
+func spz2splat() {
 	log.Println("[Info] convert spz to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
-	_, datas := gsplat.ReadSpz(input, false)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	header, datas := gsplat.ReadSpz(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -557,61 +550,60 @@ func spz2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spz2spx(args *cmn.OsArgs) {
+func spz2spx() {
 	log.Println("[Info] convert spz to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpz(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func spz2spz(args *cmn.OsArgs) {
+func spz2spz() {
 	log.Println("[Info] convert spz to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	header, datas := gsplat.ReadSpz(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree := getArgShDegree(int(header.ShDegree), args)
-	gsplat.WriteSpz(output, datas, shDegree)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ksplat2ply(args *cmn.OsArgs) {
+func ksplat2ply() {
 	log.Println("[Info] convert ksplat to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	_, header, datas := gsplat.ReadKsplat(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(header.ShDegree, args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ksplat2splat(args *cmn.OsArgs) {
+func ksplat2splat() {
 	log.Println("[Info] convert ksplat to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
-	_, _, datas := gsplat.ReadKsplat(input, false)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	_, header, datas := gsplat.ReadKsplat(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -621,61 +613,60 @@ func ksplat2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ksplat2spx(args *cmn.OsArgs) {
+func ksplat2spx() {
 	log.Println("[Info] convert ksplat to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	_, header, datas := gsplat.ReadKsplat(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree := getArgShDegree(header.ShDegree, args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func ksplat2spz(args *cmn.OsArgs) {
+func ksplat2spz() {
 	log.Println("[Info] convert ksplat to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	_, header, datas := gsplat.ReadKsplat(input, false)
+	gsplat.SetShDegreeFrom(header.ShDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree := getArgShDegree(header.ShDegree, args)
-	gsplat.WriteSpz(output, datas, shDegree)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func sog2ply(args *cmn.OsArgs) {
+func sog2ply() {
 	log.Println("[Info] convert sog to ply.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas, shDegree := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(shDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree = getArgShDegree(shDegree, args)
-	gsplat.WritePly(output, datas, comment, shDegree)
+	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func sog2splat(args *cmn.OsArgs) {
+func sog2splat() {
 	log.Println("[Info] convert sog to splat.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
-	datas, _ := gsplat.ReadSog(input)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	datas, shDegree := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(shDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
@@ -685,73 +676,34 @@ func sog2splat(args *cmn.OsArgs) {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func sog2spx(args *cmn.OsArgs) {
+func sog2spx() {
 	log.Println("[Info] convert sog to spx.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas, shDegree := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(shDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	comment := args.GetArgIgnorecase("-c", "--comment")
-	shDegree = getArgShDegree(shDegree, args)
-	gsplat.WriteSpx(output, datas, comment, shDegree)
+	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func sog2spz(args *cmn.OsArgs) {
+func sog2spz() {
 	log.Println("[Info] convert sog to spz.")
 	startTime := time.Now()
-	input := checkInputFileExists(args)
-	output := createOutputDir(args)
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
 	datas, shDegree := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(shDegree)
 	gsplat.TransformDatas(datas)
 	datas = gsplat.FilterDatas(datas)
 	gsplat.Sort(datas)
-	shDegree = getArgShDegree(shDegree, args)
-	gsplat.WriteSpz(output, datas, shDegree)
+	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), shDegree))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
-}
-
-func checkInputFilesExists(args *cmn.OsArgs) []string {
-	inputs := args.GetArgsIgnorecase("-i", "--input")
-	for i := 0; i < len(inputs); i++ {
-		cmn.ExitOnConditionError(inputs[i] == "", errors.New(`please specify the input file`))
-		if !cmn.Startwiths(inputs[i], "http://") && !cmn.Startwiths(inputs[i], "https://") {
-			cmn.ExitOnConditionError(!cmn.IsExistFile(inputs[i]), errors.New("file not found: "+inputs[i]))
-		}
-	}
-	return inputs
-}
-
-func checkInputFileExists(args *cmn.OsArgs) string {
-	input := args.GetArgIgnorecase("-i", "--input")
-	cmn.ExitOnConditionError(input == "", errors.New(`please specify the input file`))
-	if !cmn.Startwiths(input, "http://") && !cmn.Startwiths(input, "https://") {
-		cmn.ExitOnConditionError(!cmn.IsExistFile(input), errors.New("file not found: "+input))
-	}
-	return input
-}
-
-func createOutputDir(args *cmn.OsArgs) string {
-	output := args.GetArgIgnorecase("-o", "--output")
-	cmn.ExitOnConditionError(output == "", errors.New(`please specify the output file`))
-	cmn.ExitOnError(cmn.MkdirAll(cmn.Dir(output)))
-	return output
-}
-
-func getArgShDegree(dataShDegree int, args *cmn.OsArgs) int {
-	shDegree := dataShDegree
-	if args.HasArg("-sh", "--shDegree") {
-		sh := cmn.StringToInt(args.GetArgIgnorecase("-sh", "--shDegree"), -1)
-		if sh >= 0 && sh <= 3 {
-			shDegree = sh
-		}
-	}
-	return shDegree
 }

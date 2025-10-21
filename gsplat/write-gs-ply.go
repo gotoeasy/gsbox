@@ -7,11 +7,13 @@ import (
 	"os"
 )
 
-func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) {
+func WritePly(plyFile string, datas []*SplatData) {
 	file, err := os.Create(plyFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
 
+	comment := Args.GetArgIgnorecase("-c", "--comment")
+	shDegree := GetArgShDegree()
 	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 	_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
@@ -24,7 +26,7 @@ func WritePly(plyFile string, datas []*SplatData, comment string, shDegree int) 
 	cmn.ExitOnError(err)
 }
 
-func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
+func genPlyDataBin(splatData *SplatData, shDegree uint8) []byte {
 
 	bts := []byte{}
 	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...)                    // x
@@ -88,7 +90,7 @@ func genPlyDataBin(splatData *SplatData, shDegree int) []byte {
 	return bts
 }
 
-func genPlyHeader(count int, comment string, shDegree int) string {
+func genPlyHeader(count int, comment string, shDegree uint8) string {
 	lines := []string{}
 	lines = append(lines, "ply")
 	lines = append(lines, "format binary_little_endian 1.0")

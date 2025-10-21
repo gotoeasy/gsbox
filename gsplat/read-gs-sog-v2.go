@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, int) {
+func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
 	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
 	scales := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
@@ -22,7 +22,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, int) {
 
 	count := meta.Count
 	datas := make([]*SplatData, count)
-	shDegree := 0
+	shDegree := uint8(0)
 	if meta.ShN != nil {
 		shDegree = 3
 	}

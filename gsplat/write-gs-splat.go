@@ -31,7 +31,7 @@ func WriteSplat(splatFile string, rows []*SplatData) {
 	cmn.ExitOnError(err)
 }
 
-func PrintSplat(splatFile string, rows []*SplatData, shDegree int) {
+func PrintSplat(splatFile string, rows []*SplatData) {
 	file, err := os.Create(splatFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -58,6 +58,7 @@ func PrintSplat(splatFile string, rows []*SplatData, shDegree int) {
 			}
 		}
 
+		shDegree := GetArgShDegree()
 		switch shDegree {
 		case 1:
 			line := fmt.Sprintf("%s,%s,%s, %s,%s,%s, %v,%v,%v,%v, %v,%v,%v,%v, %v,%v,%v,%v,%v,%v,%v,%v,%v\r\n",

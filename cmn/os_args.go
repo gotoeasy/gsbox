@@ -3,6 +3,7 @@ package cmn
 import (
 	"os"
 	"runtime"
+	"strconv"
 )
 
 // 命令行解析结果
@@ -142,4 +143,23 @@ func (o *OsArgs) HasCmd(names ...string) bool {
 
 func (o *OsArgs) GetArgByIndex(index int) string {
 	return o.mapIndexValue[index]
+}
+
+func (o *OsArgs) GetArgFloat32(arg1 string, arg2 string, minVal float32, maxVal float32) (bool, float32) {
+	if !o.HasArg(arg1, arg2) {
+		return false, 0
+	}
+
+	str := o.GetArgIgnorecase(arg1, arg2)
+	v, err := strconv.ParseFloat(str, 64)
+	if err != nil {
+		return false, 0
+	}
+	if v < float64(minVal) {
+		return true, minVal
+	}
+	if v > float64(maxVal) {
+		return true, maxVal
+	}
+	return true, ClipFloat32(v)
 }

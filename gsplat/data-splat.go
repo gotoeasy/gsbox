@@ -8,8 +8,6 @@ import (
 	"sort"
 )
 
-var Args *cmn.OsArgs
-
 const SPLAT_DATA_SIZE = 3*4 + 3*4 + 4 + 4
 
 type SplatData struct {
@@ -413,7 +411,7 @@ func (v *Vector3) ApplyQuaternion(q *Quaternion) *Vector3 {
 	return v
 }
 
-func CompressionInfo(filePath string, num int, shDegree int, inFileSize ...int64) string {
+func CompressionInfo(filePath string, num int, inFileSize ...int64) string {
 	if cmn.Endwiths(filePath, ".ply", true) && !cmn.Endwiths(filePath, ".compressed.ply", true) {
 		return fmt.Sprintf("splat count: %v", num)
 	}
@@ -428,5 +426,6 @@ func CompressionInfo(filePath string, num int, shDegree int, inFileSize ...int64
 	sizeReduction := (1 - float64(fileSize)/float64(plySize)) * 100
 	fileSizeM := float64(fileSize) / 1024.0 / 1024.0
 
+	shDegree := GetArgShDegree()
 	return fmt.Sprintf("splat count: %v, %.1fM, %.2fx compression with sh%v (%.2f%% smaller than 3dgs ply)", num, fileSizeM, compressionRatio, shDegree, sizeReduction)
 }
