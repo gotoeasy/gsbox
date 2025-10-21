@@ -26,7 +26,9 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(plyFile))
 		log.Println("[Info]", "Download start,", plyFile)
-		cmn.HttpDownload(plyFile, downloadFile, nil)
+		err = cmn.HttpDownload(plyFile, downloadFile, nil)
+		cmn.RemoveAllFileIfError(err, tmpdir)
+		cmn.ExitOnError(err)
 		log.Println("[Info]", "Download finish")
 		plyFile = downloadFile
 	}

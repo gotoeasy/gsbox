@@ -17,11 +17,13 @@ func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
 
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
-		downloadSog := filepath.Join(tmpdir, cmn.FileName(fileSogMeta))
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(fileSogMeta))
 		log.Println("[Info]", "Download start,", fileSogMeta)
-		cmn.HttpDownload(fileSogMeta, downloadSog, nil)
+		err = cmn.HttpDownload(fileSogMeta, downloadFile, nil)
+		cmn.RemoveAllFileIfError(err, tmpdir)
+		cmn.ExitOnError(err)
 		log.Println("[Info]", "Download finish")
-		fileSogMeta = downloadSog
+		fileSogMeta = downloadFile
 	}
 
 	dir := cmn.Dir(fileSogMeta)
@@ -134,7 +136,9 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, uint8) {
 	}()
 
 	fileMeta := filepath.Join(dir, "meta.json")
-	cmn.HttpDownload(urlMetaJson, filepath.Join(dir, "meta.json"), nil)
+	err = cmn.HttpDownload(urlMetaJson, filepath.Join(dir, "meta.json"), nil)
+	cmn.RemoveAllFileIfError(err, dir)
+	cmn.ExitOnError(err)
 	strMeta, err := cmn.ReadFileString(fileMeta)
 	cmn.ExitOnError(err)
 

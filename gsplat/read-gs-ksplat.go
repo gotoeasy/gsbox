@@ -84,7 +84,9 @@ func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHe
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(ksplatFile))
 		log.Println("[Info]", "Download start,", ksplatFile)
-		cmn.HttpDownload(ksplatFile, downloadFile, nil)
+		err = cmn.HttpDownload(ksplatFile, downloadFile, nil)
+		cmn.RemoveAllFileIfError(err, tmpdir)
+		cmn.ExitOnError(err)
 		log.Println("[Info]", "Download finish")
 		ksplatFile = downloadFile
 	}

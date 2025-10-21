@@ -16,7 +16,9 @@ func ReadSpz(spzFile string, readHeadOnly bool) (*SpzHeader, []*SplatData) {
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(spzFile))
 		log.Println("[Info]", "Download start,", spzFile)
-		cmn.HttpDownload(spzFile, downloadFile, nil)
+		err = cmn.HttpDownload(spzFile, downloadFile, nil)
+		cmn.RemoveAllFileIfError(err, tmpdir)
+		cmn.ExitOnError(err)
 		log.Println("[Info]", "Download finish")
 		spzFile = downloadFile
 	}

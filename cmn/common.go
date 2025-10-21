@@ -59,6 +59,11 @@ func HttpDownload(url, saveAsPathFile string, wg *sync.WaitGroup, headers ...str
 	}
 	defer response.Body.Close()
 
+	// 检查响应状态码，非200不保存文件
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP request failed with status code: %d", response.StatusCode)
+	}
+
 	MkdirAll(Dir(saveAsPathFile))
 	file, err := os.Create(saveAsPathFile)
 	if err != nil {

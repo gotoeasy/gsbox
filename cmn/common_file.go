@@ -73,6 +73,12 @@ func RemoveAllFile(pathorfile string) error {
 	return os.RemoveAll(pathorfile)
 }
 
+func RemoveAllFileIfError(err error, pathorfile string) {
+	if err != nil {
+		os.RemoveAll(pathorfile)
+	}
+}
+
 // 复制文件
 func CopyFile(srcFilePath string, dstFilePath string) error {
 	srcFile, err := os.Open(srcFilePath)
