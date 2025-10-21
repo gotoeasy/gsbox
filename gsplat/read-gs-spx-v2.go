@@ -78,12 +78,13 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 			}
 		case BF_SPLAT10019:
 			// splat10019
-			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			logTimes := int(blockBts[8]) // log编码次数
+			bts := blockBts[12:]         // 除去前12字节（数量，格式，log编码次数）
 			for n := range blkSplatCnt {
 				data := &SplatData{}
-				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), 3)
-				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), 3)
-				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), 3)
+				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), logTimes)
+				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), logTimes)
+				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), logTimes)
 				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
 				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
 				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
@@ -151,7 +152,8 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 			}
 		case BF_SPLAT10190_WEBP:
 			// WEBP10190
-			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			logTimes := int(blockBts[8]) // log编码次数
+			bts := blockBts[12:]         // 除去前12字节（数量，格式，log编码次数）
 			size := cmn.BytesToUint32(bts[:4])
 			webps := bts[4 : size+4]
 			btsPositions, _, _, err := cmn.DecompressWebp(webps)
@@ -190,9 +192,9 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				rz := btsRotations[n*4+2]
 
 				data := &SplatData{}
-				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), 3)
-				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(y0, y1, y2), 3)
-				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(z0, z1, z2), 3)
+				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), logTimes)
+				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(y0, y1, y2), logTimes)
+				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(z0, z1, z2), logTimes)
 				data.ScaleX = cmn.DecodeSpxScale(btsScales[n*4+0])
 				data.ScaleY = cmn.DecodeSpxScale(btsScales[n*4+1])
 				data.ScaleZ = cmn.DecodeSpxScale(btsScales[n*4+2])

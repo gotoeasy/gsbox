@@ -16,6 +16,10 @@ func PathSeparator() string {
 
 // 取文件名，如“abc.txt”
 func FileName(name string) string {
+	if IsNetFile(name) {
+		ary := Split(name, "/")
+		return Split(ary[len(ary)-1], "?")[0]
+	}
 	return path.Base(ReplaceAll(name, "\\", "/"))
 }
 

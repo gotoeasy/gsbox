@@ -793,3 +793,7 @@ func DecodeLog(encoded float32, times ...int) float32 {
 	}
 	return original
 }
+
+func IsNetFile(fileName string) bool {
+	return Startwiths(fileName, "https://") || Startwiths(fileName, "http://")
+}

@@ -44,6 +44,11 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 		log.Println("[Info] block compress type: xz")
 	}
 
+	logTimes := min(max(0, uint8(cmn.StringToInt(Args.GetArgIgnorecase("-l", "--log-times"), 2))), 9) // 有效范围0~9，默认2
+	if logTimes > 0 {
+		log.Println("[Info] log encoding times:", logTimes)
+	}
+
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
 	for i := range blockCnt {
@@ -68,17 +73,17 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 		case BF_SPLAT10190_WEBP:
 			if blockSplatCount >= MinWebpBlockSize {
 				//  数据够多时才一定使用 webp 编码格式
-				writeSpxBlockSplat10190Webp(writer, blockDatas, blockSplatCount)
+				writeSpxBlockSplat10190Webp(writer, blockDatas, blockSplatCount, logTimes)
 			} else {
 				// 数据较少时，切换使用 10019 格式
-				writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType)
+				writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType, logTimes)
 			}
 		case BF_SPLAT19:
 			// splat19 格式，压缩率等综合表现好
 			writeSpxBlockSplat19(writer, blockDatas, blockSplatCount, compressType)
 		default:
 			// splat10019 格式，压缩率等综合表现比较优秀，默认使用
-			writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType)
+			writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType, logTimes)
 		}
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
@@ -285,7 +290,7 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 }
 
-func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
+func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8, logTimes uint8) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
@@ -294,24 +299,25 @@ func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, bloc
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT10019)...)           // 开放的块数据格式 60019
+	bts = append(bts, logTimes, 0, 0, 0)                             // log编码次数(通常0~9)
 
 	var bs0 []byte
 	var bs1 []byte
 	var bs2 []byte
 	for n := range blockSplatCount {
-		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, 3))
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, int(logTimes)))
 		bs0 = append(bs0, b3[0])
 		bs1 = append(bs1, b3[1])
 		bs2 = append(bs2, b3[2])
 	}
 	for n := range blockSplatCount {
-		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, 3))
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, int(logTimes)))
 		bs0 = append(bs0, b3[0])
 		bs1 = append(bs1, b3[1])
 		bs2 = append(bs2, b3[2])
 	}
 	for n := range blockSplatCount {
-		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, 3))
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, int(logTimes)))
 		bs0 = append(bs0, b3[0])
 		bs1 = append(bs1, b3[1])
 		bs2 = append(bs2, b3[2])
@@ -437,7 +443,7 @@ func writeSpxBlockSplat19Webp(writer *bufio.Writer, blockDatas []*SplatData, blo
 	cmn.ExitOnError(err)
 }
 
-func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
+func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, logTimes uint8) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
@@ -446,15 +452,16 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT10190_WEBP)...)      // 开放的块数据格式 60190
+	bts = append(bts, logTimes, 0, 0, 0)                             // log编码次数(通常0~9)
 
 	bsTmp := make([]byte, 0)
 	bs1 := make([]byte, 0)
 	bs2 := make([]byte, 0)
 	bs3 := make([]byte, 0)
 	for n := range blockSplatCount {
-		b3x := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, 3))
-		b3y := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, 3))
-		b3z := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, 3))
+		b3x := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, int(logTimes)))
+		b3y := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, int(logTimes)))
+		b3z := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, int(logTimes)))
 		bs1 = append(bs1, b3x[0], b3y[0], b3z[0], 255)
 		bs2 = append(bs2, b3x[1], b3y[1], b3z[1], 255)
 		bs3 = append(bs3, b3x[2], b3y[2], b3z[2], 255)

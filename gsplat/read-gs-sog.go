@@ -9,8 +9,23 @@ import (
 )
 
 func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
-	if cmn.Startwiths(fileSogMeta, "http") && cmn.Endwiths(fileSogMeta, "/meta.json") {
-		return readHttpSog(fileSogMeta)
+	if cmn.IsNetFile(fileSogMeta) {
+		if cmn.Endwiths(fileSogMeta, "/meta.json") {
+			return readHttpSog(fileSogMeta)
+		}
+
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+
+		defer func() {
+			cmn.RemoveAllFile(tmpdir) // 清除解压的临时文件
+		}()
+
+		downloadSog := filepath.Join(tmpdir, cmn.FileName(fileSogMeta))
+		log.Println("[Info]", "Download start,", fileSogMeta)
+		cmn.HttpDownload(fileSogMeta, downloadSog, nil)
+		log.Println("[Info]", "Download finish")
+		fileSogMeta = downloadSog
 	}
 
 	dir := cmn.Dir(fileSogMeta)
