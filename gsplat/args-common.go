@@ -14,7 +14,7 @@ func SetShDegreeFrom(shDegree uint8) {
 
 func GetAndCheckInputFiles() []string {
 	inputs := Args.GetArgsIgnorecase("-i", "--input")
-	for i := 0; i < len(inputs); i++ {
+	for i := range inputs {
 		cmn.ExitOnConditionError(inputs[i] == "", errors.New(`please specify the input file`))
 		if !cmn.Startwiths(inputs[i], "http://") && !cmn.Startwiths(inputs[i], "https://") {
 			cmn.ExitOnConditionError(!cmn.IsExistFile(inputs[i]), errors.New("file not found: "+inputs[i]))

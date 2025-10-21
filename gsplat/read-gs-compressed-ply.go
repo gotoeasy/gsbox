@@ -40,7 +40,7 @@ func readCompressedPlyDatas(file *os.File, header *PlyHeader, datas []*SplatData
 	length := len(chunks)
 	offset := header.HeaderLength + header.ChunkCount*chunkSize
 	n := 0
-	for i := 0; i < length; i++ {
+	for i := range length {
 		chunk := chunks[i]
 		if i == length-1 {
 			dataCnt = header.VertexCount % 256

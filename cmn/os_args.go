@@ -80,7 +80,7 @@ func ParseArgs(customCmds ...string) *OsArgs {
 
 // 取指定参数名对应的值切片，值去重
 func (o *OsArgs) GetArgs(names ...string) []string {
-	for i := 0; i < len(names); i++ {
+	for i := range names {
 		if o.mapParam[names[i]] != "" {
 			return UniqueStrings(Split(o.mapParam["\t"+names[i]], "\t"))
 		}
@@ -90,7 +90,7 @@ func (o *OsArgs) GetArgs(names ...string) []string {
 
 // 取指定参数名对应的值切片(忽略参数名大小写)，值去重
 func (o *OsArgs) GetArgsIgnorecase(names ...string) []string {
-	for i := 0; i < len(names); i++ {
+	for i := range names {
 		if o.mapParam[names[i]] != "" {
 			return UniqueStrings(Split(o.mapParam[ToLower("\t"+names[i])], "\t"))
 		}
@@ -101,7 +101,7 @@ func (o *OsArgs) GetArgsIgnorecase(names ...string) []string {
 // 取指定参数名对应的值
 // 例如命令 test -d /abc 用GetArg("-d", "--dir")取得/abc
 func (o *OsArgs) GetArg(names ...string) string {
-	for i := 0; i < len(names); i++ {
+	for i := range names {
 		if o.mapParam[names[i]] != "" {
 			return o.mapParam[names[i]]
 		}
@@ -111,7 +111,7 @@ func (o *OsArgs) GetArg(names ...string) string {
 
 // 取指定参数名对应的值(忽略参数名大小写)
 func (o *OsArgs) GetArgIgnorecase(names ...string) string {
-	for i := 0; i < len(names); i++ {
+	for i := range names {
 		v := o.mapParam["\n"+ToLower(names[i])]
 		if v != "" {
 			return v
@@ -133,7 +133,7 @@ func (o *OsArgs) HasArgIgnorecase(names ...string) bool {
 // 判断是否含有指定指令(忽略大小写)
 // 例如命令 docker run ... HasCmd("Run")返回true
 func (o *OsArgs) HasCmd(names ...string) bool {
-	for i := 0; i < len(names); i++ {
+	for i := range names {
 		if o.mapCmd[ToLower(Trim(names[i]))] {
 			return true
 		}

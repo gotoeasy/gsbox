@@ -81,7 +81,7 @@ func getPlyHeader(file *os.File, readLen int) (*PlyHeader, error) {
 	format := ""
 	comment := ""
 	offset := 0
-	for i := 0; i < len(lines); i++ {
+	for i := range lines {
 		if i == 0 {
 			declare = lines[i]
 		} else if cmn.Startwiths(lines[i], "property ") {

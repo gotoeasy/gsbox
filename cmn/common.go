@@ -160,7 +160,7 @@ func Left(str string, length int) string {
 	}
 
 	var rs string
-	for i := 0; i < length; i++ {
+	for i := range length {
 		rs += string(srune[i])
 	}
 	return rs
@@ -488,7 +488,7 @@ func DecodeFloat16(encoded uint16) float32 {
  */
 func HashBytes(bts []byte) uint32 {
 	var rs uint32 = 53653
-	for i := 0; i < len(bts); i++ {
+	for i := range bts {
 		rs = (rs * 33) ^ uint32(bts[i])
 	}
 	return rs
