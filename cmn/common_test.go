@@ -2,7 +2,6 @@ package cmn
 
 import (
 	"fmt"
-	"log"
 	"testing"
 )
 
@@ -28,12 +27,4 @@ func Test_cmn(t *testing.T) {
 
 	decodedValue = DecodeBytes3ToFloat32(encodedBytes)
 	fmt.Printf("Decoded value: %f\n", decodedValue)
-}
-
-func Test_xyz(t *testing.T) {
-	value := float32(1000.12345678987654321)
-	encodeValue := EncodeXyz(value)
-	decodeValue := DecodeXyz(encodeValue)
-	log.Println(value, encodeValue, decodeValue)
-
 }

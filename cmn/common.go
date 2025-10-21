@@ -764,18 +764,32 @@ func DecodeSpxRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint
 	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
 }
 
-func EncodeXyz(val float32) float32 {
-	if val >= 0 {
-		return ClipFloat32(math.Log(float64(val) + 1.0))
-	} else {
-		return ClipFloat32(-math.Log(1.0 - float64(val)))
+func EncodeLog(value float32, times ...int) float32 {
+	if len(times) > 0 && times[0] < 1 {
+		return value
 	}
+
+	logVal := ClipFloat32(math.Log(math.Abs(float64(value)) + 1.0))
+	if value < 0 {
+		logVal = -logVal
+	}
+	if len(times) > 0 && times[0] > 1 {
+		return EncodeLog(logVal, times[0]-1)
+	}
+	return logVal
 }
 
-func DecodeXyz(val float32) float32 {
-	if val >= 0 {
-		return ClipFloat32(math.Exp(float64(val)) - 1.0)
-	} else {
-		return ClipFloat32(-(math.Exp(-float64(val)) - 1.0))
+func DecodeLog(encoded float32, times ...int) float32 {
+	if len(times) > 0 && times[0] < 1 {
+		return encoded
 	}
+
+	original := ClipFloat32(math.Exp(math.Abs(float64(encoded))) - 1.0)
+	if encoded < 0 {
+		original = -original
+	}
+	if len(times) > 0 && times[0] > 1 {
+		return DecodeLog(original, times[0]-1)
+	}
+	return original
 }
