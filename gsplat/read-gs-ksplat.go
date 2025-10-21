@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"gsbox/cmn"
+	"log"
 	"math"
 	"os"
+	"path/filepath"
 )
 
 /** ksplat 文件的主头信息。主头信息长度为 4096 字节，但只有少数字段被使用。未使用的空间可能是为未来的扩展预留的 */
@@ -76,10 +78,25 @@ type CompressionConfig struct {
 }
 
 func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHeader, []*SplatData) {
+	isNetFile := cmn.IsNetFile(ksplatFile)
+	if isNetFile {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(ksplatFile))
+		log.Println("[Info]", "Download start,", ksplatFile)
+		cmn.HttpDownload(ksplatFile, downloadFile, nil)
+		log.Println("[Info]", "Download finish")
+		ksplatFile = downloadFile
+	}
 
 	file, err := os.Open(ksplatFile)
 	cmn.ExitOnError(err)
-	defer file.Close()
+	defer func() {
+		file.Close()
+		if isNetFile {
+			cmn.RemoveAllFile(cmn.Dir(ksplatFile))
+		}
+	}()
 
 	// 文件头读取
 	HeadSize := 4096

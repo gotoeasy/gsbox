@@ -9,18 +9,14 @@ import (
 )
 
 func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
-	if cmn.IsNetFile(fileSogMeta) {
+	isNetFile := cmn.IsNetFile(fileSogMeta)
+	if isNetFile {
 		if cmn.Endwiths(fileSogMeta, "/meta.json") {
 			return readHttpSog(fileSogMeta)
 		}
 
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
-
-		defer func() {
-			cmn.RemoveAllFile(tmpdir) // 清除解压的临时文件
-		}()
-
 		downloadSog := filepath.Join(tmpdir, cmn.FileName(fileSogMeta))
 		log.Println("[Info]", "Download start,", fileSogMeta)
 		cmn.HttpDownload(fileSogMeta, downloadSog, nil)
@@ -32,14 +28,18 @@ func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
 	if cmn.Endwiths(fileSogMeta, ".sog", true) {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
+		downloadTmpDir := dir
 		dir = tmpdir
 
 		defer func() {
-			cmn.RemoveAllFile(dir) // 清除解压的临时文件
+			cmn.RemoveAllFile(tmpdir) // 清除解压的临时文件
+			if isNetFile {
+				cmn.RemoveAllFile(downloadTmpDir)
+			}
 		}()
 
-		cmn.Unzip(fileSogMeta, dir)
-		fileSogMeta = filepath.Join(dir, "meta.json")
+		cmn.Unzip(fileSogMeta, tmpdir)
+		fileSogMeta = filepath.Join(tmpdir, "meta.json")
 	}
 
 	strMeta, err := cmn.ReadFileString(fileSogMeta)

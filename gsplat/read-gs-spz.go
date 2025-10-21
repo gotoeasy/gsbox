@@ -4,14 +4,31 @@ import (
 	"errors"
 	"gsbox/cmn"
 	"io"
+	"log"
 	"os"
+	"path/filepath"
 )
 
 func ReadSpz(spzFile string, readHeadOnly bool) (*SpzHeader, []*SplatData) {
+	isNetFile := cmn.IsNetFile(spzFile)
+	if isNetFile {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(spzFile))
+		log.Println("[Info]", "Download start,", spzFile)
+		cmn.HttpDownload(spzFile, downloadFile, nil)
+		log.Println("[Info]", "Download finish")
+		spzFile = downloadFile
+	}
 
 	file, err := os.Open(spzFile)
 	cmn.ExitOnConditionError(err != nil, errors.New("[SPZ ERROR] File open failed"))
-	defer file.Close()
+	defer func() {
+		file.Close()
+		if isNetFile {
+			cmn.RemoveAllFile(cmn.Dir(spzFile))
+		}
+	}()
 
 	gzipDatas, err := io.ReadAll(file)
 	cmn.ExitOnConditionError(err != nil, errors.New("[SPZ ERROR] File read failed"))

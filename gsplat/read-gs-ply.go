@@ -7,6 +7,7 @@ import (
 	"gsbox/cmn"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 const SH_C0 float64 = 0.28209479177387814
@@ -19,9 +20,25 @@ func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 }
 
 func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
+	isNetFile := cmn.IsNetFile(plyFile)
+	if isNetFile {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(plyFile))
+		log.Println("[Info]", "Download start,", plyFile)
+		cmn.HttpDownload(plyFile, downloadFile, nil)
+		log.Println("[Info]", "Download finish")
+		plyFile = downloadFile
+	}
+
 	file, err := os.Open(plyFile)
 	cmn.ExitOnError(err)
-	defer file.Close()
+	defer func() {
+		file.Close()
+		if isNetFile {
+			cmn.RemoveAllFile(cmn.Dir(plyFile))
+		}
+	}()
 
 	header, err := getPlyHeader(file, 2048)
 	cmn.ExitOnError(err)

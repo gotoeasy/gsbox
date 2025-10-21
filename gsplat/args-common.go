@@ -26,7 +26,7 @@ func GetAndCheckInputFiles() []string {
 func GetAndCheckInputFile() string {
 	input := Args.GetArgIgnorecase("-i", "--input")
 	cmn.ExitOnConditionError(input == "", errors.New(`please specify the input file`))
-	if !cmn.Startwiths(input, "http://") && !cmn.Startwiths(input, "https://") {
+	if !cmn.IsNetFile(input) {
 		cmn.ExitOnConditionError(!cmn.IsExistFile(input), errors.New("file not found: "+input))
 	}
 	return input

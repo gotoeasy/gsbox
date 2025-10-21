@@ -3,11 +3,23 @@ package gsplat
 import (
 	"gsbox/cmn"
 	"log"
+	"path/filepath"
 )
 
 var inputSpxHeader *SpxHeader
 
 func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
+	isNetFile := cmn.IsNetFile(spxFile)
+	if isNetFile {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(spxFile))
+		log.Println("[Info]", "Download start,", spxFile)
+		cmn.HttpDownload(spxFile, downloadFile, nil)
+		log.Println("[Info]", "Download finish")
+		spxFile = downloadFile
+		defer cmn.RemoveAllFile(tmpdir)
+	}
 
 	header := ParseSpxHeader(spxFile)
 	inputSpxHeader = header

@@ -4,14 +4,31 @@ import (
 	"bytes"
 	"encoding/binary"
 	"gsbox/cmn"
+	"log"
 	"os"
+	"path/filepath"
 )
 
 func ReadSplat(splatFile string) []*SplatData {
+	isNetFile := cmn.IsNetFile(splatFile)
+	if isNetFile {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		downloadFile := filepath.Join(tmpdir, cmn.FileName(splatFile))
+		log.Println("[Info]", "Download start,", splatFile)
+		cmn.HttpDownload(splatFile, downloadFile, nil)
+		log.Println("[Info]", "Download finish")
+		splatFile = downloadFile
+	}
 
 	file, err := os.Open(splatFile)
 	cmn.ExitOnError(err)
-	defer file.Close()
+	defer func() {
+		file.Close()
+		if isNetFile {
+			cmn.RemoveAllFile(cmn.Dir(splatFile))
+		}
+	}()
 
 	fileInfo, err := file.Stat()
 	cmn.ExitOnError(err)
