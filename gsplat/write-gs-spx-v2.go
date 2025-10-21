@@ -28,24 +28,20 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
-	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT19)
-	if bf != BF_SPLAT20 && bf != BF_SPLAT19_WEBP && bf != BF_SPLAT16 {
-		bf = BF_SPLAT19 // 默认splat19格式
+	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT10019)
+	if bf != BF_SPLAT20 && bf != BF_SPLAT19_WEBP && bf != BF_SPLAT19 && bf != BF_SPLAT10190_WEBP {
+		bf = BF_SPLAT10019 // 默认格式
 	}
-	if bf == BF_SPLAT16 {
-		log.Println("[Warn] (Parameter) block format:", bf, blockFormatDesc(bf))
-	} else {
-		log.Println("[Info] (Parameter) block format:", bf, blockFormatDesc(bf))
-	}
+	log.Println("[Info] (Parameter) block format:", bf, blockFormatDesc(bf))
 	log.Println("[Info] (Parameter) block size:", blockSize)
 
-	var compressType uint8 = CT_GZIP // 默认gzip
+	var compressType uint8 = CT_XZ // 默认xz
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
-	if cmn.EqualsIngoreCase(ct, "xz") || ct == "1" {
-		compressType = CT_XZ
-		log.Println("[Info] block compress type: xz")
-	} else {
+	if cmn.EqualsIngoreCase(ct, "gzip") || ct == "0" {
+		compressType = CT_GZIP
 		log.Println("[Info] block compress type: gzip")
+	} else {
+		log.Println("[Info] block compress type: xz")
 	}
 
 	var blockDatasList [][]*SplatData
@@ -69,13 +65,20 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 				// 数据较少时，切换使用 splat19 格式
 				writeSpxBlockSplat19(writer, blockDatas, blockSplatCount, compressType)
 			}
-		case BF_SPLAT16:
-			// TODO 需要空间分块等方式减少误差，仅测试实验用
-			// splat16 格式，压缩率较好，有些情况误差较大，但若肉眼可接受可能换取更高的压缩率，供手动选用
-			writeSpxBlockSplat16(writer, blockDatas, blockSplatCount, compressType)
-		default:
-			// splat19 格式，压缩率等综合表现比较优秀，默认使用
+		case BF_SPLAT10190_WEBP:
+			if blockSplatCount >= MinWebpBlockSize {
+				//  数据够多时才一定使用 webp 编码格式
+				writeSpxBlockSplat10190Webp(writer, blockDatas, blockSplatCount)
+			} else {
+				// 数据较少时，切换使用 10019 格式
+				writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType)
+			}
+		case BF_SPLAT19:
+			// splat19 格式，压缩率等综合表现好
 			writeSpxBlockSplat19(writer, blockDatas, blockSplatCount, compressType)
+		default:
+			// splat10019 格式，压缩率等综合表现比较优秀，默认使用
+			writeSpxBlockSplat10019(writer, blockDatas, blockSplatCount, compressType)
 		}
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
@@ -282,6 +285,94 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 	}
 }
 
+func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
+	SortBlockDatas4Compress(blockDatas)
+	for n := range blockSplatCount {
+		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
+	}
+
+	bts := make([]byte, 0)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
+	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT10019)...)           // 开放的块数据格式 60019
+
+	var bs0 []byte
+	var bs1 []byte
+	var bs2 []byte
+	for n := range blockSplatCount {
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, 3))
+		bs0 = append(bs0, b3[0])
+		bs1 = append(bs1, b3[1])
+		bs2 = append(bs2, b3[2])
+	}
+	for n := range blockSplatCount {
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, 3))
+		bs0 = append(bs0, b3[0])
+		bs1 = append(bs1, b3[1])
+		bs2 = append(bs2, b3[2])
+	}
+	for n := range blockSplatCount {
+		b3 := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, 3))
+		bs0 = append(bs0, b3[0])
+		bs1 = append(bs1, b3[1])
+		bs2 = append(bs2, b3[2])
+	}
+	bts = append(bts, bs0...)
+	bts = append(bts, bs1...)
+	bts = append(bts, bs2...)
+
+	for n := range blockSplatCount {
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleX))
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleY))
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleZ))
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].ColorR)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].ColorG)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].ColorB)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].ColorA)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].RotationX)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].RotationY)
+	}
+	for n := range blockSplatCount {
+		bts = append(bts, blockDatas[n].RotationZ)
+	}
+
+	if blockSplatCount >= MinCompressBlockSize {
+		var err error
+		if compressType == CT_XZ {
+			bts, err = cmn.CompressXZ(bts)
+		} else {
+			bts, err = cmn.CompressGzip(bts)
+		}
+		cmn.ExitOnError(err)
+		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
+		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
+		cmn.ExitOnError(err)
+		_, err = writer.Write(bts)
+		cmn.ExitOnError(err)
+	} else {
+		blockByteLength := int32(len(bts))
+		_, err := writer.Write(cmn.Int32ToBytes(blockByteLength))
+		cmn.ExitOnError(err)
+		_, err = writer.Write(bts)
+		cmn.ExitOnError(err)
+	}
+}
+
 func writeSpxBlockSplat19Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
@@ -346,9 +437,7 @@ func writeSpxBlockSplat19Webp(writer *bufio.Writer, blockDatas []*SplatData, blo
 	cmn.ExitOnError(err)
 }
 
-// TODO 需要空间分块等方式减少误差，仅测试实验用
-func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
-	mm := ComputeXyzMinMax(blockDatas)
+func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
@@ -356,97 +445,74 @@ func writeSpxBlockSplat16(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
-	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT16)...)              // 开放的块数据格式 16
-	bts = append(bts, cmn.Float32ToBytes(mm.MinX)...)
-	bts = append(bts, cmn.Float32ToBytes(mm.MaxX)...)
-	bts = append(bts, cmn.Float32ToBytes(mm.MinY)...)
-	bts = append(bts, cmn.Float32ToBytes(mm.MaxY)...)
-	bts = append(bts, cmn.Float32ToBytes(mm.MinZ)...)
-	bts = append(bts, cmn.Float32ToBytes(mm.MaxZ)...)
+	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT10190_WEBP)...)      // 开放的块数据格式 60190
 
-	var bs0 []byte
-	var bs1 []byte
+	bsTmp := make([]byte, 0)
+	bs1 := make([]byte, 0)
+	bs2 := make([]byte, 0)
+	bs3 := make([]byte, 0)
 	for n := range blockSplatCount {
-		b2 := cmn.EncodeSpxPositionUint16(blockDatas[n].PositionX, mm.MinX, mm.MaxX)
-		bs0 = append(bs0, b2[0])
-		bs1 = append(bs1, b2[1])
+		b3x := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionX, 3))
+		b3y := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionY, 3))
+		b3z := cmn.EncodeSpxPositionUint24(cmn.EncodeLog(blockDatas[n].PositionZ, 3))
+		bs1 = append(bs1, b3x[0], b3y[0], b3z[0], 255)
+		bs2 = append(bs2, b3x[1], b3y[1], b3z[1], 255)
+		bs3 = append(bs3, b3x[2], b3y[2], b3z[2], 255)
 	}
-	for n := range blockSplatCount {
-		b2 := cmn.EncodeSpxPositionUint16(blockDatas[n].PositionY, mm.MinY, mm.MaxY)
-		bs0 = append(bs0, b2[0])
-		bs1 = append(bs1, b2[1])
-	}
-	for n := range blockSplatCount {
-		b2 := cmn.EncodeSpxPositionUint16(blockDatas[n].PositionZ, mm.MinZ, mm.MaxZ)
-		bs0 = append(bs0, b2[0])
-		bs1 = append(bs1, b2[1])
-	}
-	bts = append(bts, bs0...)
-	bts = append(bts, bs1...)
+	bsTmp = append(bsTmp, bs1...)
+	bsTmp = append(bsTmp, bs2...)
+	bsTmp = append(bsTmp, bs3...)
+	bsTmp, err := cmn.CompressWebp(bsTmp)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
 
+	bsTmp = make([]byte, 0)
 	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleX))
+		bsTmp = append(bsTmp, cmn.EncodeSpxScale(blockDatas[n].ScaleX), cmn.EncodeSpxScale(blockDatas[n].ScaleY), cmn.EncodeSpxScale(blockDatas[n].ScaleZ), 255)
 	}
-	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleY))
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, cmn.EncodeSpxScale(blockDatas[n].ScaleZ))
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].ColorR)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].ColorG)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].ColorB)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].ColorA)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].RotationX)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].RotationY)
-	}
-	for n := range blockSplatCount {
-		bts = append(bts, blockDatas[n].RotationZ)
-	}
+	bsTmp, err = cmn.CompressWebp(bsTmp)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
 
-	if blockSplatCount >= MinCompressBlockSize {
-		var err error
-		if compressType == CT_XZ {
-			bts, err = cmn.CompressXZ(bts)
-		} else {
-			bts, err = cmn.CompressGzip(bts)
-		}
-		cmn.ExitOnError(err)
-		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
-		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
-		cmn.ExitOnError(err)
-		_, err = writer.Write(bts)
-		cmn.ExitOnError(err)
-	} else {
-		blockByteLength := int32(len(bts))
-		_, err := writer.Write(cmn.Int32ToBytes(blockByteLength))
-		cmn.ExitOnError(err)
-		_, err = writer.Write(bts)
-		cmn.ExitOnError(err)
+	bsTmp = make([]byte, 0)
+	for n := range blockSplatCount {
+		bsTmp = append(bsTmp, blockDatas[n].ColorR, blockDatas[n].ColorG, blockDatas[n].ColorB, blockDatas[n].ColorA)
 	}
+	bsTmp, err = cmn.CompressWebp(bsTmp)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
+
+	bsTmp = make([]byte, 0)
+	for n := range blockSplatCount {
+		bsTmp = append(bsTmp, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ, 255)
+	}
+	bsTmp, err = cmn.CompressWebp(bsTmp)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
+
+	blockByteLength := int32(len(bts))
+	_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
+	cmn.ExitOnError(err)
+	_, err = writer.Write(bts)
+	cmn.ExitOnError(err)
 }
 
 func blockFormatDesc(bf int) string {
 	rs := ""
 	switch bf {
-	case BF_SPLAT16:
-		rs = "[Just For Test]"
 	case BF_SPLAT19:
+		rs = "(splat per 19 bytes)"
+	case BF_SPLAT10019:
 		rs = "(splat per 19 bytes)"
 	case BF_SPLAT20:
 		rs = "(splat per 20 bytes)"
 	case BF_SPLAT19_WEBP:
+		rs = "(splat per 19 bytes, webp encoding)"
+	case BF_SPLAT10190_WEBP:
 		rs = "(splat per 19 bytes, webp encoding)"
 	}
 

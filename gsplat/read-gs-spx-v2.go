@@ -58,36 +58,6 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
-		case BF_SPLAT16:
-			// TODO 需要空间分块等方式减少误差，仅测试实验用
-			// splat16
-			minX := cmn.BytesToFloat32(blockBts[8:12])
-			maxX := cmn.BytesToFloat32(blockBts[12:16])
-			minY := cmn.BytesToFloat32(blockBts[16:20])
-			maxY := cmn.BytesToFloat32(blockBts[20:24])
-			minZ := cmn.BytesToFloat32(blockBts[24:28])
-			maxZ := cmn.BytesToFloat32(blockBts[28:32])
-
-			bts := blockBts[32:] // 除去前32字节（数量，格式，包围盒）
-			for n := range blkSplatCnt {
-				data := &SplatData{}
-				x := cmn.BytesToUint16([]byte{bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n]})
-				y := cmn.BytesToUint16([]byte{bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n]})
-				z := cmn.BytesToUint16([]byte{bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n]})
-
-				data.PositionX = cmn.DecodeSpxPositionUint16(x, minX, maxX)
-				data.PositionY = cmn.DecodeSpxPositionUint16(y, minY, maxY)
-				data.PositionZ = cmn.DecodeSpxPositionUint16(z, minZ, maxZ)
-				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*6+n])
-				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*7+n])
-				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*8+n])
-				data.ColorR = bts[blkSplatCnt*9+n]
-				data.ColorG = bts[blkSplatCnt*10+n]
-				data.ColorB = bts[blkSplatCnt*11+n]
-				data.ColorA = bts[blkSplatCnt*12+n]
-				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(bts[blkSplatCnt*13+n], bts[blkSplatCnt*14+n], bts[blkSplatCnt*15+n])
-				datas = append(datas, data)
-			}
 		case BF_SPLAT19:
 			// splat19
 			bts := blockBts[8:] // 除去前8字节（数量，格式）
@@ -96,6 +66,24 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				data.PositionX = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n])
 				data.PositionY = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n])
 				data.PositionZ = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n])
+				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
+				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
+				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
+				data.ColorR = bts[blkSplatCnt*12+n]
+				data.ColorG = bts[blkSplatCnt*13+n]
+				data.ColorB = bts[blkSplatCnt*14+n]
+				data.ColorA = bts[blkSplatCnt*15+n]
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n])
+				datas = append(datas, data)
+			}
+		case BF_SPLAT10019:
+			// splat10019
+			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			for n := range blkSplatCnt {
+				data := &SplatData{}
+				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), 3)
+				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), 3)
+				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), 3)
 				data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
 				data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
 				data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
@@ -150,6 +138,61 @@ func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 				data.PositionX = cmn.DecodeSpxPositionUint24(x0, x1, x2)
 				data.PositionY = cmn.DecodeSpxPositionUint24(y0, y1, y2)
 				data.PositionZ = cmn.DecodeSpxPositionUint24(z0, z1, z2)
+				data.ScaleX = cmn.DecodeSpxScale(btsScales[n*4+0])
+				data.ScaleY = cmn.DecodeSpxScale(btsScales[n*4+1])
+				data.ScaleZ = cmn.DecodeSpxScale(btsScales[n*4+2])
+				data.ColorR = btsColors[n*4+0]
+				data.ColorG = btsColors[n*4+1]
+				data.ColorB = btsColors[n*4+2]
+				data.ColorA = btsColors[n*4+3]
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(rx, ry, rz)
+
+				datas = append(datas, data)
+			}
+		case BF_SPLAT10190_WEBP:
+			// WEBP10190
+			bts := blockBts[8:] // 除去前8字节（数量，格式）
+			size := cmn.BytesToUint32(bts[:4])
+			webps := bts[4 : size+4]
+			btsPositions, _, _, err := cmn.DecompressWebp(webps)
+			cmn.ExitOnError(err)
+
+			bts = bts[size+4:]
+			size = cmn.BytesToUint32(bts[:4])
+			webps = bts[4 : size+4]
+			btsScales, _, _, err := cmn.DecompressWebp(webps)
+			cmn.ExitOnError(err)
+
+			bts = bts[size+4:]
+			size = cmn.BytesToUint32(bts[:4])
+			webps = bts[4 : size+4]
+			btsColors, _, _, err := cmn.DecompressWebp(webps)
+			cmn.ExitOnError(err)
+
+			bts = bts[size+4:]
+			size = cmn.BytesToUint32(bts[:4])
+			webps = bts[4 : size+4]
+			btsRotations, _, _, err := cmn.DecompressWebp(webps)
+			cmn.ExitOnError(err)
+
+			for n := range blkSplatCnt {
+				x0 := btsPositions[n*4+0]
+				y0 := btsPositions[n*4+1]
+				z0 := btsPositions[n*4+2]
+				x1 := btsPositions[blkSplatCnt*4+n*4+0]
+				y1 := btsPositions[blkSplatCnt*4+n*4+1]
+				z1 := btsPositions[blkSplatCnt*4+n*4+2]
+				x2 := btsPositions[blkSplatCnt*8+n*4+0]
+				y2 := btsPositions[blkSplatCnt*8+n*4+1]
+				z2 := btsPositions[blkSplatCnt*8+n*4+2]
+				rx := btsRotations[n*4+0]
+				ry := btsRotations[n*4+1]
+				rz := btsRotations[n*4+2]
+
+				data := &SplatData{}
+				data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), 3)
+				data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(y0, y1, y2), 3)
+				data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(z0, z1, z2), 3)
 				data.ScaleX = cmn.DecodeSpxScale(btsScales[n*4+0])
 				data.ScaleY = cmn.DecodeSpxScale(btsScales[n*4+1])
 				data.ScaleZ = cmn.DecodeSpxScale(btsScales[n*4+2])
