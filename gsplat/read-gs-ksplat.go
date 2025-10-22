@@ -77,7 +77,7 @@ type CompressionConfig struct {
 	scaleQuantRange    uint32
 }
 
-func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHeader, []*SplatData) {
+func ReadKsplat(ksplatFile string) (*SectionHeader, *KsplatHeader, []*SplatData) {
 	isNetFile := cmn.IsNetFile(ksplatFile)
 	if isNetFile {
 		tmpdir, err := cmn.CreateTempDir()
@@ -201,11 +201,6 @@ func ReadKsplat(ksplatFile string, readHeadOnly bool) (*SectionHeader, *KsplatHe
 		if mainHeader.ShDegree < h.ShDegree {
 			mainHeader.ShDegree = h.ShDegree
 		}
-	}
-
-	// 仅需读取概要信息时，直接返回头部信息跳过内容读取
-	if readHeadOnly {
-		return secHeaders[0], mainHeader, nil
 	}
 
 	shDims := []int{0, 9, 24, 15}

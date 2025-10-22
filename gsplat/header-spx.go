@@ -8,9 +8,6 @@ import (
 	"strings"
 )
 
-/** 创建者ID */
-const ID1202056903 uint32 = 1202056903
-
 /** spx文件头长度 */
 const HeaderSizeSpx = 128
 

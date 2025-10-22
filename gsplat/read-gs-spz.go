@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func ReadSpz(spzFile string, readHeadOnly bool) (*SpzHeader, []*SplatData) {
+func ReadSpz(spzFile string) (*SpzHeader, []*SplatData) {
 	isNetFile := cmn.IsNetFile(spzFile)
 	if isNetFile {
 		tmpdir, err := cmn.CreateTempDir()
@@ -40,10 +40,6 @@ func ReadSpz(spzFile string, readHeadOnly bool) (*SpzHeader, []*SplatData) {
 	cmn.ExitOnConditionError(len(ungzipDatas) < HeaderSizeSpz, errors.New("[SPZ ERROR] Invalid spz header"))
 
 	header := ParseSpzHeader(ungzipDatas[0:HeaderSizeSpz])
-	if readHeadOnly {
-		return header, nil
-	}
-
 	datas := readSpzDatas(ungzipDatas[HeaderSizeSpz:], header)
 	return header, datas
 }

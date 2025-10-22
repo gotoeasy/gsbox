@@ -11,23 +11,25 @@ import (
 const SPLAT_DATA_SIZE = 3*4 + 3*4 + 4 + 4
 
 type SplatData struct {
-	PositionX float32
-	PositionY float32
-	PositionZ float32
-	ScaleX    float32
-	ScaleY    float32
-	ScaleZ    float32
-	ColorR    uint8
-	ColorG    uint8
-	ColorB    uint8
-	ColorA    uint8
-	RotationW uint8
-	RotationX uint8
-	RotationY uint8
-	RotationZ uint8
-	SH1       []uint8 // sh1 only
-	SH2       []uint8 // sh1 + sh2
-	SH3       []uint8 // sh3 only
+	PositionX   float32
+	PositionY   float32
+	PositionZ   float32
+	ScaleX      float32
+	ScaleY      float32
+	ScaleZ      float32
+	ColorR      uint8
+	ColorG      uint8
+	ColorB      uint8
+	ColorA      uint8
+	RotationW   uint8
+	RotationX   uint8
+	RotationY   uint8
+	RotationZ   uint8
+	SH1         []uint8 // sh1 only
+	SH2         []uint8 // sh1 + sh2
+	SH3         []uint8 // sh3 only
+	IsWaterMark bool
+	FlagValue   uint16
 }
 
 func TransformDatas(datas []*SplatData) []*SplatData {
