@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
+func ReadSpxOpenV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 	file, err := os.Open(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()

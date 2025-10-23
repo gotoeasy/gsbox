@@ -30,7 +30,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 	}
 
 	if header.Version == 1 {
-		return ReadSpxV1(spxFile, header)
+		return ReadSpxOpenV1(spxFile, header)
 	}
 	return ReadSpxV2(spxFile, header)
 }

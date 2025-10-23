@@ -18,7 +18,7 @@ func WriteSpx(spxFile string, rows []*SplatData) {
 
 	if ver == "1" {
 		log.Println("[Info] output spx version: 1")
-		WriteSpxV1(spxFile, rows, comment, shDegree)
+		WriteSpxOpenV1(spxFile, rows, comment, shDegree)
 	} else {
 		log.Println("[Info] output spx version: 2")
 		WriteSpxV2(spxFile, rows, comment, shDegree)
