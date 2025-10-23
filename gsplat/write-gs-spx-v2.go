@@ -29,7 +29,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	cmn.ExitOnError(err)
 
 	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT10019)
-	if bf != BF_SPLAT20 && bf != BF_SPLAT19_WEBP && bf != BF_SPLAT19 && bf != BF_SPLAT10190_WEBP {
+	if bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT19 && bf != BF_SPLAT10190_WEBP {
 		bf = BF_SPLAT10019 // 默认格式
 	}
 	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
@@ -62,7 +62,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 		case BF_SPLAT20:
 			// splat20 格式，优势不够突出，spx v1版本使用
 			writeSpxBlockSplat20(writer, blockDatas, blockSplatCount, compressType)
-		case BF_SPLAT19_WEBP:
+		case BF_SPLAT190_WEBP:
 			if blockSplatCount >= MinWebpBlockSize {
 				//  数据够多时才一定使用 webp 编码格式
 				writeSpxBlockSplat19Webp(writer, blockDatas, blockSplatCount)
@@ -88,7 +88,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 		blockDatasList = append(blockDatasList, blockDatas)
 	}
 
-	if shDegree > 0 && bf == BF_SPLAT19_WEBP {
+	if shDegree > 0 && bf == BF_SPLAT190_WEBP {
 		for i := range blockDatasList {
 			writeSpxBlockSH3Webp(writer, blockDatasList[i], shDegree)
 		}
@@ -387,7 +387,7 @@ func writeSpxBlockSplat19Webp(writer *bufio.Writer, blockDatas []*SplatData, blo
 
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
-	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT19_WEBP)...)         // 开放的块数据格式 190
+	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT190_WEBP)...)        // 开放的块数据格式 190
 
 	bsTmp := make([]byte, 0)
 	bs1 := make([]byte, 0)

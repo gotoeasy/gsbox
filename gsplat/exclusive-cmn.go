@@ -68,7 +68,7 @@ func BlockFormatDesc(bf int) string {
 		rs = "(splat per 19 bytes)"
 	case BF_SPLAT20:
 		rs = "(splat per 20 bytes)"
-	case BF_SPLAT19_WEBP:
+	case BF_SPLAT190_WEBP:
 		rs = "(splat per 19 bytes, webp encoding)"
 	case BF_SPLAT10190_WEBP:
 		rs = "(splat per 19 bytes, webp encoding)"
