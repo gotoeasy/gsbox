@@ -42,3 +42,7 @@ func GetSpxOutputHeaderHash(bts []byte) uint32 {
 func CheckSpxHeaderHash(bts []byte, hash uint32) bool {
 	return cmn.HashBytes(bts) == hash
 }
+
+func GetLodFlag() uint8 {
+	return 0
+}

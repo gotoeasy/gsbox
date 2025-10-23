@@ -116,8 +116,8 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 }
 
 func genSpxHeaderV2(datas []*SplatData, comment string, shDegree uint8) *SpxHeader {
-	var f1 uint8 = 0 // 是否Y轴倒立模型
-	var f8 uint8 = 0 // 是否大场景
+	var f1 uint8 = 0            // 是否Y轴倒立模型
+	var f8 uint8 = GetLodFlag() // 是否大场景
 
 	if !Args.HasCmd("join") && inputSpxHeader != nil && inputSpxHeader.Version > 1 {
 		if inputSpxHeader.IsInverted() {
