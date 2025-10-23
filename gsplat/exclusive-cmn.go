@@ -46,3 +46,7 @@ func CheckSpxHeaderHash(bts []byte, hash uint32) bool {
 func GetLodFlag() uint8 {
 	return 0
 }
+
+func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+	WriteSpxOpenV2(spxFile, rows, comment, shDegree)
+}
