@@ -87,7 +87,7 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree uint8, flag1 uint
 	}
 	header.Comment = comment // 注释
 	if header.Comment == "" {
-		header.Comment = "created by gsbox " + cmn.VER + " https://github.com/gotoeasy/gsbox"
+		header.Comment = DefaultSpxComment()
 	}
 
 	if len(datas) > 0 {

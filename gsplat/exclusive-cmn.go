@@ -50,3 +50,7 @@ func GetLodFlag() uint8 {
 func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	WriteSpxOpenV2(spxFile, rows, comment, shDegree)
 }
+
+func DefaultSpxComment() string {
+	return "created by gsbox " + cmn.VER + " https://github.com/gotoeasy/gsbox"
+}
