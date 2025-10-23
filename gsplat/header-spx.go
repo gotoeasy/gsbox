@@ -108,7 +108,7 @@ func (h *SpxHeader) ToBytes() []byte {
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve1)...)
 	bts = append(bts, cmn.Uint32ToBytes(h.Reserve2)...)
 	bts = append(bts, cmn.StringToBytes(cmn.Left(cmn.Trim(h.Comment)+strings.Repeat(" ", 60), 60))...) // 右边补足空格取60个accsii字符
-	bts = append(bts, cmn.Uint32ToBytes(cmn.HashBytes(bts[0:124]))...)
+	bts = append(bts, cmn.Uint32ToBytes(GetSpxOutputHeaderHash(bts[0:124]))...)
 	return bts
 }
 
@@ -160,7 +160,7 @@ func readSpxHeader(bts []byte) *SpxHeader {
 		Reserve1:     cmn.BytesToUint32(bts[56:60]),
 		Reserve2:     cmn.BytesToUint32(bts[60:64]),
 		Hash:         cmn.BytesToUint32(bts[124:128]),
-		checkHash:    cmn.HashBytes(bts[0:124]) == cmn.BytesToUint32(bts[124:128]),
+		checkHash:    CheckSpxHeaderHash(bts[0:124], cmn.BytesToUint32(bts[124:128])),
 	}
 	if header.ShDegree != 1 && header.ShDegree != 2 && header.ShDegree != 3 {
 		header.ShDegree = 0

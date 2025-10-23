@@ -528,8 +528,11 @@ func DecodeFloat16(encoded uint16) float32 {
 /*
 *【注意】要用于专有校验时，应修改初始值或添加自定义的前缀后缀参与计算，且不公开
  */
-func HashBytes(bts []byte) uint32 {
+func HashBytes(bts []byte, vals ...uint32) uint32 {
 	var rs uint32 = 53653
+	if len(vals) > 0 && vals[0] > 0 {
+		rs = vals[0]
+	}
 	for i := range bts {
 		rs = (rs * 33) ^ uint32(bts[i])
 	}
