@@ -51,6 +51,28 @@ func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint
 	WriteSpxOpenV2(spxFile, rows, comment, shDegree)
 }
 
+func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
+	return ReadSpxOpenV2(spxFile, header)
+}
+
 func DefaultSpxComment() string {
 	return "created by gsbox " + cmn.VER + " https://github.com/gotoeasy/gsbox"
+}
+
+func BlockFormatDesc(bf int) string {
+	rs := ""
+	switch bf {
+	case BF_SPLAT19:
+		rs = "(splat per 19 bytes)"
+	case BF_SPLAT10019:
+		rs = "(splat per 19 bytes)"
+	case BF_SPLAT20:
+		rs = "(splat per 20 bytes)"
+	case BF_SPLAT19_WEBP:
+		rs = "(splat per 19 bytes, webp encoding)"
+	case BF_SPLAT10190_WEBP:
+		rs = "(splat per 19 bytes, webp encoding)"
+	}
+
+	return rs
 }

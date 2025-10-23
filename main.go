@@ -11,8 +11,7 @@ import (
 )
 
 func main() {
-	args := cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
-	gsplat.Args = args
+	args := gsplat.InitArgs()
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {

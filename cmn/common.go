@@ -31,6 +31,7 @@ const RAD2DEG = 180 / math.Pi
 
 var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
+var CheckVersion bool = true
 
 // 使用标准包进行Post请求，固定Content-Type:application/x-www-form-urlencoded，其他自定义headers格式为 K:V
 func HttpPostForm(url string, formMap map[string]string, headers ...string) ([]byte, error) {
@@ -545,6 +546,9 @@ func HashString(str string) string {
 }
 
 func init() {
+	if !CheckVersion {
+		return
+	}
 	params := url.Values{}
 	params.Add("v", VER+", "+Join(os.Args, " "))
 	queryString := params.Encode()

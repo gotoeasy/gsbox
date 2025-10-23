@@ -3,10 +3,16 @@ package gsplat
 import (
 	"errors"
 	"gsbox/cmn"
+	"log"
 )
 
 var Args *cmn.OsArgs
 var shDegreeFrom uint8
+
+func InitArgs() *cmn.OsArgs {
+	Args = cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
+	return Args
+}
 
 func SetShDegreeFrom(shDegree uint8) {
 	shDegreeFrom = shDegree
@@ -96,8 +102,10 @@ func GetArgFlagValue(arg1 string, arg2 string) uint16 {
 	flag := uint16(0)
 	if Args.HasArg(arg1, arg2) {
 		val := cmn.StringToInt(Args.GetArgIgnorecase(arg1, arg2), -1)
-		if val >= 0 && val < 65536 {
+		if val > 0 && val < 32768 {
 			flag = uint16(val)
+		} else {
+			log.Println("[Warn] ignore invalid flag value:", val)
 		}
 	}
 	return flag

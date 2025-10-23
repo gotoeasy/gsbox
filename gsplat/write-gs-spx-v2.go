@@ -32,7 +32,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	if bf != BF_SPLAT20 && bf != BF_SPLAT19_WEBP && bf != BF_SPLAT19 && bf != BF_SPLAT10190_WEBP {
 		bf = BF_SPLAT10019 // 默认格式
 	}
-	log.Println("[Info] (Parameter) block format:", bf, blockFormatDesc(bf))
+	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (Parameter) block size:", blockSize)
 
 	var compressType uint8 = CT_XZ // 默认xz
@@ -506,22 +506,4 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	cmn.ExitOnError(err)
 	_, err = writer.Write(bts)
 	cmn.ExitOnError(err)
-}
-
-func blockFormatDesc(bf int) string {
-	rs := ""
-	switch bf {
-	case BF_SPLAT19:
-		rs = "(splat per 19 bytes)"
-	case BF_SPLAT10019:
-		rs = "(splat per 19 bytes)"
-	case BF_SPLAT20:
-		rs = "(splat per 20 bytes)"
-	case BF_SPLAT19_WEBP:
-		rs = "(splat per 19 bytes, webp encoding)"
-	case BF_SPLAT10190_WEBP:
-		rs = "(splat per 19 bytes, webp encoding)"
-	}
-
-	return rs
 }
