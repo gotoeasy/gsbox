@@ -9,10 +9,10 @@ const ExclusiveIdPrd uint32 = 3141592653 // 专属ID，专业版
 
 // 数据处理
 func ProcessDatas(datas []*SplatData) []*SplatData {
-	TransformDatas(datas)
-	rsDatas := FilterDatas(datas)
-	Sort(rsDatas)
-	return rsDatas
+	datas = FilterDatas(datas)
+	datas = TransformDatas(datas)
+	Sort(datas)
+	return datas
 }
 
 func GetOutputCreaterId() uint32 {
@@ -28,6 +28,10 @@ func IsOpenCreaterId(id uint32) bool {
 }
 
 func IsOpenExclusiveId(id uint32) bool {
+	return id == ExclusiveIdOpen
+}
+
+func CanParseExclusiveId(id uint32) bool {
 	return id == ExclusiveIdOpen
 }
 

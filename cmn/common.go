@@ -846,3 +846,11 @@ func DecodeLog(encoded float32, times ...int) float32 {
 func IsNetFile(fileName string) bool {
 	return Startwiths(fileName, "https://") || Startwiths(fileName, "http://")
 }
+
+func RandomUint8() uint8 {
+	return uint8(RandomInt(1, 255))
+}
+
+func RandomInt(min, max int) int {
+	return rand.Intn(max-min) + min
+}
