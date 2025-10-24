@@ -216,7 +216,12 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH1)...)                  // 开放的块数据格式 1:sh1
 
+	splatCnt := 0
 	for n := range blockSplatCount {
+		if blockDatas[n].IsWaterMark {
+			continue
+		}
+		splatCnt++
 		if len(blockDatas[n].SH1) > 0 {
 			for i := range 9 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
@@ -231,8 +236,17 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			}
 		}
 	}
+	if splatCnt == 0 {
+		return
+	} else if splatCnt < blockSplatCount {
+		cntBytes := cmn.Uint32ToBytes(uint32(splatCnt))
+		bts[0] = cntBytes[0]
+		bts[1] = cntBytes[1]
+		bts[2] = cntBytes[2]
+		bts[3] = cntBytes[3]
+	}
 
-	if blockSplatCount >= MinCompressBlockSize {
+	if splatCnt >= MinCompressBlockSize {
 		var err error
 		switch compressType {
 		case CT_XZ:
@@ -261,7 +275,12 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH2)...)                  // 开放的块数据格式 2:sh2
 
+	splatCnt := 0
 	for n := range blockSplatCount {
+		if blockDatas[n].IsWaterMark {
+			continue
+		}
+		splatCnt++
 		if len(blockDatas[n].SH1) > 0 {
 			for i := range 9 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
@@ -279,8 +298,17 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			}
 		}
 	}
+	if splatCnt == 0 {
+		return
+	} else if splatCnt < blockSplatCount {
+		cntBytes := cmn.Uint32ToBytes(uint32(splatCnt))
+		bts[0] = cntBytes[0]
+		bts[1] = cntBytes[1]
+		bts[2] = cntBytes[2]
+		bts[3] = cntBytes[3]
+	}
 
-	if blockSplatCount >= MinCompressBlockSize {
+	if splatCnt >= MinCompressBlockSize {
 		var err error
 		switch compressType {
 		case CT_XZ:
@@ -309,7 +337,12 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH3)...)                  // 开放的块数据格式 3:sh3
 
+	splatCnt := 0
 	for n := range blockSplatCount {
+		if blockDatas[n].IsWaterMark {
+			continue
+		}
+		splatCnt++
 		if len(blockDatas[n].SH3) > 0 {
 			for i := range 21 {
 				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH3[i]))
@@ -320,8 +353,17 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			}
 		}
 	}
+	if splatCnt == 0 {
+		return
+	} else if splatCnt < blockSplatCount {
+		cntBytes := cmn.Uint32ToBytes(uint32(splatCnt))
+		bts[0] = cntBytes[0]
+		bts[1] = cntBytes[1]
+		bts[2] = cntBytes[2]
+		bts[3] = cntBytes[3]
+	}
 
-	if blockSplatCount >= MinCompressBlockSize {
+	if splatCnt >= MinCompressBlockSize {
 		var err error
 		switch compressType {
 		case CT_XZ:
@@ -350,9 +392,14 @@ func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegre
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH3_WEBP)...)             // 开放的块数据格式 4:球谐系数3级（共15个）
 
+	splatCnt := 0
 	color0 := cmn.EncodeSplatSH(0.0)
 	shRgba := make([]byte, 0)
 	for n := range blockSplatCount {
+		if blockDatas[n].IsWaterMark {
+			continue
+		}
+		splatCnt++
 		if len(blockDatas[n].SH1) > 0 {
 			// 只有1级数据，输出1、2、3级别都是一样的结果
 			for i := range 3 {
@@ -432,6 +479,15 @@ func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegre
 				shRgba = append(shRgba, color0, color0, color0, 255)
 			}
 		}
+	}
+	if splatCnt == 0 {
+		return
+	} else if splatCnt < blockSplatCount {
+		cntBytes := cmn.Uint32ToBytes(uint32(splatCnt))
+		bts[0] = cntBytes[0]
+		bts[1] = cntBytes[1]
+		bts[2] = cntBytes[2]
+		bts[3] = cntBytes[3]
 	}
 
 	webpBts, err := cmn.CompressWebp(shRgba)
