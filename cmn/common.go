@@ -546,6 +546,10 @@ func HashString(str string) string {
 }
 
 func init() {
+	go checkLastVersion()
+}
+
+func checkLastVersion() {
 	if !CheckVersion {
 		return
 	}
