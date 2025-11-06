@@ -7,14 +7,17 @@ import (
 	"sort"
 )
 
-func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, labels []int32) {
+func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
 	n := len(nSh45)
+	paletteSize := int(math.Min(64, math.Pow(2, math.Floor(math.Log2(float64(n)/1024.0)))) * 1024)
+	const maxIters = 10 // 固定10次迭代
+
 	labels = make([]int32, n)
 
 	// 1. 随机选 k 个中心
-	f32Centroids := make([][]float32, k)
+	f32Centroids := make([][]float32, paletteSize)
 	used := make([]bool, n)
-	for i := 0; i < k; {
+	for i := 0; i < paletteSize; {
 		idx := rand.Intn(n)
 		if !used[idx] {
 			used[idx] = true
@@ -24,7 +27,7 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 		}
 	}
 
-	for iter := range iters {
+	for iter := range maxIters {
 		log.Println("iters ", iter+1)
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
@@ -35,9 +38,9 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 		}
 
 		// 4. 累加新中心
-		newCents := make([][]float32, k)
-		counts := make([]int32, k)
-		for i := range k {
+		newCents := make([][]float32, paletteSize)
+		counts := make([]int32, paletteSize)
+		for i := range paletteSize {
 			newCents[i] = make([]float32, 45)
 		}
 		for i := range n {
@@ -48,7 +51,7 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 			counts[c]++
 		}
 		// 空簇重投
-		for c := range k {
+		for c := range paletteSize {
 			if counts[c] == 0 {
 				copy(newCents[c], nSh45[rand.Intn(n)])
 			} else {
@@ -83,7 +86,7 @@ type kdTree struct {
 func buildKDTree(cents [][]float32) *kdTree {
 	k := int32(len(cents))
 	idxs := make([]int32, k)
-	for i := int32(0); i < k; i++ {
+	for i := range k {
 		idxs[i] = i
 	}
 	var build func([]int32, int32) *kdNode
