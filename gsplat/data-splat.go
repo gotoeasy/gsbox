@@ -431,3 +431,51 @@ func CompressionInfo(filePath string, num int, inFileSize ...int64) string {
 	shDegree := GetArgShDegree()
 	return fmt.Sprintf("splat count: %v, %.1fM, %.2fx compression with sh%v (%.2f%% smaller than 3dgs ply)", num, fileSizeM, compressionRatio, shDegree, sizeReduction)
 }
+
+func GetSh45(data *SplatData) []uint8 {
+	var sh45 []uint8
+	if len(data.SH1) > 0 {
+		for i := range 9 {
+			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH1[i]))
+		}
+		for range 15 {
+			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
+		}
+	} else if len(data.SH3) > 0 {
+		for i := range 24 {
+			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH2[i]))
+		}
+		for i := range 21 {
+			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH3[i]))
+		}
+	} else if len(data.SH2) > 0 {
+		for i := range 24 {
+			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH2[i]))
+		}
+		for range 21 {
+			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
+		}
+	} else {
+		for range 45 {
+			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
+		}
+	}
+	return sh45
+}
+
+func GetSh45Float32(data *SplatData) []float32 {
+	shs := GetSh45(data)
+	var rs []float32
+	for i := range 45 {
+		rs = append(rs, cmn.DecodeSplatSH(shs[i]))
+	}
+	return rs
+}
+
+func ToSh45(shs []float32) []uint8 {
+	sh45 := make([]uint8, 45)
+	for i := range 45 {
+		sh45[i] = cmn.EncodeSplatSH(float64(shs[i]))
+	}
+	return sh45
+}
