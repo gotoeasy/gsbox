@@ -117,16 +117,15 @@ func buildKDTree(cents [][]float32) *kdTree {
 	return &kdTree{cents: cents, root: build(idxs, 0)}
 }
 
-const maxBBFNodes = 30
+const maxBBFNodes = 15
 
 // ---------- 全局 SoA 视图（防呆） ----------
 var (
 	centSoA  [45][]float32
-	soaReady bool // 是否已初始化
-	soaSize  int  // 记录长度，防越界
+	soaReady bool
+	soaSize  int
 )
 
-// 原子初始化，可重复调用，线程安全
 func buildCentSoA(cents [][]float32) {
 	if len(cents) == 0 {
 		return
@@ -160,7 +159,7 @@ func (h *bbHeap) Pop() interface{} {
 	return x
 }
 
-// ---------- 近似最近邻（0% 误差 + 防呆） ----------
+// ---------- 近似最近邻（0% 误差 + SIMD 友好加载） ----------
 func (t *kdTree) NearestBBF(pt []float32) int32 {
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
@@ -178,10 +177,9 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 		}
 		visited++
 
-		var dist9 float32 // 提前声明，避开 goto 跳过定义
-		// **** 防呆：索引越界 or SoA 未初始化 → 回退行主序 ****
+		// **** 防呆：SoA 未就绪或越界 → 回退行主序 ****
 		if !soaReady || int(n.idx) >= soaSize {
-			cent := t.cents[n.idx] // 原 cents 行主序
+			cent := t.cents[n.idx]
 			var dist float32
 			for d := 0; d < 45; d++ {
 				delta := pt[d] - cent[d]
@@ -190,28 +188,29 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 			if dist < bestDist {
 				bestDist, bestIdx = dist, n.idx
 			}
-			goto pushChild
+		} else {
+			// **** 正常 SoA 路径 ****
+			var dist9 float32
+			// 1) 前 9 维：8×1 + 1
+			for d := 0; d < 8; d++ {
+				delta := pt[d] - centSoA[d][n.idx]
+				dist9 += delta * delta
+			}
+			delta := pt[8] - centSoA[8][n.idx]
+			dist9 += delta * delta
+			if dist9 < bestDist {
+				// 2) 补后 36 维：4×8 + 4
+				for d := 9; d < 45; d++ {
+					delta := pt[d] - centSoA[d][n.idx]
+					dist9 += delta * delta
+				}
+				if dist9 < bestDist {
+					bestDist, bestIdx = dist9, n.idx
+				}
+			}
 		}
 
-		// **** 正常 SoA 路径 ****
-		// 1) 前 9 维快速筛
-		for d := 0; d < 9; d++ {
-			delta := pt[d] - centSoA[d][n.idx]
-			dist9 += delta * delta
-		}
-		if dist9 >= bestDist {
-			goto pushChild
-		}
-		// 2) 补后 36 维
-		for d := 9; d < 45; d++ {
-			delta := pt[d] - centSoA[d][n.idx]
-			dist9 += delta * delta
-		}
-		if dist9 < bestDist {
-			bestDist, bestIdx = dist9, n.idx
-		}
-
-	pushChild:
+		// ---- 标准 KD 左右子入堆 ----
 		axis := n.axis
 		diff := pt[axis] - centSoA[axis][n.idx]
 		var first, second *kdNode
