@@ -7,10 +7,6 @@ import (
 	"sort"
 )
 
-const dim = 45
-
-// Kmeans45 对 n×45 维数据做 KD-Tree 加速 Lloyd 迭代
-// nSh45 长度必须 > k，且每行 45 元素；返回 k×45 中心矩阵 和 n×1 标签切片
 func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, labels []int32) {
 	n := len(nSh45)
 	labels = make([]int32, n)
@@ -22,7 +18,7 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 		idx := rand.Intn(n)
 		if !used[idx] {
 			used[idx] = true
-			f32Centroids[i] = make([]float32, dim)
+			f32Centroids[i] = make([]float32, 45)
 			copy(f32Centroids[i], nSh45[idx])
 			i++
 		}
@@ -42,11 +38,11 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 		newCents := make([][]float32, k)
 		counts := make([]int32, k)
 		for i := range k {
-			newCents[i] = make([]float32, dim)
+			newCents[i] = make([]float32, 45)
 		}
 		for i := range n {
 			c := labels[i]
-			for d := 0; d < dim; d++ {
+			for d := range 45 {
 				newCents[c][d] += nSh45[i][d]
 			}
 			counts[c]++
@@ -56,7 +52,7 @@ func KmeansSh45(nSh45 [][]float32, k int, iters int) (centroids [][]uint8, label
 			if counts[c] == 0 {
 				copy(newCents[c], nSh45[rand.Intn(n)])
 			} else {
-				for d := 0; d < dim; d++ {
+				for d := range 45 {
 					newCents[c][d] /= float32(counts[c])
 				}
 			}
@@ -95,7 +91,7 @@ func buildKDTree(cents [][]float32) *kdTree {
 		if len(idxs) == 0 {
 			return nil
 		}
-		axis := depth % dim
+		axis := depth % 45
 		sort.Slice(idxs, func(i, j int) bool {
 			return cents[idxs[i]][axis] < cents[idxs[j]][axis]
 		})
@@ -120,14 +116,14 @@ func (t *kdTree) nearest(pt []float32) int32 {
 		}
 		cent := t.cents[n.idx]
 		dist := float32(0)
-		for d := 0; d < dim; d++ {
+		for d := range 45 {
 			delta := pt[d] - cent[d]
 			dist += delta * delta
 		}
 		if dist < bestDist {
 			bestDist, bestIdx = dist, n.idx
 		}
-		axis := depth % dim
+		axis := depth % 45
 		diff := pt[axis] - cent[axis]
 		var first, second *kdNode
 		if diff < 0 {
