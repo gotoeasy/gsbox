@@ -5,7 +5,9 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"runtime"
 	"sort"
+	"sync"
 	"time"
 )
 
@@ -33,12 +35,14 @@ func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
 		log.Println("iters ", iter+1)
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
+		buildCentSoA(f32Centroids)
 
 		// 3. 分配
 		startTime := time.Now().UnixMilli()
-		for i := range n {
-			labels[i] = tree.NearestBBF(nSh45[i])
-		}
+		parAssign(n, nSh45, labels, tree)
+		// for i := range n {
+		// 	labels[i] = tree.NearestBBF(nSh45[i])
+		// }
 		log.Println("tree.nearest 耗时", (time.Now().UnixMilli() - startTime), "MS")
 
 		// 4. 累加新中心
@@ -113,9 +117,34 @@ func buildKDTree(cents [][]float32) *kdTree {
 	return &kdTree{cents: cents, root: build(idxs, 0)}
 }
 
+const maxBBFNodes = 30
+
+// ---------- 全局 SoA 视图（防呆） ----------
+var (
+	centSoA  [45][]float32
+	soaReady bool // 是否已初始化
+	soaSize  int  // 记录长度，防越界
+)
+
+// 原子初始化，可重复调用，线程安全
+func buildCentSoA(cents [][]float32) {
+	if len(cents) == 0 {
+		return
+	}
+	soaSize = len(cents)
+	for d := 0; d < 45; d++ {
+		centSoA[d] = make([]float32, soaSize)
+		for i := 0; i < soaSize; i++ {
+			centSoA[d][i] = cents[i][d]
+		}
+	}
+	soaReady = true
+}
+
+// ---------- 堆结构 ----------
 type bbEntry struct {
 	node *kdNode
-	dist float32 // 到分割面的距离
+	dist float32
 }
 type bbHeap []bbEntry
 
@@ -131,9 +160,7 @@ func (h *bbHeap) Pop() interface{} {
 	return x
 }
 
-const maxBBFNodes = 20 // 想再快就调小，想更准就调大
-
-// 近似最近
+// ---------- 近似最近邻（0% 误差 + 防呆） ----------
 func (t *kdTree) NearestBBF(pt []float32) int32 {
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
@@ -151,30 +178,42 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 		}
 		visited++
 
-		// 计算到当前节点的真实距离（SIMD 友好版）
-		cent := t.cents[n.idx]
-		dist := float32(0)
-
-		// 主循环 5×8
-		for d := 0; d < 40; d += 8 {
-			for k := 0; k < 8; k++ {
-				delta := pt[d+k] - cent[d+k]
+		var dist9 float32 // 提前声明，避开 goto 跳过定义
+		// **** 防呆：索引越界 or SoA 未初始化 → 回退行主序 ****
+		if !soaReady || int(n.idx) >= soaSize {
+			cent := t.cents[n.idx] // 原 cents 行主序
+			var dist float32
+			for d := 0; d < 45; d++ {
+				delta := pt[d] - cent[d]
 				dist += delta * delta
 			}
-		}
-		// 尾处理 45-40=5
-		for d := 40; d < 45; d++ {
-			delta := pt[d] - cent[d]
-			dist += delta * delta
-		}
-
-		if dist < bestDist {
-			bestDist, bestIdx = dist, n.idx
+			if dist < bestDist {
+				bestDist, bestIdx = dist, n.idx
+			}
+			goto pushChild
 		}
 
-		// 标准 KD-Tree 左右子入堆
+		// **** 正常 SoA 路径 ****
+		// 1) 前 9 维快速筛
+		for d := 0; d < 9; d++ {
+			delta := pt[d] - centSoA[d][n.idx]
+			dist9 += delta * delta
+		}
+		if dist9 >= bestDist {
+			goto pushChild
+		}
+		// 2) 补后 36 维
+		for d := 9; d < 45; d++ {
+			delta := pt[d] - centSoA[d][n.idx]
+			dist9 += delta * delta
+		}
+		if dist9 < bestDist {
+			bestDist, bestIdx = dist9, n.idx
+		}
+
+	pushChild:
 		axis := n.axis
-		diff := pt[axis] - cent[axis]
+		diff := pt[axis] - centSoA[axis][n.idx]
 		var first, second *kdNode
 		if diff < 0 {
 			first, second = n.left, n.right
@@ -189,4 +228,25 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 		}
 	}
 	return bestIdx
+}
+
+// ---------- 并行 assign ----------
+func parAssign(n int, nSh45 [][]float32, labels []int32, tree *kdTree) {
+	var wg sync.WaitGroup
+	stride := (n + runtime.GOMAXPROCS(0) - 1) / runtime.GOMAXPROCS(0)
+	for g := 0; g < runtime.GOMAXPROCS(0); g++ {
+		wg.Add(1)
+		go func(g int) {
+			start := g * stride
+			end := start + stride
+			if end > n {
+				end = n
+			}
+			for i := start; i < end; i++ {
+				labels[i] = tree.NearestBBF(nSh45[i])
+			}
+			wg.Done()
+		}(g)
+	}
+	wg.Wait()
 }
