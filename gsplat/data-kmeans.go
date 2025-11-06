@@ -40,9 +40,6 @@ func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
 		// 3. 分配
 		startTime := time.Now().UnixMilli()
 		parAssign(n, nSh45, labels, tree)
-		// for i := range n {
-		// 	labels[i] = tree.NearestBBF(nSh45[i])
-		// }
 		log.Println("tree.nearest 耗时", (time.Now().UnixMilli() - startTime), "MS")
 
 		// 4. 累加新中心
@@ -117,9 +114,8 @@ func buildKDTree(cents [][]float32) *kdTree {
 	return &kdTree{cents: cents, root: build(idxs, 0)}
 }
 
-const maxBBFNodes = 15
+const maxBBFNodes = 15 // 越小误差越大速度越快，酌情调整
 
-// ---------- 全局 SoA 视图（防呆） ----------
 var (
 	centSoA  [45][]float32
 	soaReady bool
@@ -140,7 +136,6 @@ func buildCentSoA(cents [][]float32) {
 	soaReady = true
 }
 
-// ---------- 堆结构 ----------
 type bbEntry struct {
 	node *kdNode
 	dist float32
@@ -159,7 +154,7 @@ func (h *bbHeap) Pop() interface{} {
 	return x
 }
 
-// ---------- 近似最近邻（0% 误差 + SIMD 友好加载） ----------
+// 近似最近邻（SIMD 友好加载）
 func (t *kdTree) NearestBBF(pt []float32) int32 {
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
@@ -177,7 +172,7 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 		}
 		visited++
 
-		// **** 防呆：SoA 未就绪或越界 → 回退行主序 ****
+		// 防呆：SoA 未就绪或越界 → 回退行主序
 		if !soaReady || int(n.idx) >= soaSize {
 			cent := t.cents[n.idx]
 			var dist float32
@@ -189,7 +184,7 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 				bestDist, bestIdx = dist, n.idx
 			}
 		} else {
-			// **** 正常 SoA 路径 ****
+			// 正常 SoA 路径
 			var dist9 float32
 			// 1) 前 9 维：8×1 + 1
 			for d := 0; d < 8; d++ {
@@ -210,7 +205,7 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 			}
 		}
 
-		// ---- 标准 KD 左右子入堆 ----
+		// 标准 KD 左右子入堆
 		axis := n.axis
 		diff := pt[axis] - centSoA[axis][n.idx]
 		var first, second *kdNode
@@ -229,7 +224,7 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 	return bestIdx
 }
 
-// ---------- 并行 assign ----------
+// 并行 assign
 func parAssign(n int, nSh45 [][]float32, labels []int32, tree *kdTree) {
 	var wg sync.WaitGroup
 	stride := (n + runtime.GOMAXPROCS(0) - 1) / runtime.GOMAXPROCS(0)
