@@ -3,6 +3,7 @@ package gsplat
 import (
 	"bytes"
 	"container/heap"
+	"gsbox/cmn"
 	"log"
 	"math"
 	"math/rand"
@@ -11,22 +12,23 @@ import (
 	"sync"
 )
 
-func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []int16) {
+func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8) {
 	shDegreeOutput := GetArgShDegree()
 	if shDegreeOutput == 0 {
 		return // 不输出球谐系数时跳过
 	}
 
+	dataCnt := len(rows)
 	var nSh45 [][]float32
-	for n := range rows {
+	for n := range dataCnt {
 		nSh45 = append(nSh45, GetSh45Float32(rows[n]))
 	}
 	dims := []int{0, 9, 24, 45}
-	palettes, indexs := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
+	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
 
-	for n := range rows {
+	for n := range dataCnt {
 		data := rows[n]
-		shs := palettes[indexs[n]]
+		shs := palettes[indexes[n]]
 		switch shDegreeOutput {
 		case 1:
 			data.SH1 = shs[:9]
@@ -52,26 +54,32 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []i
 	}
 
 	paletteSize := len(palettes)
+	maxPaletteIdx := paletteSize - 1
 	height := int(math.Ceil(float64(paletteSize) / 64.0))
-	shN_centroids = make([]uint8, height*64*15*4)
-	for i := range height {
-		for j := range 64 {
-			idx := min(height*64*i+j, paletteSize-1)
-			shs := palettes[idx]
-			for k := range 15 {
-				shN_centroids[idx*60+k*4+0] = shs[k*3+0]
-				shN_centroids[idx*60+k*4+1] = shs[k*3+1]
-				shN_centroids[idx*60+k*4+2] = shs[k*3+2]
-				shN_centroids[idx*60+k*4+3] = 255
-			}
+	centroidsPixCnt := height * 64
+	shN_centroids = make([]uint8, centroidsPixCnt*15*4)
+	index := 0
+	for range centroidsPixCnt {
+		shs := palettes[index]
+		for k := range 15 {
+			shN_centroids[index*15*4+k*4+0] = shs[k*3+0]
+			shN_centroids[index*15*4+k*4+1] = shs[k*3+1]
+			shN_centroids[index*15*4+k*4+2] = shs[k*3+2]
+			shN_centroids[index*15*4+k*4+3] = 255
 		}
+		index = min(index+1, maxPaletteIdx)
 	}
 
-	shN_labels = make([]int16, len(indexs))
-	for i, v := range indexs {
-		h := int16(v/64) << 6
-		w := int16(v & 63)
-		shN_labels[i] = h | w
+	w, h := cmn.ComputeWidthHeight(dataCnt)
+	labelsPixCnt := w * h
+	shN_labels = make([]uint8, labelsPixCnt*4)
+	maxDataIdx := dataCnt - 1
+	for i := range labelsPixCnt {
+		idx := indexes[min(i, maxDataIdx)]
+		shN_labels[i*4+0] = uint8(idx & 0xFF)
+		shN_labels[i*4+1] = uint8(idx >> 8)
+		shN_labels[i*4+2] = 0
+		shN_labels[i*4+3] = 255
 	}
 	return
 }
