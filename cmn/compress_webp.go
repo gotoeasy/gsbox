@@ -9,9 +9,8 @@ import (
 	"github.com/HugoSmits86/nativewebp"
 )
 
-func CompressWebp(bts []byte) ([]byte, error) {
+func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error) {
 	datas := bts
-	width, height := ComputeWidthHeight(len(bts))
 	if len(bts) != width*height {
 		// 数据少的没必要webp编码压缩，只考虑最终图片至少32*32以上大小的场景
 		datas = bts[:]
@@ -41,6 +40,11 @@ func CompressWebp(bts []byte) ([]byte, error) {
 	}
 
 	return webpComp.Compress(datas, width, height)
+}
+
+func CompressWebp(bts []byte) ([]byte, error) {
+	width, height := ComputeWidthHeight(len(bts))
+	return CompressWebpByWidthHeight(bts, width, height)
 }
 
 func DecompressWebp(webpBytes []byte) (rgbas []byte, width int, height int, err error) {
