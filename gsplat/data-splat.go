@@ -438,9 +438,6 @@ func GetSh45(data *SplatData) []uint8 {
 		for i := range 9 {
 			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH1[i]))
 		}
-		for range 15 {
-			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
-		}
 	} else if len(data.SH3) > 0 {
 		for i := range 24 {
 			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH2[i]))
