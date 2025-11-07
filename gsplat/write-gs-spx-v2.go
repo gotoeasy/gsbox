@@ -45,7 +45,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	}
 
 	logTimes := min(max(0, uint8(cmn.StringToInt(Args.GetArgIgnorecase("-l", "--log-times"), 1))), 9) // 有效范围0~9，默认1
-	if logTimes > 0 {
+	if (bf == BF_SPLAT10019 || bf == BF_SPLAT10190_WEBP) && logTimes > 0 {
 		log.Println("[Info] log encoding times:", logTimes)
 	}
 
@@ -65,7 +65,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 		case BF_SPLAT190_WEBP:
 			if blockSplatCount >= MinWebpBlockSize {
 				//  数据够多时才一定使用 webp 编码格式
-				writeSpxBlockSplat19Webp(writer, blockDatas, blockSplatCount)
+				writeSpxBlockSplat190Webp(writer, blockDatas, blockSplatCount)
 			} else {
 				// 数据较少时，切换使用 splat19 格式
 				writeSpxBlockSplat19(writer, blockDatas, blockSplatCount, compressType)
@@ -379,7 +379,7 @@ func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, bloc
 	}
 }
 
-func writeSpxBlockSplat19Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
+func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
 	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
