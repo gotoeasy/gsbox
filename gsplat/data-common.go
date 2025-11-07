@@ -7,7 +7,7 @@ import (
 )
 
 func IsOutputSpx() bool {
-	if Args.HasCmd("p2x", "ply2spx", "s2x", "splat2spx", "z2x", "spz2spx", "x2x", "spx2spx", "k2x", "ksplat2spx") {
+	if Args.HasCmd("p2x", "ply2spx", "s2x", "splat2spx", "z2x", "spz2spx", "x2x", "spx2spx", "k2x", "ksplat2spx", "g2x", "sog2spx") {
 		return true
 	}
 	if Args.HasCmd("join") && cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), ".spx", true) {
@@ -17,7 +17,7 @@ func IsOutputSpx() bool {
 }
 
 func IsOutputSpz() bool {
-	if Args.HasCmd("p2z", "ply2spz", "s2z", "splat2spz", "z2z", "spz2spz", "x2z", "spx2spz", "k2z", "ksplat2spz") {
+	if Args.HasCmd("p2z", "ply2spz", "s2z", "splat2spz", "z2z", "spz2spz", "x2z", "spx2spz", "k2z", "ksplat2spz", "g2z", "sog2spz") {
 		return true
 	}
 	if Args.HasCmd("join") && cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), ".spz", true) {
@@ -27,7 +27,7 @@ func IsOutputSpz() bool {
 }
 
 func IsOutputPly() bool {
-	if Args.HasCmd("p2p", "ply2ply", "s2p", "splat2ply", "z2p", "spz2ply", "x2p", "spx2ply", "k2p", "ksplat2ply") {
+	if Args.HasCmd("p2p", "ply2ply", "s2p", "splat2ply", "z2p", "spz2ply", "x2p", "spx2ply", "k2p", "ksplat2ply", "g2p", "sog2ply") {
 		return true
 	}
 	if Args.HasCmd("join") && cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), ".ply", true) {
@@ -37,10 +37,20 @@ func IsOutputPly() bool {
 }
 
 func IsOutputSplat() bool {
-	if Args.HasCmd("p2s", "ply2splat", "s2s", "splat2splat", "z2s", "spz2splat", "x2s", "spx2splat", "k2s", "ksplat2splat") {
+	if Args.HasCmd("p2s", "ply2splat", "s2s", "splat2splat", "z2s", "spz2splat", "x2s", "spx2splat", "k2s", "ksplat2splat", "g2s", "sog2splat") {
 		return true
 	}
 	if Args.HasCmd("join") && cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), ".splat", true) {
+		return true
+	}
+	return false
+}
+
+func IsOutputSog() bool {
+	if Args.HasCmd("p2g", "ply2sog", "s2g", "splat2sog", "z2g", "spz2sog", "x2g", "spx2sog", "k2g", "ksplat2sog", "g2g", "sog2sog") {
+		return true
+	}
+	if Args.HasCmd("join") && cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), ".sog", true) {
 		return true
 	}
 	return false

@@ -110,3 +110,19 @@ func GetArgFlagValue(arg1 string, arg2 string) uint16 {
 	}
 	return flag
 }
+
+func GetArgKmeansIterations() int {
+	val := cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), -1)
+	if val < 1 || val > 50 {
+		return 10 // 默认迭代10次
+	}
+	return val
+}
+
+func GetArgKmeansNearestNodes() int {
+	val := cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), -1)
+	if val < 10 || val > 100 {
+		return 15 // 查找最邻近的15个节点
+	}
+	return val
+}
