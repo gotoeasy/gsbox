@@ -1,6 +1,7 @@
 package gsplat
 
 import (
+	"bytes"
 	"container/heap"
 	"log"
 	"math"
@@ -8,15 +9,86 @@ import (
 	"runtime"
 	"sort"
 	"sync"
-	"time"
 )
 
-func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
+func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []int16) {
+	shDegreeOutput := GetArgShDegree()
+	if shDegreeOutput == 0 {
+		return // 不输出球谐系数时跳过
+	}
+
+	var nSh45 [][]float32
+	for n := range rows {
+		nSh45 = append(nSh45, GetSh45Float32(rows[n]))
+	}
+	dims := []int{0, 9, 24, 45}
+	palettes, indexs := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
+
+	for n := range rows {
+		data := rows[n]
+		shs := palettes[indexs[n]]
+		switch shDegreeOutput {
+		case 1:
+			data.SH1 = shs[:9]
+			data.SH2 = []uint8(nil)
+			data.SH3 = []uint8(nil)
+		case 2:
+			data.SH1 = []uint8(nil)
+			data.SH2 = shs[:24]
+			data.SH3 = []uint8(nil)
+		case 3:
+			data.SH1 = []uint8(nil)
+			data.SH2 = shs[:24]
+			data.SH3 = shs[24:]
+		default:
+			data.SH1 = []uint8(nil)
+			data.SH2 = []uint8(nil)
+			data.SH3 = []uint8(nil)
+		}
+	}
+
+	if !IsOutputSog() {
+		return
+	}
+
+	paletteSize := len(palettes)
+	height := int(math.Ceil(float64(paletteSize) / 64.0))
+	shN_centroids = make([]uint8, height*64*15*4)
+	for i := range height {
+		for j := range 64 {
+			idx := min(height*64*i+j, paletteSize-1)
+			shs := palettes[idx]
+			for k := range 15 {
+				shN_centroids[idx*60+k*4+0] = shs[k*3+0]
+				shN_centroids[idx*60+k*4+1] = shs[k*3+1]
+				shN_centroids[idx*60+k*4+2] = shs[k*3+2]
+				shN_centroids[idx*60+k*4+3] = 255
+			}
+		}
+	}
+
+	shN_labels = make([]int16, len(indexs))
+	for i, v := range indexs {
+		h := int16(v/64) << 6
+		w := int16(v & 63)
+		shN_labels[i] = h | w
+	}
+	return
+}
+
+func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32) {
 	n := len(nSh45)
 	paletteSize := int(math.Min(64, math.Pow(2, math.Floor(math.Log2(float64(n)/1024.0)))) * 1024)
-	const maxIters = 10 // 固定10次迭代
-
 	labels = make([]int32, n)
+
+	// 0 维快速返回
+	if dim == 0 {
+		centroids = make([][]uint8, paletteSize)
+		for i := range centroids {
+			centroids[i] = bytes.Repeat([]uint8{128}, 45) // 置零，45个128（浮点数0.0编码后为128）
+		}
+		return
+	}
 
 	// 1. 随机选 k 个中心
 	f32Centroids := make([][]float32, paletteSize)
@@ -32,17 +104,17 @@ func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
 	}
 
 	for iter := range maxIters {
-		log.Println("iters ", iter+1)
+		log.Println("iters", iter+1)
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
 		buildCentSoA(f32Centroids)
 
-		// 3. 分配
-		startTime := time.Now().UnixMilli()
-		parAssign(n, nSh45, labels, tree)
-		log.Println("tree.nearest 耗时", (time.Now().UnixMilli() - startTime), "MS")
+		// 3. 分配（只算前 dim 维）
+		// startTime := time.Now().UnixMilli()
+		parAssignDim(n, nSh45, labels, tree, dim, maxBBFNodes)
+		// log.Println("tree.nearest 耗时", time.Now().UnixMilli()-startTime, "MS")
 
-		// 4. 累加新中心
+		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
 		counts := make([]int32, paletteSize)
 		for i := range paletteSize {
@@ -68,9 +140,12 @@ func KmeansSh45(nSh45 [][]float32) (centroids [][]uint8, labels []int32) {
 		f32Centroids = newCents
 	}
 
-	centroids = make([][]uint8, len(f32Centroids))
+	centroids = make([][]uint8, paletteSize)
 	for i, v := range f32Centroids {
 		centroids[i] = ToSh45(v)
+		for j := dim; j < 45; j++ {
+			centroids[i][j] = 128 // 超有效维度的部分都置零（浮点数0.0编码后为128）
+		}
 	}
 	return
 }
@@ -114,8 +189,7 @@ func buildKDTree(cents [][]float32) *kdTree {
 	return &kdTree{cents: cents, root: build(idxs, 0)}
 }
 
-const maxBBFNodes = 15 // 越小误差越大速度越快，酌情调整
-
+/* ---------- SoA 中心视图 ---------- */
 var (
 	centSoA  [45][]float32
 	soaReady bool
@@ -136,6 +210,7 @@ func buildCentSoA(cents [][]float32) {
 	soaReady = true
 }
 
+/* ---------- 堆结构 ---------- */
 type bbEntry struct {
 	node *kdNode
 	dist float32
@@ -154,8 +229,9 @@ func (h *bbHeap) Pop() interface{} {
 	return x
 }
 
-// 近似最近邻（SIMD 友好加载）
-func (t *kdTree) NearestBBF(pt []float32) int32 {
+/* ---------- 维度感知最近邻 ---------- */
+func (t *kdTree) NearestBBF(pt []float32, dim int, maxBBFNodes int) int32 {
+	// const maxBBFNodes = 15 // 最近邻搜索节点上限，必要时再考虑命令行参数传入
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
 
@@ -176,7 +252,7 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 		if !soaReady || int(n.idx) >= soaSize {
 			cent := t.cents[n.idx]
 			var dist float32
-			for d := 0; d < 45; d++ {
+			for d := range dim { // 只算前 dim 维
 				delta := pt[d] - cent[d]
 				dist += delta * delta
 			}
@@ -184,24 +260,14 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 				bestDist, bestIdx = dist, n.idx
 			}
 		} else {
-			// 正常 SoA 路径
-			var dist9 float32
-			// 1) 前 9 维：8×1 + 1
-			for d := 0; d < 8; d++ {
+			// 正常 SoA 路径：只算前 dim 维
+			var distShort float32
+			for d := range dim {
 				delta := pt[d] - centSoA[d][n.idx]
-				dist9 += delta * delta
+				distShort += delta * delta
 			}
-			delta := pt[8] - centSoA[8][n.idx]
-			dist9 += delta * delta
-			if dist9 < bestDist {
-				// 2) 补后 36 维：4×8 + 4
-				for d := 9; d < 45; d++ {
-					delta := pt[d] - centSoA[d][n.idx]
-					dist9 += delta * delta
-				}
-				if dist9 < bestDist {
-					bestDist, bestIdx = dist9, n.idx
-				}
+			if distShort < bestDist {
+				bestDist, bestIdx = distShort, n.idx
 			}
 		}
 
@@ -224,20 +290,17 @@ func (t *kdTree) NearestBBF(pt []float32) int32 {
 	return bestIdx
 }
 
-// 并行 assign
-func parAssign(n int, nSh45 [][]float32, labels []int32, tree *kdTree) {
+/* ---------- 并行 assign（维度感知） ---------- */
+func parAssignDim(n int, nSh45 [][]float32, labels []int32, tree *kdTree, dim int, maxBBFNodes int) {
 	var wg sync.WaitGroup
 	stride := (n + runtime.GOMAXPROCS(0) - 1) / runtime.GOMAXPROCS(0)
 	for g := 0; g < runtime.GOMAXPROCS(0); g++ {
 		wg.Add(1)
 		go func(g int) {
 			start := g * stride
-			end := start + stride
-			if end > n {
-				end = n
-			}
+			end := min(start+stride, n)
 			for i := start; i < end; i++ {
-				labels[i] = tree.NearestBBF(nSh45[i])
+				labels[i] = tree.NearestBBF(nSh45[i], dim, maxBBFNodes)
 			}
 			wg.Done()
 		}(g)
