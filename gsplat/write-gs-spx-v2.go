@@ -28,9 +28,9 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
-	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT10019)
-	if bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT19 && bf != BF_SPLAT10190_WEBP {
-		bf = BF_SPLAT10019 // 默认格式
+	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT19)
+	if bf != BF_SPLAT19 && bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT10190_WEBP && bf != BF_SPLAT10019 {
+		bf = BF_SPLAT19 // 默认格式
 	}
 	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (Parameter) block size:", blockSize)
@@ -48,6 +48,8 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	if (bf == BF_SPLAT10019 || bf == BF_SPLAT10190_WEBP) && logTimes > 0 {
 		log.Println("[Info] log encoding times:", logTimes)
 	}
+
+	ReWriteShByKmeans(rows)
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
