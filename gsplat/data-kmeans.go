@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"sort"
 	"sync"
+	"time"
 )
 
 func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8) {
@@ -118,9 +119,9 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		buildCentSoA(f32Centroids)
 
 		// 3. 分配（只算前 dim 维）
-		// startTime := time.Now().UnixMilli()
+		startTime := time.Now().UnixMilli()
 		parAssignDim(n, nSh45, labels, tree, dim, maxBBFNodes)
-		// log.Println("tree.nearest 耗时", time.Now().UnixMilli()-startTime, "MS")
+		log.Println("tree.nearest 耗时", time.Now().UnixMilli()-startTime, "MS")
 
 		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
@@ -239,7 +240,6 @@ func (h *bbHeap) Pop() interface{} {
 
 /* ---------- 维度感知最近邻 ---------- */
 func (t *kdTree) NearestBBF(pt []float32, dim int, maxBBFNodes int) int32 {
-	// const maxBBFNodes = 15 // 最近邻搜索节点上限，必要时再考虑命令行参数传入
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
 
