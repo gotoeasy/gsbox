@@ -3,12 +3,14 @@ package cmn
 import (
 	"archive/zip"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 )
 
 // 打包成一个sog文件
 func ZipSogFiles(zipAsSogFile string, files []string) {
+	log.Println("[Info] save as sog")
 	os.MkdirAll(filepath.Dir(zipAsSogFile), 0666)
 
 	zipFile, err := os.Create(zipAsSogFile)

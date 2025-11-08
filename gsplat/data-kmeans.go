@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"container/heap"
 	"gsbox/cmn"
-	"log"
 	"math"
 	"math/rand"
 	"runtime"
@@ -26,30 +25,30 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	dims := []int{0, 9, 24, 45}
 	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
 
-	for n := range dataCnt {
-		data := rows[n]
-		shs := palettes[indexes[n]]
-		switch shDegreeOutput {
-		case 1:
-			data.SH1 = shs[:9]
-			data.SH2 = []uint8(nil)
-			data.SH3 = []uint8(nil)
-		case 2:
-			data.SH1 = []uint8(nil)
-			data.SH2 = shs[:24]
-			data.SH3 = []uint8(nil)
-		case 3:
-			data.SH1 = []uint8(nil)
-			data.SH2 = shs[:24]
-			data.SH3 = shs[24:]
-		default:
-			data.SH1 = []uint8(nil)
-			data.SH2 = []uint8(nil)
-			data.SH3 = []uint8(nil)
-		}
-	}
-
 	if !IsOutputSog() {
+		for n := range dataCnt {
+			data := rows[n]
+			shs := palettes[indexes[n]]
+			switch shDegreeOutput {
+			case 1:
+				data.SH1 = shs[:9]
+				data.SH2 = []uint8(nil)
+				data.SH3 = []uint8(nil)
+			case 2:
+				data.SH1 = []uint8(nil)
+				data.SH2 = shs[:24]
+				data.SH3 = []uint8(nil)
+			case 3:
+				data.SH1 = []uint8(nil)
+				data.SH2 = shs[:24]
+				data.SH3 = shs[24:]
+			default:
+				data.SH1 = []uint8(nil)
+				data.SH2 = []uint8(nil)
+				data.SH3 = []uint8(nil)
+			}
+		}
+
 		return
 	}
 
@@ -111,8 +110,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		}
 	}
 
-	for iter := range maxIters {
-		log.Println("iters", iter+1)
+	for range maxIters {
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
 		buildCentSoA(f32Centroids)
