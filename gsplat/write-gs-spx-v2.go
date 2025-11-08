@@ -44,7 +44,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 		log.Println("[Info] block compress type: xz")
 	}
 
-	logTimes := min(max(0, uint8(cmn.StringToInt(Args.GetArgIgnorecase("-l", "--log-times"), 1))), 9) // 有效范围0~9，默认1
+	logTimes := min(max(0, uint8(cmn.StringToInt(Args.GetArgIgnorecase("-l", "--log-times"), 1))), 9) // [TEST]有效范围0~9，默认1
 	if (bf == BF_SPLAT10019 || bf == BF_SPLAT10190_WEBP) && logTimes > 0 {
 		log.Println("[Info] log encoding times:", logTimes)
 	}
