@@ -49,8 +49,6 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 		log.Println("[Info] log encoding times:", logTimes)
 	}
 
-	ReWriteShByKmeans(rows)
-
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
 	for i := range blockCnt {
