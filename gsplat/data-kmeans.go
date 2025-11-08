@@ -10,7 +10,6 @@ import (
 	"runtime"
 	"sort"
 	"sync"
-	"time"
 )
 
 func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8) {
@@ -119,9 +118,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		buildCentSoA(f32Centroids)
 
 		// 3. 分配（只算前 dim 维）
-		startTime := time.Now().UnixMilli()
 		parAssignDim(n, nSh45, labels, tree, dim, maxBBFNodes)
-		log.Println("tree.nearest 耗时", time.Now().UnixMilli()-startTime, "MS")
 
 		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
@@ -159,7 +156,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 	return
 }
 
-/* ---------- KD-Tree ---------- */
+// KD-Tree
 type kdNode struct {
 	idx   int32
 	axis  int32
@@ -198,7 +195,7 @@ func buildKDTree(cents [][]float32) *kdTree {
 	return &kdTree{cents: cents, root: build(idxs, 0)}
 }
 
-/* ---------- SoA 中心视图 ---------- */
+// SoA 中心视图
 var (
 	centSoA  [45][]float32
 	soaReady bool
@@ -219,7 +216,7 @@ func buildCentSoA(cents [][]float32) {
 	soaReady = true
 }
 
-/* ---------- 堆结构 ---------- */
+// 堆结构
 type bbEntry struct {
 	node *kdNode
 	dist float32
@@ -238,7 +235,7 @@ func (h *bbHeap) Pop() interface{} {
 	return x
 }
 
-/* ---------- 维度感知最近邻 ---------- */
+// 维度感知最近邻
 func (t *kdTree) NearestBBF(pt []float32, dim int, maxBBFNodes int) int32 {
 	var bestIdx int32 = -1
 	var bestDist float32 = math.MaxFloat32
@@ -298,7 +295,7 @@ func (t *kdTree) NearestBBF(pt []float32, dim int, maxBBFNodes int) int32 {
 	return bestIdx
 }
 
-/* ---------- 并行 assign（维度感知） ---------- */
+// 并行 assign（维度感知）
 func parAssignDim(n int, nSh45 [][]float32, labels []int32, tree *kdTree, dim int, maxBBFNodes int) {
 	var wg sync.WaitGroup
 	stride := (n + runtime.GOMAXPROCS(0) - 1) / runtime.GOMAXPROCS(0)
