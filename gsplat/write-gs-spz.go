@@ -32,6 +32,8 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		Reserved:       0,
 	}
 
+	ReWriteShByKmeans(rows)
+
 	bts := make([]byte, 0)
 	bts = append(bts, h.ToBytes()...)
 
