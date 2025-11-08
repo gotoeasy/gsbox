@@ -33,6 +33,8 @@ var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
 var CheckVersion bool = true
 
+const SQRT2 = float64(1.4142135623730951) // math.Sqrt(2.0)
+
 // 使用标准包进行Post请求，固定Content-Type:application/x-www-form-urlencoded，其他自定义headers格式为 K:V
 func HttpPostForm(url string, formMap map[string]string, headers ...string) ([]byte, error) {
 
@@ -337,6 +339,16 @@ func ClipUint8(f float64) uint8 {
 		return 255
 	}
 	return uint8(f)
+}
+
+// 限制范围
+func ClipUint16(f float64) uint16 {
+	if f < 0 {
+		return 0
+	} else if f > 65535 {
+		return 65535
+	}
+	return uint16(f)
 }
 
 // 限制范围
@@ -781,6 +793,11 @@ func EncodeSpxSH(encodeSHval uint8) uint8 {
 	return ClipUint8(q)
 }
 
+func EncodeSplatRotations4(r0 float32, r1 float32, r2 float32, r3 float32) (byte, byte, byte, byte) {
+	w, x, y, z := float64(r0), float64(r1), float64(r2), float64(r3)
+	return EncodeSplatRotation(w), EncodeSplatRotation(x), EncodeSplatRotation(y), EncodeSplatRotation(z)
+}
+
 func NormalizeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (byte, byte, byte, byte) {
 	r0 := float64(rw)/128.0 - 1.0
 	r1 := float64(rx)/128.0 - 1.0
@@ -791,10 +808,6 @@ func NormalizeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (byte, byte, byt
 	}
 	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
 	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
-}
-
-func NormalizeRotations4(r0 float32, r1 float32, r2 float32, r3 float32) (byte, byte, byte, byte) {
-	return ClipUint8(float64(r0)*128.0 + 128.0), ClipUint8(float64(r1)*128.0 + 128.0), ClipUint8(float64(r2)*128.0 + 128.0), ClipUint8(float64(r3)*128.0 + 128.0)
 }
 
 func NormalizeRotations3(rx uint8, ry uint8, rz uint8, rw uint8) (byte, byte, byte, byte) {
@@ -857,4 +870,58 @@ func RandomUint8() uint8 {
 
 func RandomInt(min, max int) int {
 	return rand.Intn(max-min) + min
+}
+
+func SogEncodeRotation(f float64) uint8 {
+	return ClipUint8((f/SQRT2 + 0.5) * 255.0)
+}
+
+func SogDecodeRotation(r uint8) float32 {
+	return ClipFloat32((float64(r)/255.0 - 0.5) * SQRT2)
+}
+
+func NormalizeRotationsFloat64(rw uint8, rx uint8, ry uint8, rz uint8) []float64 {
+	r0 := float64(rw)/128.0 - 1.0
+	r1 := float64(rx)/128.0 - 1.0
+	r2 := float64(ry)/128.0 - 1.0
+	r3 := float64(rz)/128.0 - 1.0
+	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+	return []float64{r0 / qlen, r1 / qlen, r2 / qlen, r3 / qlen}
+}
+
+func SogEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (r byte, g byte, b byte, a byte) {
+	quats := NormalizeRotationsFloat64(rw, rx, ry, rz)
+
+	index := 0
+	for i := 1; i < 4; i++ {
+		if math.Abs(quats[index]) < math.Abs(quats[i]) {
+			index = i
+		}
+	}
+	if quats[index] < 0 {
+		quats[0], quats[1], quats[2], quats[3] = -quats[0], -quats[1], -quats[2], -quats[3]
+	}
+
+	a = uint8(index + 252)
+
+	switch index {
+	case 0:
+		r, g, b = SogEncodeRotation(quats[1]), SogEncodeRotation(quats[2]), SogEncodeRotation(quats[3])
+	case 1:
+		r, g, b = SogEncodeRotation(quats[0]), SogEncodeRotation(quats[2]), SogEncodeRotation(quats[3])
+	case 2:
+		r, g, b = SogEncodeRotation(quats[0]), SogEncodeRotation(quats[1]), SogEncodeRotation(quats[3])
+	default:
+		r, g, b = SogEncodeRotation(quats[0]), SogEncodeRotation(quats[1]), SogEncodeRotation(quats[2])
+	}
+
+	return
+}
+
+func SogEncodeLog(value float32) float64 {
+	logVal := math.Log(math.Abs(float64(value)) + 1.0)
+	if value < 0 {
+		logVal = -logVal
+	}
+	return logVal
 }

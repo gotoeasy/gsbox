@@ -6,8 +6,6 @@ import (
 	"path/filepath"
 )
 
-const SQRT2 = float32(1.4142135623730951) // math.Sqrt(2.0)
-
 func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
 	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
@@ -70,20 +68,20 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 		sz = meta.Scales.Mins[2] + (meta.Scales.Maxs[2]-meta.Scales.Mins[2])*sz
 		splatData.ScaleX, splatData.ScaleY, splatData.ScaleZ = sx, sy, sz
 
-		r0 := (float32(quats[i*4+0])/255.0 - 0.5) * SQRT2
-		r1 := (float32(quats[i*4+1])/255.0 - 0.5) * SQRT2
-		r2 := (float32(quats[i*4+2])/255.0 - 0.5) * SQRT2
+		r0 := cmn.SogDecodeRotation(quats[i*4+0])
+		r1 := cmn.SogDecodeRotation(quats[i*4+1])
+		r2 := cmn.SogDecodeRotation(quats[i*4+2])
 		ri := cmn.ClipFloat32(math.Sqrt(float64(max(0, 1.0-r0*r0-r1*r1-r2*r2))))
 		idx := uint8(quats[i*4+3]) - 252
 		switch idx {
 		case 0:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(ri, r0, r1, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(ri, r0, r1, r2)
 		case 1:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, ri, r1, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, ri, r1, r2)
 		case 2:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, r1, ri, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, r1, ri, r2)
 		case 3:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, r1, r2, ri)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, r1, r2, ri)
 		}
 
 		r := float64(meta.Sh0.Mins[0] + (meta.Sh0.Maxs[0]-meta.Sh0.Mins[0])*(float32(sh0[i*4+0])/255.0))

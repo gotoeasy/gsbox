@@ -58,20 +58,20 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 		sz := meta.Scales.Codebook[scales[i*4+2]]
 		splatData.ScaleX, splatData.ScaleY, splatData.ScaleZ = sx, sy, sz
 
-		r0 := (float32(quats[i*4+0])/255.0 - 0.5) * SQRT2
-		r1 := (float32(quats[i*4+1])/255.0 - 0.5) * SQRT2
-		r2 := (float32(quats[i*4+2])/255.0 - 0.5) * SQRT2
+		r0 := cmn.SogDecodeRotation(quats[i*4+0])
+		r1 := cmn.SogDecodeRotation(quats[i*4+1])
+		r2 := cmn.SogDecodeRotation(quats[i*4+2])
 		ri := cmn.ClipFloat32(math.Sqrt(float64(max(0, 1.0-r0*r0-r1*r1-r2*r2))))
 		idx := uint8(quats[i*4+3]) - 252
 		switch idx {
 		case 0:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(ri, r0, r1, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(ri, r0, r1, r2)
 		case 1:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, ri, r1, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, ri, r1, r2)
 		case 2:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, r1, ri, r2)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, r1, ri, r2)
 		case 3:
-			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.NormalizeRotations4(r0, r1, r2, ri)
+			splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.EncodeSplatRotations4(r0, r1, r2, ri)
 		}
 
 		r := float64(meta.Sh0.Codebook[sh0[i*4+0]])
