@@ -28,9 +28,9 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
-	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT19)
+	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT190_WEBP)
 	if bf != BF_SPLAT19 && bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT10190_WEBP && bf != BF_SPLAT10019 {
-		bf = BF_SPLAT19 // 默认格式
+		bf = BF_SPLAT190_WEBP // 默认格式
 	}
 	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (Parameter) block size:", blockSize)
