@@ -6,18 +6,18 @@ import (
 )
 
 type V3MinMax struct {
-	MinX    float64
-	MinY    float64
-	MinZ    float64
-	MaxX    float64
-	MaxY    float64
-	MaxZ    float64
-	LenX    float64
-	LenY    float64
-	LenZ    float64
-	CenterX float64
-	CenterY float64
-	CenterZ float64
+	MinX    float32
+	MinY    float32
+	MinZ    float32
+	MaxX    float32
+	MaxY    float32
+	MaxZ    float32
+	LenX    float32
+	LenY    float32
+	LenZ    float32
+	CenterX float32
+	CenterY float32
+	CenterZ float32
 }
 
 func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
@@ -31,9 +31,9 @@ func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
 	}
 
 	for i := range datas {
-		x := float64(datas[i].PositionX)
-		y := float64(datas[i].PositionY)
-		z := float64(datas[i].PositionZ)
+		x := datas[i].PositionX
+		y := datas[i].PositionY
+		z := datas[i].PositionZ
 		xyzRange.MinX = min(xyzRange.MinX, x)
 		xyzRange.MinY = min(xyzRange.MinY, y)
 		xyzRange.MinZ = min(xyzRange.MinZ, z)
@@ -86,20 +86,12 @@ func ComputeXyzLogMinMax(datas []*SplatData) *V3MinMax {
 
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 func EncodeMorton3(x, y, z float32, mm *V3MinMax) uint32 {
-	ix := min(1023, uint32(math.Floor(1024.0*(float64(x)-mm.MinX)/mm.LenX)))
-	iy := min(1023, uint32(math.Floor(1024.0*(float64(y)-mm.MinY)/mm.LenY)))
-	iz := min(1023, uint32(math.Floor(1024.0*(float64(z)-mm.MinZ)/mm.LenZ)))
+	ix := min(1023, uint32(math.Floor(float64(1024.0*(x-mm.MinX)/mm.LenX))))
+	iy := min(1023, uint32(math.Floor(float64(1024.0*(y-mm.MinY)/mm.LenY))))
+	iz := min(1023, uint32(math.Floor(float64(1024.0*(z-mm.MinZ)/mm.LenZ))))
 
 	return (Part1By2(iz) << 2) + (Part1By2(iy) << 1) + Part1By2(ix)
 }
-
-// func EncodeMorton3(x, y, z float32, mm *V3MinMax) uint32 {
-// 	ix := min(1023, uint32(1024*(x-mm.MinX)/mm.LenX))
-// 	iy := min(1023, uint32(1024*(y-mm.MinY)/mm.LenY))
-// 	iz := min(1023, uint32(1024*(z-mm.MinZ)/mm.LenZ))
-
-// 	return (Part1By2(iz) << 2) | (Part1By2(iy) << 1) | Part1By2(ix)
-// }
 
 func Part1By1(x uint32) uint32 {
 	x &= 0x0000ffff                 // x = ---- ---- ---- ---- fedc ba98 7654 3210

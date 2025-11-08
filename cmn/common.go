@@ -342,7 +342,7 @@ func ClipUint8(f float64) uint8 {
 }
 
 // 限制范围
-func ClipUint16(f float64) uint16 {
+func ClipUint16(f float32) uint16 {
 	if f < 0 {
 		return 0
 	} else if f > 65535 {
@@ -918,10 +918,10 @@ func SogEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (r byte, g byte,
 	return
 }
 
-func SogEncodeLog(value float32) float64 {
+func SogEncodeLog(value float32) float32 {
 	logVal := math.Log(math.Abs(float64(value)) + 1.0)
 	if value < 0 {
 		logVal = -logVal
 	}
-	return logVal
+	return ClipFloat32(logVal)
 }
