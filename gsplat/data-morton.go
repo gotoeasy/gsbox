@@ -1,20 +1,23 @@
 package gsplat
 
-import "math"
+import (
+	"gsbox/cmn"
+	"math"
+)
 
 type V3MinMax struct {
-	MinX    float32
-	MinY    float32
-	MinZ    float32
-	MaxX    float32
-	MaxY    float32
-	MaxZ    float32
-	LenX    float32
-	LenY    float32
-	LenZ    float32
-	CenterX float32
-	CenterY float32
-	CenterZ float32
+	MinX    float64
+	MinY    float64
+	MinZ    float64
+	MaxX    float64
+	MaxY    float64
+	MaxZ    float64
+	LenX    float64
+	LenY    float64
+	LenZ    float64
+	CenterX float64
+	CenterY float64
+	CenterZ float64
 }
 
 func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
@@ -28,12 +31,47 @@ func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
 	}
 
 	for i := range datas {
-		xyzRange.MinX = min(xyzRange.MinX, datas[i].PositionX)
-		xyzRange.MinY = min(xyzRange.MinY, datas[i].PositionY)
-		xyzRange.MinZ = min(xyzRange.MinZ, datas[i].PositionZ)
-		xyzRange.MaxX = max(xyzRange.MaxX, datas[i].PositionX)
-		xyzRange.MaxY = max(xyzRange.MaxY, datas[i].PositionY)
-		xyzRange.MaxZ = max(xyzRange.MaxZ, datas[i].PositionZ)
+		x := float64(datas[i].PositionX)
+		y := float64(datas[i].PositionY)
+		z := float64(datas[i].PositionZ)
+		xyzRange.MinX = min(xyzRange.MinX, x)
+		xyzRange.MinY = min(xyzRange.MinY, y)
+		xyzRange.MinZ = min(xyzRange.MinZ, z)
+		xyzRange.MaxX = max(xyzRange.MaxX, x)
+		xyzRange.MaxY = max(xyzRange.MaxY, y)
+		xyzRange.MaxZ = max(xyzRange.MaxZ, z)
+	}
+
+	xyzRange.LenX = xyzRange.MaxX - xyzRange.MinX
+	xyzRange.LenY = xyzRange.MaxY - xyzRange.MinY
+	xyzRange.LenZ = xyzRange.MaxZ - xyzRange.MinZ
+	xyzRange.CenterX = (xyzRange.MaxX + xyzRange.MinX) / 2.0
+	xyzRange.CenterY = (xyzRange.MaxY + xyzRange.MinY) / 2.0
+	xyzRange.CenterZ = (xyzRange.MaxZ + xyzRange.MinZ) / 2.0
+
+	return xyzRange
+}
+
+func ComputeXyzLogMinMax(datas []*SplatData) *V3MinMax {
+	xyzRange := &V3MinMax{
+		MinX: math.MaxFloat32,
+		MinY: math.MaxFloat32,
+		MinZ: math.MaxFloat32,
+		MaxX: -math.MaxFloat32,
+		MaxY: -math.MaxFloat32,
+		MaxZ: -math.MaxFloat32,
+	}
+
+	for i := range datas {
+		x := cmn.SogEncodeLog(datas[i].PositionX)
+		y := cmn.SogEncodeLog(datas[i].PositionY)
+		z := cmn.SogEncodeLog(datas[i].PositionZ)
+		xyzRange.MinX = min(xyzRange.MinX, x)
+		xyzRange.MinY = min(xyzRange.MinY, y)
+		xyzRange.MinZ = min(xyzRange.MinZ, z)
+		xyzRange.MaxX = max(xyzRange.MaxX, x)
+		xyzRange.MaxY = max(xyzRange.MaxY, y)
+		xyzRange.MaxZ = max(xyzRange.MaxZ, z)
 	}
 
 	xyzRange.LenX = xyzRange.MaxX - xyzRange.MinX
@@ -48,9 +86,9 @@ func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
 
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 func EncodeMorton3(x, y, z float32, mm *V3MinMax) uint32 {
-	ix := min(1023, uint32(math.Floor(float64(1024.0*(x-mm.MinX)/mm.LenX))))
-	iy := min(1023, uint32(math.Floor(float64(1024.0*(y-mm.MinY)/mm.LenY))))
-	iz := min(1023, uint32(math.Floor(float64(1024.0*(z-mm.MinZ)/mm.LenZ))))
+	ix := min(1023, uint32(math.Floor(1024.0*(float64(x)-mm.MinX)/mm.LenX)))
+	iy := min(1023, uint32(math.Floor(1024.0*(float64(y)-mm.MinY)/mm.LenY)))
+	iz := min(1023, uint32(math.Floor(1024.0*(float64(z)-mm.MinZ)/mm.LenZ)))
 
 	return (Part1By2(iz) << 2) + (Part1By2(iy) << 1) + Part1By2(ix)
 }
