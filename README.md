@@ -75,7 +75,7 @@ Options:
   info <file>                        display the model file information
   -i,  --input <file>                specify the input file
   -o,  --output <file>               specify the output file
-  -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output, default is gzip
+  -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output
   -c,  --comment <text>              specify the comment for ply/spx output
   -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data
   -bs, --block-size <num>            specify the block size(64~1048576) for spx output (default is 65536)
