@@ -831,7 +831,7 @@ func DecodeSpxRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint
 }
 
 func EncodeLog(value float32, times ...int) float32 {
-	if len(times) > 0 && times[0] < 1 {
+	if len(times) < 1 || (len(times) > 0 && times[0] < 1) {
 		return value
 	}
 
