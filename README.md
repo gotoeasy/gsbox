@@ -16,16 +16,16 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 <p>
 
 ## Features
-- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, `.spz(v2,v3)`, and `.sog(v2)` formats for 3DGS.
-- [x] Viewing file header information for `.ply`, `.spx`, `.spz`, `.sog`, and `.ksplat` files, or simple information of `.splat`.
-- [x] Supports data transformation (Rotation, Scale, Translation).
-- [x] Supports merging multiple model files into one.
+- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, `.spz`, and `.sog`
+- [x] Viewing file information for `.ply`, `.splat`, `.spx`, `.spz`, `.sog`, and `.ksplat` files
+- [x] Supports data transformation (Rotation, Scale, Translation)
+- [x] Supports merging multiple model files into one
 
 
 |       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` | `.sog`    |
 |-------|----------|-------------------|----------|----------|---------|-----------|-----------|
 | Read  | &#9745;  |  &#9745;          | &#9745;  | &#9745;  | &#9745; | &#9745;   | &#9745;   |
-| Write | &#9745;  |                   | &#9745;  | &#9745;  | &#9745; |           | &#9745;   |
+| Write | &#9745;  |                   | &#9745;  | &#9745;  | &#9745; |           | &#9745; (v4.2.0+ 🌟)  |
 | Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://github.com/playcanvas/splat-transform">Link</a> |
 
 
