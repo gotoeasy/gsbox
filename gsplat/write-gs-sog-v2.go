@@ -47,6 +47,11 @@ func writeMeta(dir string, mm *V3MinMax, count int) []string {
 	m := new(Meta)
 	m.Version = 2
 	m.Count = count
+	_, comment := cmn.RemoveNonASCII(Args.GetArgIgnorecase("-c", "--comment"))
+	if comment == "" {
+		comment = DefaultSpxComment()
+	}
+	m.Comment = comment
 	var means Means
 	means.Mins = []float32{mm.MinX, mm.MinY, mm.MinZ}
 	means.Maxs = []float32{mm.MaxX, mm.MaxY, mm.MaxZ}
@@ -213,6 +218,7 @@ func getQuatsRgba(rows []*SplatData) []uint8 {
 type Meta struct {
 	Version int    `json:"version"`
 	Count   int    `json:"count"`
+	Comment string `json:"comment,omitempty"`
 	Means   Means  `json:"means"`
 	Scales  Scales `json:"scales"`
 	Quats   Quats  `json:"quats"`
