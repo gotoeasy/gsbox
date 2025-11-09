@@ -22,9 +22,11 @@ func WriteSpx(spxFile string, rows []*SplatData) {
 
 	switch ver {
 	case 1:
-		WriteSpxOpenV1(spxFile, rows, comment, shDegree)
+		WriteSpxV1(spxFile, rows, comment, shDegree)
 	case 2:
 		WriteSpxV2(spxFile, rows, comment, shDegree)
+	case 3:
+		WriteSpxV3(spxFile, rows, comment, shDegree)
 	default:
 		cmn.ExitOnError(errors.New("unknow output version: " + cmn.IntToString(ver)))
 	}

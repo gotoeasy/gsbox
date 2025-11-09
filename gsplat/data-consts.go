@@ -22,8 +22,10 @@ const (
 	BF_SH3 = 3
 	// 块数据类型, 4:球谐系数3级（共15个）
 	BF_SH3_WEBP = 4
-	// 块数据类型, 9:球谐系数调色板
-	BF_SH_PALETTES = 9
+	// 块数据类型, 8:球谐系数调色板
+	BF_SH_PALETTES = 8
+	// 块数据类型, 9:球谐系数调色板, WEBP压缩
+	BF_SH_PALETTES_WEBP = 9
 
 	// [TEST]块数据类型, 10019:每点19字节编码长度，坐标log编码
 	BF_SPLAT10019 = 10019

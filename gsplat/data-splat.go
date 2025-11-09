@@ -30,6 +30,7 @@ type SplatData struct {
 	SH3         []uint8 // sh3 only
 	IsWaterMark bool
 	FlagValue   uint16
+	PaletteIdx  uint16
 }
 
 func TransformDatas(datas []*SplatData) []*SplatData {
