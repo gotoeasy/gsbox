@@ -6,6 +6,13 @@ import (
 	"log"
 )
 
+const NewestSpxVersion = int(3)
+
+func OutputSpxVersion() int {
+	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), NewestSpxVersion)
+	return max(1, min(ver, NewestSpxVersion))
+}
+
 func IsOutputSpx() bool {
 	if Args.HasCmd("p2x", "ply2spx", "s2x", "splat2spx", "z2x", "spz2spx", "x2x", "spx2spx", "k2x", "ksplat2spx", "g2x", "sog2spx") {
 		return true

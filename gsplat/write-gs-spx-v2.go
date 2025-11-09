@@ -13,7 +13,6 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	cmn.ExitOnError(err)
 	defer file.Close()
 
-	log.Println("[Info] output shDegree:", shDegree)
 	writer := bufio.NewWriter(file)
 
 	inputBlockSize := Args.GetArgIgnorecase("-bs", "--block-size")

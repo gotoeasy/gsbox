@@ -25,7 +25,7 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	dims := []int{0, 9, 24, 45}
 	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
 
-	if !IsOutputSog() {
+	if !IsOutputSog() && !(IsOutputSpx() && OutputSpxVersion() >= 3) {
 		for n := range dataCnt {
 			data := rows[n]
 			shs := palettes[indexes[n]]
@@ -48,7 +48,6 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 				data.SH3 = []uint8(nil)
 			}
 		}
-
 		return
 	}
 
