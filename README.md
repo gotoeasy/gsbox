@@ -1,5 +1,5 @@
 <p align=center>
-<img src="https://gotoeasy.github.io/3dgs/gsbox.png"/>
+<img src="https://gotoeasy.github.io/3dgs/gsbox.jpg"/>
 </p>
 
 
