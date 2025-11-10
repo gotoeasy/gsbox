@@ -82,7 +82,7 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		}
 	} else if IsOutputSpx() {
 		for i, d := range rows {
-			d.PaletteIdx = uint16(indexes[i])
+			d.ShPaletteIdx = uint16(indexes[i])
 		}
 	}
 

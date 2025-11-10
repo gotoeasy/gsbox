@@ -1,6 +1,7 @@
 package gsplat
 
 import (
+	"errors"
 	"gsbox/cmn"
 	"log"
 	"path/filepath"
@@ -29,8 +30,15 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 		log.Println("[Warn] hash check failed! CreaterId:" + cmn.Uint32ToString(header.CreaterId) + ", ExclusiveId:" + cmn.Uint32ToString(header.ExclusiveId))
 	}
 
-	if header.Version == 1 {
+	switch header.Version {
+	case 1:
 		return ReadSpxOpenV1(spxFile, header)
+	case 2:
+		return ReadSpxOpenV2(spxFile, header)
+	case 3:
+		return ReadSpxOpenV3(spxFile, header)
+	default:
+		cmn.ExitOnError(errors.New("unsupport spx version: " + cmn.IntToString(int(header.Version))))
+		return nil, nil
 	}
-	return ReadSpxV2(spxFile, header)
 }

@@ -61,6 +61,9 @@ type SpxHeader struct {
 	/** v2 */
 	MaxFlagValue uint16
 
+	/** v3 */
+	ShPalettes []uint8
+
 	checkHash bool
 }
 
@@ -123,7 +126,8 @@ func ParseSpxHeader(spxFile string) *SpxHeader {
 		cmn.ExitOnError(err)
 	}
 
-	if bs[0] == 's' && bs[1] == 'p' && bs[2] == 'x' && (bs[3] == 1 || bs[3] == 2) {
+	spxVer := int(bs[3])
+	if bs[0] == 's' && bs[1] == 'p' && bs[2] == 'x' && (spxVer > 0 && spxVer <= NewestSpxVersion) {
 		header := readSpxHeader(bs)
 		if !CanParseExclusiveId(header.ExclusiveId) && !Args.HasCmd("info") {
 			cmn.ExitOnError(errors.New("unknown exclusive id: " + cmn.Uint32ToString(header.ExclusiveId))) // 内含不识别的专属格式时，退出
