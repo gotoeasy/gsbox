@@ -202,7 +202,6 @@ func genSpxHeaderV2(datas []*SplatData, comment string, shDegree uint8) *SpxHead
 }
 
 func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8) {
-	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
 	}
@@ -290,7 +289,6 @@ func writeSpxBlockSplat19(writer *bufio.Writer, blockDatas []*SplatData, blockSp
 }
 
 func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, compressType uint8, logTimes uint8) {
-	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
 	}
@@ -379,7 +377,6 @@ func writeSpxBlockSplat10019(writer *bufio.Writer, blockDatas []*SplatData, bloc
 }
 
 func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int) {
-	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
 	}
@@ -443,7 +440,6 @@ func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, bl
 }
 
 func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, blockSplatCount int, logTimes uint8) {
-	SortBlockDatas4Compress(blockDatas)
 	for n := range blockSplatCount {
 		blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ = cmn.NormalizeRotations(blockDatas[n].RotationW, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ)
 	}
