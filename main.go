@@ -293,7 +293,7 @@ func printSplat() {
 }
 
 func join() {
-	log.Println("[Info] join the input model files into a single output file")
+	log.Println("[Info] join the input models into one")
 	startTime := time.Now()
 	inputs := gsplat.GetAndCheckInputFiles()
 	output := gsplat.CreateOutputDir()
@@ -301,7 +301,7 @@ func join() {
 	isOutSplat := cmn.Endwiths(output, ".splat", true)
 	isOutSpx := cmn.Endwiths(output, ".spx", true)
 	isOutSpz := cmn.Endwiths(output, ".spz", true)
-	isOutSog := cmn.Endwiths(output, ".sog", true)
+	isOutSog := cmn.Endwiths(output, ".sog", true) || cmn.FileName(output) == "meta.json"
 
 	ok := isOutPly || isOutSplat || isOutSpx || isOutSpz || isOutSog
 	cmn.ExitOnConditionError(!ok, errors.New("output file must be (ply | splat | spx | spz | sog) format"))
@@ -336,6 +336,7 @@ func join() {
 	}
 	gsplat.SetShDegreeFrom(maxFromShDegree)
 	datas = gsplat.ProcessDatas(datas)
+	var fileSize int64
 	if isOutPly {
 		gsplat.WritePly(output, datas)
 	} else if isOutSplat {
@@ -345,10 +346,10 @@ func join() {
 	} else if isOutSpz {
 		gsplat.WriteSpz(output, datas)
 	} else if isOutSog {
-		gsplat.WriteSog(output, datas)
+		fileSize = gsplat.WriteSog(output, datas)
 	}
 	log.Println("[Info]", inputs, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -402,9 +403,9 @@ func ply2sog() {
 	header, datas := gsplat.ReadPly(input)
 	gsplat.SetShDegreeFrom(header.MaxShDegree())
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -472,9 +473,9 @@ func splat2sog() {
 	datas := gsplat.ReadSplat(input)
 	gsplat.SetShDegreeFrom(0)
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), 0))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -542,9 +543,9 @@ func spx2sog() {
 	header, datas := gsplat.ReadSpx(input)
 	gsplat.SetShDegreeFrom(header.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -612,9 +613,9 @@ func spz2sog() {
 	header, datas := gsplat.ReadSpz(input)
 	gsplat.SetShDegreeFrom(header.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -696,9 +697,9 @@ func ksplat2sog() {
 	_, header, datas := gsplat.ReadKsplat(input)
 	gsplat.SetShDegreeFrom(header.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
@@ -766,8 +767,8 @@ func sog2sog() {
 	datas, shDegree := gsplat.ReadSog(input)
 	gsplat.SetShDegreeFrom(shDegree)
 	datas = gsplat.ProcessDatas(datas)
-	gsplat.WriteSog(output, datas)
+	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
-	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas)))
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
