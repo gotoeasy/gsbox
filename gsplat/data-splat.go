@@ -239,7 +239,7 @@ func Sort(rows []*SplatData) {
 	// PLY没有压缩，忽略排序
 	if IsOutputSplat() {
 		SortSplat(rows) // 仅编码，按原作排序
-	} else if IsOutputSpx() || IsOutputSpz() {
+	} else if !IsOutputPly() {
 		SortMorton(rows) // 莫顿码排序，提高压缩率
 	}
 }
@@ -435,11 +435,7 @@ func CompressionInfo(filePath string, num int, inFileSize ...int64) string {
 
 func GetSh45(data *SplatData) []uint8 {
 	var sh45 []uint8
-	if len(data.SH1) > 0 {
-		for i := range 9 {
-			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH1[i]))
-		}
-	} else if len(data.SH3) > 0 {
+	if len(data.SH3) > 0 {
 		for i := range 24 {
 			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH2[i]))
 		}
@@ -450,13 +446,14 @@ func GetSh45(data *SplatData) []uint8 {
 		for i := range 24 {
 			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH2[i]))
 		}
-		for range 21 {
-			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
+	} else if len(data.SH1) > 0 {
+		for i := range 9 {
+			sh45 = append(sh45, cmn.EncodeSpxSH(data.SH1[i]))
 		}
-	} else {
-		for range 45 {
-			sh45 = append(sh45, cmn.EncodeSplatSH(0.0))
-		}
+	}
+
+	for n := len(sh45); n < 45; n++ {
+		sh45 = append(sh45, 128) // cmn.EncodeSplatSH(0.0) = 128
 	}
 	return sh45
 }

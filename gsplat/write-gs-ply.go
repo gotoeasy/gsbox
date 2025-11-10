@@ -68,7 +68,7 @@ func genPlyDataBin(splatData *SplatData, shDegree uint8) []byte {
 		}
 
 		for i := len(shs); i < 45; i++ {
-			shs = append(shs, cmn.EncodeSplatSH(0.0))
+			shs = append(shs, 128) // cmn.EncodeSplatSH(0.0) = 128
 		}
 
 		for c := range 3 {
