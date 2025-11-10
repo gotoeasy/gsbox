@@ -66,6 +66,10 @@ func DefaultSpxComment() string {
 func BlockFormatDesc(bf int) string {
 	rs := ""
 	switch bf {
+	case BF_SPLAT22:
+		rs = "(splat per 20|22 bytes)"
+	case BF_SPLAT220_WEBP:
+		rs = "(splat per 20|22 bytes, webp encoding)"
 	case BF_SPLAT19:
 		rs = "(splat per 19 bytes)"
 	case BF_SPLAT10019:

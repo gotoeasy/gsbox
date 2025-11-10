@@ -9,7 +9,7 @@ import (
 const NewestSpxVersion = int(3)
 
 func OutputSpxVersion() int {
-	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
+	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 3)
 	return max(1, min(ver, NewestSpxVersion))
 }
 

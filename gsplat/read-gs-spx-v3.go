@@ -57,14 +57,14 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 		blkSplatCnt := int(i32BlockSplatCount)       // 数量
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
-		case BF_SPLAT19:
-			readSpxBF_SPLAT19_V3(blockBts, blkSplatCnt, header, &datas)
-		case BF_SPLAT190_WEBP:
-			readSpxBF_SPLAT190_WEBP_V3(blockBts, blkSplatCnt, header, &datas)
+		case BF_SPLAT22:
+			readSpxBF22_V3(blockBts, blkSplatCnt, header, &datas)
+		case BF_SPLAT220_WEBP:
+			readSpxBF220_WEBP_V3(blockBts, blkSplatCnt, header, &datas)
 		case BF_SH_PALETTES:
-			readSpxBF_SH_PALETTES_V3(header, blockBts)
+			readSpxPalettes_V3(header, blockBts)
 		case BF_SH_PALETTES_WEBP:
-			readSpxBF_SH_PALETTES_WEBP_V3(header, blockBts)
+			readSpxPalettesWebp_V3(header, blockBts)
 		default:
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
@@ -78,8 +78,7 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 	return header, datas
 }
 
-func readSpxBF_SPLAT19_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
-	// splat19
+func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		data := &SplatData{}
@@ -93,9 +92,12 @@ func readSpxBF_SPLAT19_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 		data.ColorG = bts[blkSplatCnt*13+n]
 		data.ColorB = bts[blkSplatCnt*14+n]
 		data.ColorA = bts[blkSplatCnt*15+n]
-		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.DecodeSpxRotations(bts[blkSplatCnt*16+n], bts[blkSplatCnt*17+n], bts[blkSplatCnt*18+n])
+		data.RotationW = bts[blkSplatCnt*16+n]
+		data.RotationX = bts[blkSplatCnt*17+n]
+		data.RotationY = bts[blkSplatCnt*18+n]
+		data.RotationZ = bts[blkSplatCnt*19+n]
 		if header.ShDegree > 0 {
-			data.ShPaletteIdx = uint16(bts[blkSplatCnt*19+n]) | (uint16(bts[blkSplatCnt*20+n]) << 8)
+			data.ShPaletteIdx = uint16(bts[blkSplatCnt*20+n]) | (uint16(bts[blkSplatCnt*21+n]) << 8)
 		}
 
 		*datas = append(*datas, data)
@@ -103,8 +105,7 @@ func readSpxBF_SPLAT19_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 
 }
 
-func readSpxBF_SPLAT190_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
-	// WEBP190
+func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
 	size := cmn.BytesToUint32(bts[:4])
 	webps := bts[4 : size+4]
@@ -177,13 +178,13 @@ func readSpxBF_SPLAT190_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHea
 	}
 }
 
-func readSpxBF_SH_PALETTES_V3(header *SpxHeader, blockBts []byte) {
+func readSpxPalettes_V3(header *SpxHeader, blockBts []byte) {
 	// 调色板
 	centroids := blockBts[8:] // 除去前8字节（数量，格式）
 	header.ShPalettes = centroids
 }
 
-func readSpxBF_SH_PALETTES_WEBP_V3(header *SpxHeader, blockBts []byte) {
+func readSpxPalettesWebp_V3(header *SpxHeader, blockBts []byte) {
 	// 调色板
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	centroids, _, _, err := cmn.DecompressWebp(dataBytes)
