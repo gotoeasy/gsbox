@@ -123,9 +123,10 @@ func GetArgKmeansIterations(printLog ...bool) int {
 }
 
 func GetArgKmeansNearestNodes(printLog ...bool) int {
-	val := cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), 20)
+	defaultKn := 15
+	val := cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), defaultKn)
 	if val < 10 || val > 100 {
-		val = 20 // 查找最邻近的N个节点
+		val = defaultKn // 查找最邻近的N个节点
 	}
 	if len(printLog) > 0 && printLog[0] {
 		log.Println("[Info] (Parameter) kn:", val, "(kmeans nearest nodes)")

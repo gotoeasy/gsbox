@@ -58,7 +58,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 		sz := meta.Scales.Codebook[scales[i*4+2]]
 		splatData.ScaleX, splatData.ScaleY, splatData.ScaleZ = sx, sy, sz
 
-		splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.SogDecodeRotations(quats[i*4+0], quats[i*4+1], quats[i*4+2], uint8(quats[i*4+3])-252)
+		splatData.RotationW, splatData.RotationX, splatData.RotationY, splatData.RotationZ = cmn.SogDecodeRotations(quats[i*4+0], quats[i*4+1], quats[i*4+2], uint8(quats[i*4+3]))
 
 		r := float64(meta.Sh0.Codebook[sh0[i*4+0]])
 		g := float64(meta.Sh0.Codebook[sh0[i*4+1]])

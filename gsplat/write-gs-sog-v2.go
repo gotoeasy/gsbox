@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// 仅支持输出单个sog文件
-func WriteSog(sogFile string, rows []*SplatData) {
+// 支持输出zip压缩单个sog文件，或压缩前的多个文件
+func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	ver := Args.GetArgIgnorecase("-ov", "--output-version")
 	cmn.ExitOnConditionError(ver != "" && ver != "2", errors.New("support sog version 2 only"))
 
@@ -19,16 +19,21 @@ func WriteSog(sogFile string, rows []*SplatData) {
 	GetArgKmeansIterations(true)
 	GetArgKmeansNearestNodes(true)
 
-	tmpdir, err := cmn.CreateTempDir()
-	cmn.ExitOnError(err)
-	defer func() {
-		cmn.RemoveAllFile(tmpdir)
-	}()
+	dir := cmn.Dir(sogOrJsonFile)
+	isSog := cmn.Endwiths(sogOrJsonFile, ".sog", true)
+	if isSog {
+		tmpdir, err := cmn.CreateTempDir()
+		cmn.ExitOnError(err)
+		dir = tmpdir
+		defer func() {
+			cmn.RemoveAllFile(tmpdir)
+		}()
+	}
 
-	files, mm := writeMeans(tmpdir, rows)
-	files = append(files, writeScales(tmpdir, rows)...)
-	files = append(files, writeQuats(tmpdir, rows)...)
-	files = append(files, writeSh0(tmpdir, rows)...)
+	files, mm := writeMeans(dir, rows)
+	files = append(files, writeScales(dir, rows)...)
+	files = append(files, writeQuats(dir, rows)...)
+	files = append(files, writeSh0(dir, rows)...)
 	if shDegree > 0 {
 		shN_centroids, shN_labels := ReWriteShByKmeans(rows)
 		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, 960, 1024)
@@ -36,11 +41,21 @@ func WriteSog(sogFile string, rows []*SplatData) {
 		bytsLabels, err := cmn.CompressWebp(shN_labels)
 		cmn.ExitOnError(err)
 
-		files = append(files, writeShN(tmpdir, bytsCentroids, bytsLabels)...)
+		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
 	}
-	files = append(files, writeMeta(tmpdir, mm, len(rows))...)
+	files = append(files, writeMeta(dir, mm, len(rows))...)
 
-	cmn.ZipSogFiles(sogFile, files)
+	if !isSog {
+		fileSize = 0
+		for _, f := range files {
+			fileSize += cmn.GetFileSize(f)
+		}
+	}
+
+	if isSog {
+		cmn.ZipSogFiles(sogOrJsonFile, files)
+	}
+	return
 }
 
 func writeMeta(dir string, mm *V3MinMax, count int) []string {

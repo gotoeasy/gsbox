@@ -923,7 +923,7 @@ func SogDecodeRotations(R0 uint8, R1 uint8, R2 uint8, Ri uint8) (rw byte, rx byt
 	r1 := SogDecodeRotation(R1)
 	r2 := SogDecodeRotation(R2)
 	ri := ClipFloat32(math.Sqrt(float64(max(0, 1.0-r0*r0-r1*r1-r2*r2))))
-	idx := uint8(Ri) - 252
+	idx := Ri - 252
 	switch idx {
 	case 0:
 		rw, rx, ry, rz = EncodeSplatRotations4(ri, r0, r1, r2)
