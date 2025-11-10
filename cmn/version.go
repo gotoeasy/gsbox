@@ -1,3 +1,3 @@
 package cmn
 
-const VER = "v4.3-dev"
+const VER = "v4.2.2"
