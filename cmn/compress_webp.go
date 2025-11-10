@@ -12,30 +12,34 @@ import (
 func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error) {
 	datas := bts
 	if len(bts) != width*height {
-		// 数据少的没必要webp编码压缩，只考虑最终图片至少32*32以上大小的场景
 		datas = bts[:]
-		fullRows := len(bts) / width
-		partRowLen := len(bts) % width
-		dataRows := fullRows
-		if partRowLen > 0 {
-			dataRows++
-		}
-		if partRowLen > 0 {
-			// 不足一行的，取上行同列填充
-			start := fullRows*width - width + partRowLen
-			addPartRow := bts[start : start+width-partRowLen]
-			datas = append(datas, addPartRow...)
+		dataPixCnt := len(bts) / 4
+		fullRows := dataPixCnt / width                                     // 完整数据行的数量
+		partRowDataPix := dataPixCnt % width                               // 部分数据行中数据的像素数量
+		dataRows := int(math.Ceil((float64(dataPixCnt) / float64(width)))) // 总数据行数
+		if partRowDataPix > 0 {
+			// 部分数据行自动填充
+			if dataRows > 1 {
+				// 多行，取上行同列填充
+				start := fullRows*width - width + partRowDataPix
+				addPartRow := bts[start : start+width-partRowDataPix]
+				datas = append(datas, addPartRow...)
+			} else {
+				// 仅1行，用最后数据像素填充
+				pix := bts[dataPixCnt*4-4 : dataPixCnt*4]
+				for i := dataPixCnt; i < width; i++ {
+					datas = append(datas, pix...)
+				}
+			}
 		}
 
-		addFullRowCnt := height - dataRows // max 3
-		for i := range addFullRowCnt {
-			// 空行的，倒序逐行取整行填充
-			srcRow := dataRows - 1 - i
-			if partRowLen > 0 {
-				srcRow--
+		// 参数指定行比数据行大，用最后行补足
+		if height > dataRows {
+			addRowCnt := height - dataRows
+			row := datas[fullRows*width*4 : (fullRows+1)*width*4]
+			for range addRowCnt {
+				datas = append(datas, row...)
 			}
-			addFullRow := bts[(srcRow-1)*width : srcRow*width]
-			datas = append(datas, addFullRow...)
 		}
 	}
 

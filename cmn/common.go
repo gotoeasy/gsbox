@@ -918,6 +918,25 @@ func SogEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (r byte, g byte,
 	return
 }
 
+func SogDecodeRotations(R0 uint8, R1 uint8, R2 uint8, Ri uint8) (rw byte, rx byte, ry byte, rz byte) {
+	r0 := SogDecodeRotation(R0)
+	r1 := SogDecodeRotation(R1)
+	r2 := SogDecodeRotation(R2)
+	ri := ClipFloat32(math.Sqrt(float64(max(0, 1.0-r0*r0-r1*r1-r2*r2))))
+	idx := uint8(Ri) - 252
+	switch idx {
+	case 0:
+		rw, rx, ry, rz = EncodeSplatRotations4(ri, r0, r1, r2)
+	case 1:
+		rw, rx, ry, rz = EncodeSplatRotations4(r0, ri, r1, r2)
+	case 2:
+		rw, rx, ry, rz = EncodeSplatRotations4(r0, r1, ri, r2)
+	case 3:
+		rw, rx, ry, rz = EncodeSplatRotations4(r0, r1, r2, ri)
+	}
+	return
+}
+
 func SogEncodeLog(value float32) float32 {
 	logVal := math.Log(math.Abs(float64(value)) + 1.0)
 	if value < 0 {
