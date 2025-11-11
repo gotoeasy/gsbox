@@ -363,14 +363,12 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 func writePalettes_V3(writer *bufio.Writer, shCentroids []byte, compressType uint8) {
 	log.Println("[Info] palettes block format:", BF_SH_PALETTES, BlockFormatDesc(BF_SH_PALETTES))
 
-	compressBytes, err := cmn.CompressXZ(shCentroids)
-	cmn.ExitOnError(err)
-
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(0)...)              // 占位
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH_PALETTES)...) // 球谐系数调色板
-	bts = append(bts, compressBytes...)                     // 数据
+	bts = append(bts, shCentroids...)                       // 数据
 
+	var err error
 	if compressType == CT_XZ {
 		bts, err = cmn.CompressXZ(bts)
 	} else {
