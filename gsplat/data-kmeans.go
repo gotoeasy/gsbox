@@ -54,10 +54,10 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	paletteSize := len(palettes)
 	maxPaletteIdx := paletteSize - 1
 	height := int(math.Ceil(float64(paletteSize) / 64.0))
-	centroidsPixCnt := height * 64
-	shN_centroids = make([]uint8, centroidsPixCnt*15*4)
+	centroidsCnt := height * 64
+	shN_centroids = make([]uint8, centroidsCnt*15*4)
 	index := 0
-	for range centroidsPixCnt {
+	for range centroidsCnt {
 		shs := palettes[index]
 		for k := range 15 {
 			shN_centroids[index*15*4+k*4+0] = shs[k*3+0]

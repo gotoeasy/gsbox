@@ -62,7 +62,7 @@ type SpxHeader struct {
 	MaxFlagValue uint16
 
 	/** v3 */
-	ShPalettes []uint8
+	Palettes []uint8
 
 	checkHash bool
 }

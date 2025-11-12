@@ -169,9 +169,7 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SogDecodeRotations(rx, ry, rz, ri)
 
 		if len(btsPaletteIdxs) > 0 {
-			b0 := uint16(btsPaletteIdxs[n*4+0])
-			b1 := uint16(btsPaletteIdxs[n*4+1])
-			data.ShPaletteIdx = b0 & (b1 << 8)
+			data.ShPaletteIdx = uint16(btsPaletteIdxs[n*4+0]) | (uint16(btsPaletteIdxs[n*4+1]) << 8)
 		}
 
 		*datas = append(*datas, data)
@@ -180,22 +178,21 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 
 func readSpxPalettes_V3(header *SpxHeader, blockBts []byte) {
 	// 调色板
-	centroids := blockBts[8:] // 除去前8字节（数量，格式）
-	header.ShPalettes = centroids
+	header.Palettes = blockBts[8:] // 除去前8字节（数量，格式）
 }
 
 func readSpxPalettesWebp_V3(header *SpxHeader, blockBts []byte) {
-	// 调色板
+	// 调色板webp
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	centroids, _, _, err := cmn.DecompressWebp(dataBytes)
 	cmn.ExitOnError(err)
-	header.ShPalettes = centroids
+	header.Palettes = centroids
 }
 
 func setAllShByPalettes(header *SpxHeader, rows []*SplatData) {
-	if len(header.ShPalettes) > 0 {
+	if len(header.Palettes) > 0 {
 		for _, d := range rows {
-			setShByPalettes(d, header.ShPalettes, header.ShDegree)
+			setShByPalettes(d, header.Palettes, header.ShDegree)
 		}
 	}
 }
