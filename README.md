@@ -31,11 +31,11 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 | Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://github.com/playcanvas/splat-transform">Link</a> |
 
 
-<br>
-
 #### Docs(By Zread AI)
 - https://zread.ai/gotoeasy/gsbox
 
+
+<br>
 
 ## `.spx`
 - The `.spx` format is flexible, expandable, and supports proprietary data protection. It incorporates encoding methods from `.splat`, `.spz` and `.sog` formats and adds block compression processing. It supports progressive loading and is suitable for large file models.
