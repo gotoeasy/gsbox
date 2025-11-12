@@ -810,18 +810,6 @@ func NormalizeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (byte, byte, byt
 	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
 }
 
-func NormalizeRotations3(rx uint8, ry uint8, rz uint8, rw uint8) (byte, byte, byte, byte) {
-	r0 := float64(rx)/128.0 - 1.0
-	r1 := float64(ry)/128.0 - 1.0
-	r2 := float64(rz)/128.0 - 1.0
-	r3 := float64(rw)/128.0 - 1.0
-	if r3 < 0 {
-		r0, r1, r2, r3 = -r0, -r1, -r2, -r3
-	}
-	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
-}
-
 func DecodeSpxRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint8) {
 	r1 := float64(rx)/128.0 - 1.0
 	r2 := float64(ry)/128.0 - 1.0

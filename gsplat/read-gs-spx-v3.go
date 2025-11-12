@@ -97,7 +97,7 @@ func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *
 		data.RotationY = bts[blkSplatCnt*18+n]
 		data.RotationZ = bts[blkSplatCnt*19+n]
 		if header.ShDegree > 0 {
-			data.ShPaletteIdx = uint16(bts[blkSplatCnt*20+n]) | (uint16(bts[blkSplatCnt*21+n]) << 8)
+			data.PaletteIdx = uint16(bts[blkSplatCnt*20+n]) | (uint16(bts[blkSplatCnt*21+n]) << 8)
 		}
 
 		*datas = append(*datas, data)
@@ -169,7 +169,7 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SogDecodeRotations(rx, ry, rz, ri)
 
 		if len(btsPaletteIdxs) > 0 {
-			data.ShPaletteIdx = uint16(btsPaletteIdxs[n*4+0]) | (uint16(btsPaletteIdxs[n*4+1]) << 8)
+			data.PaletteIdx = uint16(btsPaletteIdxs[n*4+0]) | (uint16(btsPaletteIdxs[n*4+1]) << 8)
 		}
 
 		*datas = append(*datas, data)
@@ -201,7 +201,7 @@ func setShByPalettes(d *SplatData, palettes []uint8, shDegree uint8) {
 	var shs []uint8
 	for i := range 15 {
 		for j := range 3 {
-			shs = append(shs, palettes[int(d.ShPaletteIdx)*60+i*4+j])
+			shs = append(shs, palettes[int(d.PaletteIdx)*60+i*4+j])
 		}
 	}
 	switch shDegree {

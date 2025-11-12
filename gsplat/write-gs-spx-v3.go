@@ -45,9 +45,6 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 		}
 	}
 
-	for _, d := range rows {
-		d.RotationW, d.RotationX, d.RotationY, d.RotationZ = cmn.NormalizeRotations(d.RotationW, d.RotationX, d.RotationY, d.RotationZ)
-	}
 	shCentroids, _ := ReWriteShByKmeans(rows)
 
 	// 分块
@@ -193,6 +190,9 @@ func genSpxHeaderV3(datas []*SplatData, comment string, shDegree uint8) *SpxHead
 }
 
 func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8, compressType uint8) {
+	for _, d := range blockDatas {
+		d.RotationW, d.RotationX, d.RotationY, d.RotationZ = cmn.NormalizeRotations(d.RotationW, d.RotationX, d.RotationY, d.RotationZ)
+	}
 
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(blockDatas)))...) // 块中的高斯点个数
@@ -260,10 +260,10 @@ func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uin
 
 	if shDegree > 0 {
 		for _, d := range blockDatas {
-			bts = append(bts, byte(d.ShPaletteIdx&0xFF))
+			bts = append(bts, byte(d.PaletteIdx&0xFF))
 		}
 		for _, d := range blockDatas {
-			bts = append(bts, byte(d.ShPaletteIdx>>8))
+			bts = append(bts, byte(d.PaletteIdx>>8))
 		}
 	}
 
@@ -345,7 +345,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 	if shDegree > 0 {
 		bsTmp = make([]byte, 0)
 		for _, d := range blockDatas {
-			bsTmp = append(bsTmp, byte(d.ShPaletteIdx&0xFF), byte(d.ShPaletteIdx>>8), 0, 255)
+			bsTmp = append(bsTmp, byte(d.PaletteIdx&0xFF), byte(d.PaletteIdx>>8), 0, 255)
 		}
 		bsTmp, err = cmn.CompressWebp(bsTmp)
 		cmn.ExitOnError(err)
