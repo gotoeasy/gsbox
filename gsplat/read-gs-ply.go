@@ -52,60 +52,73 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 	datas := make([]*SplatData, header.VertexCount)
 	if header.ChunkCount == 0 {
 		// 标准3dgs的ply
-		for i := 0; i < header.VertexCount; i++ {
-			dataBytes := make([]byte, header.RowLength)
+		const batchSize = 1024 // 每次读取的最大点数
+		for i := 0; i < header.VertexCount; i += batchSize {
+			// 计算本次读取的点数
+			batchCount := batchSize
+			if i+batchCount > header.VertexCount {
+				batchCount = header.VertexCount - i
+			}
+
+			// 一次性读取一批数据
+			dataBytes := make([]byte, batchCount*header.RowLength)
 			_, err := file.ReadAt(dataBytes, int64(header.HeaderLength+i*header.RowLength))
 			cmn.ExitOnError(err)
 
-			data := &SplatData{}
-			data.PositionX = cmn.ClipFloat32(readValue(header, "x", dataBytes))
-			data.PositionY = cmn.ClipFloat32(readValue(header, "y", dataBytes))
-			data.PositionZ = cmn.ClipFloat32(readValue(header, "z", dataBytes))
-			data.ScaleX = cmn.ClipFloat32(readValue(header, "scale_0", dataBytes))
-			data.ScaleY = cmn.ClipFloat32(readValue(header, "scale_1", dataBytes))
-			data.ScaleZ = cmn.ClipFloat32(readValue(header, "scale_2", dataBytes))
-			data.ColorR = cmn.EncodeSplatColor(readValue(header, "f_dc_0", dataBytes))
-			data.ColorG = cmn.EncodeSplatColor(readValue(header, "f_dc_1", dataBytes))
-			data.ColorB = cmn.EncodeSplatColor(readValue(header, "f_dc_2", dataBytes))
-			data.ColorA = cmn.EncodeSplatOpacity(readValue(header, "opacity", dataBytes))
-			data.RotationW = cmn.EncodeSplatRotation(readValue(header, "rot_0", dataBytes))
-			data.RotationX = cmn.EncodeSplatRotation(readValue(header, "rot_1", dataBytes))
-			data.RotationY = cmn.EncodeSplatRotation(readValue(header, "rot_2", dataBytes))
-			data.RotationZ = cmn.EncodeSplatRotation(readValue(header, "rot_3", dataBytes))
+			// 按点处理这批数据
+			for j := 0; j < batchCount; j++ {
+				offset := j * header.RowLength
+				data := &SplatData{}
+				rowBytes := dataBytes[offset:]
+				data.PositionX = cmn.ClipFloat32(readValue(header, "x", rowBytes))
+				data.PositionY = cmn.ClipFloat32(readValue(header, "y", rowBytes))
+				data.PositionZ = cmn.ClipFloat32(readValue(header, "z", rowBytes))
+				data.ScaleX = cmn.ClipFloat32(readValue(header, "scale_0", rowBytes))
+				data.ScaleY = cmn.ClipFloat32(readValue(header, "scale_1", rowBytes))
+				data.ScaleZ = cmn.ClipFloat32(readValue(header, "scale_2", rowBytes))
+				data.ColorR = cmn.EncodeSplatColor(readValue(header, "f_dc_0", rowBytes))
+				data.ColorG = cmn.EncodeSplatColor(readValue(header, "f_dc_1", rowBytes))
+				data.ColorB = cmn.EncodeSplatColor(readValue(header, "f_dc_2", rowBytes))
+				data.ColorA = cmn.EncodeSplatOpacity(readValue(header, "opacity", rowBytes))
+				data.RotationW = cmn.EncodeSplatRotation(readValue(header, "rot_0", rowBytes))
+				data.RotationX = cmn.EncodeSplatRotation(readValue(header, "rot_1", rowBytes))
+				data.RotationY = cmn.EncodeSplatRotation(readValue(header, "rot_2", rowBytes))
+				data.RotationZ = cmn.EncodeSplatRotation(readValue(header, "rot_3", rowBytes))
 
-			datas[i] = data
+				datas[i+j] = data
 
-			shDim := 0
-			maxShDegree := header.MaxShDegree()
-			switch maxShDegree {
-			case 1:
-				shDim = 3
-			case 2:
-				shDim = 8
-			case 3:
-				shDim = 15
-			}
-
-			shs := make([]byte, 45)
-			n := 0
-			for j := range shDim {
-				for c := range 3 {
-					shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), dataBytes))
-					n++
+				shDim := 0
+				maxShDegree := header.MaxShDegree()
+				switch maxShDegree {
+				case 1:
+					shDim = 3
+				case 2:
+					shDim = 8
+				case 3:
+					shDim = 15
 				}
-			}
-			for ; n < 45; n++ {
-				shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
-			}
 
-			switch maxShDegree {
-			case 3:
-				data.SH2 = shs[:24]
-				data.SH3 = shs[24:]
-			case 2:
-				data.SH2 = shs[:24]
-			case 1:
-				data.SH1 = shs[:9]
+				shs := make([]byte, 45)
+				n := 0
+				for j := 0; j < shDim; j++ {
+					for c := range 3 {
+						shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), rowBytes))
+						n++
+					}
+				}
+				for ; n < 45; n++ {
+					shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
+				}
+
+				switch maxShDegree {
+				case 3:
+					data.SH2 = shs[:24]
+					data.SH3 = shs[24:]
+				case 2:
+					data.SH2 = shs[:24]
+				case 1:
+					data.SH1 = shs[:9]
+				}
 			}
 		}
 
