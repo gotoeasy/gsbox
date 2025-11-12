@@ -27,9 +27,10 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
+	// 默认使用webp编码压缩
 	bf := cmn.StringToInt(Args.GetArgIgnorecase("-bf", "--block-format"), BF_SPLAT220_WEBP)
 	if bf != BF_SPLAT22 && bf != BF_SPLAT220_WEBP {
-		bf = BF_SPLAT22 // 默认格式
+		bf = BF_SPLAT22 // 参数指定的格式有误时的默认格式，偏向速度
 	}
 	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (Parameter) block size:", blockSize)
@@ -189,6 +190,8 @@ func genSpxHeaderV3(datas []*SplatData, comment string, shDegree uint8) *SpxHead
 	return header
 }
 
+// 此格式在保持良好的压缩率基础上，更偏向于编码和解码速度
+// 选择gizp时最快，选xz时较快，速度优于webp，压缩率通常16倍以上，略逊于webp
 func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8, compressType uint8) {
 	for _, d := range blockDatas {
 		d.RotationW, d.RotationX, d.RotationY, d.RotationZ = cmn.NormalizeRotations(d.RotationW, d.RotationX, d.RotationY, d.RotationZ)
@@ -289,6 +292,9 @@ func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uin
 	}
 }
 
+// 此格式在保持良好的性能基础上，更偏向于压缩率
+// 使用多CPU和近似计算等优化方式，加速球谐系数调色板的提取计算过程
+// 使用webp编码压缩，本机安装libwebp时会自动调用以获取最好的压缩性能和压缩效果，压缩率通常20倍左右，最高可达25倍左右
 func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8) {
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(blockDatas)))...) // 块中的高斯点个数
