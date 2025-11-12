@@ -82,9 +82,9 @@ func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		data := &SplatData{}
-		data.PositionX = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n])
-		data.PositionY = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n])
-		data.PositionZ = cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n])
+		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), 1)
+		data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), 1)
+		data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), 1)
 		data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
 		data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
 		data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
@@ -197,30 +197,13 @@ func setAllShByPalettes(header *SpxHeader, rows []*SplatData) {
 	}
 }
 
-func setShByPalettes(d *SplatData, centroids []uint8, shDegree uint8) {
-	col := (d.ShPaletteIdx & 63) * 15 // 同 (n % 64) * 15
-	row := d.ShPaletteIdx >> 6        // 同 Math.floor(n / 64)
-	offset := int(row*960 + col)      // 960 = 64 * 15
-
-	sh1 := make([]uint8, 9)
-	sh2 := make([]uint8, 15)
-	sh3 := make([]uint8, 21)
-	for d := range 3 {
-		for k := range 3 {
-			sh1[k*3+d] = centroids[(offset+k)*4+d]
-		}
-		for k := range 5 {
-			sh2[k*3+d] = centroids[(offset+3+k)*4+d]
-		}
-		for k := range 7 {
-			sh3[k*3+d] = centroids[(offset+8+k)*4+d]
+func setShByPalettes(d *SplatData, palettes []uint8, shDegree uint8) {
+	var shs []uint8
+	for i := range 15 {
+		for j := range 3 {
+			shs = append(shs, palettes[int(d.ShPaletteIdx)*60+i*4+j])
 		}
 	}
-	var shs []uint8
-	shs = append(shs, sh1...)
-	shs = append(shs, sh2...)
-	shs = append(shs, sh3...)
-
 	switch shDegree {
 	case 3:
 		d.SH2 = shs[:24]
