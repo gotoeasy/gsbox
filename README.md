@@ -30,7 +30,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 
 
 ## `.spx`
-- The `.spx` format is flexible, expandable, and supports proprietary data protection. It incorporates encoding methods from both `.splat` and `.spz` formats and adds block compression processing. It supports progressive loading and is suitable for large file models.
+- The `.spx` format is flexible, expandable, and supports proprietary data protection. It incorporates encoding methods from `.splat`, `.spz` and `.sog` formats and adds block compression processing. It supports progressive loading and is suitable for large file models.
 - For detailed information about the `.spx` format, please refer to [SPX Specification](https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md)
 - To render and view models in the `.spx` format, you can use [Reall3dViewer](https://github.com/reall3d-com/Reall3dViewer). This viewer is built on Three.js and supports features such as marking, measurements, and text watermarks.
 
