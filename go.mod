@@ -5,7 +5,6 @@ go 1.25.1
 require (
 	github.com/HugoSmits86/nativewebp v1.2.0
 	github.com/gen2brain/webp v0.5.5
-	github.com/klauspost/compress v1.18.0
 	github.com/ulikunitz/xz v0.5.12
 )
 
