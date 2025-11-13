@@ -29,8 +29,8 @@ func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree uint
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
-	log.Println("[Info] (Parameter) block format:", BF_SPLAT20, BlockFormatDesc(BF_SPLAT20))
-	log.Println("[Info] (Parameter) block size:", blockSize)
+	log.Println("[Info] (parameter) block format:", BF_SPLAT20, BlockFormatDesc(BF_SPLAT20))
+	log.Println("[Info] (parameter) block size:", blockSize)
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize

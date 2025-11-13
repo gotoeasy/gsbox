@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"image"
+	"log"
 	"math"
 
 	"github.com/HugoSmits86/nativewebp"
@@ -55,4 +56,10 @@ func ComputeWidthHeight(length int) (width int, height int) {
 	w := math.Ceil(math.Sqrt(float64(length))/4.0) * 4.0
 	h := math.Ceil(float64(length)/w/4.0) * 4.0
 	return int(w), int(h)
+}
+
+func PrintLibwebpInfo(hasWebp bool) {
+	if hasWebp && webp.Dynamic() == nil {
+		log.Println("[Info] using libwebp for webp compression - perfect setup")
+	}
 }

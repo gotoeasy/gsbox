@@ -32,8 +32,8 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 	if bf != BF_SPLAT22 && bf != BF_SPLAT220_WEBP {
 		bf = BF_SPLAT22 // 参数指定的格式有误时的默认格式，偏向速度
 	}
-	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
-	log.Println("[Info] (Parameter) block size:", blockSize)
+	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
+	log.Println("[Info] (parameter) block size:", blockSize)
 
 	var compressType uint8 = CT_XZ // 默认xz
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
@@ -70,10 +70,12 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 	// 写文件
 	palettesDone := shDegree == 0
 	writeCnt := 0
+	hasWebp := false
 	for _, blockDatas := range blockList {
 		if bf == BF_SPLAT220_WEBP && (len(blockDatas) >= MinWebpBlockSize || Args.HasArgIgnorecase("-bf", "--block-format")) {
 			// 默认提示WEBP编码且数据量够大，或强制参数要求WEBP编码
 			writeSpxBF220_WEBP_V3(writer, blockDatas, shDegree)
+			hasWebp = true
 		} else {
 			writeSpxBF22_V3(writer, blockDatas, shDegree, compressType)
 		}
@@ -83,6 +85,7 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 			// 调色板插在较前处写入，避免中断下载后无法读取
 			if bf == BF_SPLAT220_WEBP || compressType == CT_XZ {
 				writePalettesWebp_V3(writer, shCentroids)
+				hasWebp = true
 			} else {
 				writePalettes_V3(writer, shCentroids, compressType)
 			}
@@ -94,6 +97,7 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 		// 确保调色板存在时会写入
 		if bf == BF_SPLAT220_WEBP || compressType == CT_XZ {
 			writePalettesWebp_V3(writer, shCentroids)
+			hasWebp = true
 		} else {
 			writePalettes_V3(writer, shCentroids, compressType)
 		}
@@ -101,6 +105,7 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 
 	err = writer.Flush()
 	cmn.ExitOnError(err)
+	cmn.PrintLibwebpInfo(hasWebp)
 }
 
 func genSpxHeaderV3(datas []*SplatData, comment string, shDegree uint8) *SpxHeader {

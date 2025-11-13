@@ -117,7 +117,7 @@ func GetArgKmeansIterations(printLog ...bool) int {
 		val = 10 // 默认迭代10次
 	}
 	if len(printLog) > 0 && printLog[0] {
-		log.Println("[Info] (Parameter) ki:", val, "(kmeans iterations)")
+		log.Println("[Info] (parameter) ki:", val, "(kmeans iterations)")
 	}
 	return val
 }
@@ -129,7 +129,7 @@ func GetArgKmeansNearestNodes(printLog ...bool) int {
 		val = defaultKn // 查找最邻近的N个节点
 	}
 	if len(printLog) > 0 && printLog[0] {
-		log.Println("[Info] (Parameter) kn:", val, "(kmeans nearest nodes)")
+		log.Println("[Info] (parameter) kn:", val, "(kmeans nearest nodes)")
 	}
 	return val
 }

@@ -44,6 +44,7 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
 	}
 	files = append(files, writeMeta(dir, mm, len(rows))...)
+	cmn.PrintLibwebpInfo(true)
 
 	if !isSog {
 		fileSize = 0

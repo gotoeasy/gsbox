@@ -31,8 +31,8 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	if bf != BF_SPLAT19 && bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT10190_WEBP && bf != BF_SPLAT10019 {
 		bf = BF_SPLAT190_WEBP // 默认格式
 	}
-	log.Println("[Info] (Parameter) block format:", bf, BlockFormatDesc(bf))
-	log.Println("[Info] (Parameter) block size:", blockSize)
+	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
+	log.Println("[Info] (parameter) block size:", blockSize)
 
 	var compressType uint8 = CT_XZ // 默认xz
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
