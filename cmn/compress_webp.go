@@ -7,8 +7,8 @@ import (
 	"log"
 	"math"
 
-	"github.com/HugoSmits86/nativewebp"
-	"github.com/gen2brain/webp"
+	gen2brainWebp "github.com/gen2brain/webp"
+	"golang.org/x/image/webp"
 )
 
 func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error) {
@@ -20,13 +20,13 @@ func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error
 	var buf bytes.Buffer
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	copy(img.Pix, datas)
-	options := webp.Options{
+	options := gen2brainWebp.Options{
 		Quality:  90,    // 质量，默认75，最大100
 		Lossless: true,  // 无损
 		Method:   6,     // 越大压缩效果越好速度最慢，默认4，最大6
 		Exact:    false, // 透明时不需要保持RGB值
 	}
-	err := webp.Encode(&buf, img, options)
+	err := gen2brainWebp.Encode(&buf, img, options)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +40,7 @@ func CompressWebp(bts []byte) ([]byte, error) {
 
 func DecompressWebp(webpBytes []byte) (rgbas []byte, width int, height int, err error) {
 	reader := bytes.NewReader(webpBytes)
-	img, err := nativewebp.Decode(reader)
+	img, err := webp.Decode(reader)
 	if err != nil {
 		return nil, 0, 0, err
 	}
@@ -59,7 +59,7 @@ func ComputeWidthHeight(length int) (width int, height int) {
 }
 
 func PrintLibwebpInfo(hasWebp bool) {
-	if hasWebp && webp.Dynamic() == nil {
+	if hasWebp && gen2brainWebp.Dynamic() == nil {
 		log.Println("[Info] using libwebp for webp compression - perfect setup")
 	}
 }
