@@ -2,10 +2,9 @@ package gsplat
 
 import "gsbox/cmn"
 
-const CreaterIdOpen uint32 = 1202056903  // 创建者ID，开放版
-const ExclusiveIdOpen uint32 = 0         // 专属ID，开放版
-const CreaterIdPrd uint32 = 0            // 创建者ID，官方
-const ExclusiveIdPrd uint32 = 3141592653 // 专属ID，专业版
+const CreaterIdOpen uint32 = 1202056903 // 创建者ID，开放版
+const ExclusiveIdOpen uint32 = 0        // 专属ID，开放版
+const CreaterIdPrd uint32 = 0           // 创建者ID，官方
 
 // 数据处理
 func ProcessDatas(datas []*SplatData) []*SplatData {
@@ -36,7 +35,7 @@ func CanParseExclusiveId(id uint32) bool {
 }
 
 func IsPrdExclusiveId(id uint32) bool {
-	return id == ExclusiveIdPrd
+	return false
 }
 
 func GetSpxOutputHeaderHash(bts []byte) uint32 {
@@ -51,12 +50,28 @@ func GetLodFlag() uint8 {
 	return 0
 }
 
+func WriteSpxV1(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+	WriteSpxOpenV1(spxFile, rows, comment, shDegree)
+}
+
+func ReadSpxV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
+	return ReadSpxOpenV1(spxFile, header)
+}
+
 func WriteSpxV2(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	WriteSpxOpenV2(spxFile, rows, comment, shDegree)
 }
 
 func ReadSpxV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 	return ReadSpxOpenV2(spxFile, header)
+}
+
+func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+	WriteSpxOpenV3(spxFile, rows, comment, shDegree)
+}
+
+func ReadSpxV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
+	return ReadSpxOpenV3(spxFile, header)
 }
 
 func DefaultSpxComment() string {

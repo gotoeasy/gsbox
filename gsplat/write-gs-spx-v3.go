@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
