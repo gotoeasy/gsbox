@@ -32,7 +32,12 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		Reserved:       0,
 	}
 
-	ReWriteShByKmeans(rows)
+	if GetArgShDegree() > 0 && inputSogHeader == nil && inputSpxHeader == nil {
+		// 非x2z, g2z
+		GetArgKmeansIterations(true)
+		GetArgKmeansNearestNodes(true)
+		ReWriteShByKmeans(rows)
+	}
 
 	bts := make([]byte, 0)
 	bts = append(bts, h.ToBytes()...)
