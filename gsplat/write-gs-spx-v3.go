@@ -35,6 +35,11 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (parameter) block size:", blockSize)
 
+	if GetArgShDegree() > 0 {
+		GetArgKmeansIterations(true)
+		GetArgKmeansNearestNodes(true)
+	}
+
 	var compressType uint8 = CT_XZ // 默认xz
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
 	if bf != BF_SPLAT220_WEBP {
@@ -46,7 +51,10 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 		}
 	}
 
-	shCentroids, _ := ReWriteShByKmeans(rows)
+	var shCentroids []uint8
+	if GetArgShDegree() > 0 {
+		shCentroids, _ = ReWriteShByKmeans(rows)
+	}
 
 	// 分块
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
@@ -81,7 +89,7 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 		}
 		writeCnt += len(blockDatas)
 
-		if !palettesDone && writeCnt >= DefaultBlockSize*4 {
+		if !palettesDone && writeCnt >= DefaultBlockSize*4 && len(shCentroids) > 0 {
 			// 调色板插在较前处写入，避免中断下载后无法读取
 			if bf == BF_SPLAT220_WEBP || compressType == CT_XZ {
 				writePalettesWebp_V3(writer, shCentroids)
@@ -93,7 +101,7 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 		}
 	}
 
-	if !palettesDone {
+	if !palettesDone && len(shCentroids) > 0 {
 		// 确保调色板存在时会写入
 		if bf == BF_SPLAT220_WEBP || compressType == CT_XZ {
 			writePalettesWebp_V3(writer, shCentroids)
