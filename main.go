@@ -12,6 +12,7 @@ import (
 
 func main() {
 	args := gsplat.InitArgs()
+	startTime := time.Now()
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
@@ -84,6 +85,10 @@ func main() {
 		info(args)
 	} else {
 		usage()
+	}
+	dur := time.Since(startTime).Milliseconds()
+	if dur < 1000 {
+		time.Sleep(1 * time.Second) // wait 1 second to get latest version
 	}
 	fmt.Print(cmn.NewVersionMessage)
 }
@@ -279,9 +284,9 @@ func printSplat() {
 		datas = ds
 		shDegree = max(header.ShDegree, shDegree)
 	} else if cmn.Endwiths(input, ".sog", true) || cmn.FileName(input) == "meta.json" {
-		ds, degree := gsplat.ReadSog(input)
+		ds, h := gsplat.ReadSog(input)
 		datas = ds
-		shDegree = max(degree, shDegree)
+		shDegree = max(h.ShDegree, shDegree)
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
@@ -329,8 +334,8 @@ func join() {
 			maxFromShDegree = max(uint8(header.ShDegree), maxFromShDegree)
 			datas = append(datas, ds...)
 		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" || (cmn.Startwiths(file, "http") && cmn.Endwiths(file, "/meta.json")) {
-			ds, degree := gsplat.ReadSog(file)
-			maxFromShDegree = max(uint8(degree), maxFromShDegree)
+			ds, h := gsplat.ReadSog(file)
+			maxFromShDegree = max(h.ShDegree, maxFromShDegree)
 			datas = append(datas, ds...)
 		}
 	}
@@ -708,8 +713,8 @@ func sog2ply() {
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
-	datas, shDegree := gsplat.ReadSog(input)
-	gsplat.SetShDegreeFrom(shDegree)
+	datas, h := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(h.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	gsplat.WritePly(output, datas)
 	log.Println("[Info]", input, " --> ", output)
@@ -722,8 +727,8 @@ func sog2splat() {
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
-	datas, shDegree := gsplat.ReadSog(input)
-	gsplat.SetShDegreeFrom(shDegree)
+	datas, h := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(h.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	gsplat.WriteSplat(output, datas)
 	log.Println("[Info]", input, " --> ", output)
@@ -736,8 +741,8 @@ func sog2spx() {
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
-	datas, shDegree := gsplat.ReadSog(input)
-	gsplat.SetShDegreeFrom(shDegree)
+	datas, h := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(h.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	gsplat.WriteSpx(output, datas)
 	log.Println("[Info]", input, " --> ", output)
@@ -750,8 +755,8 @@ func sog2spz() {
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
-	datas, shDegree := gsplat.ReadSog(input)
-	gsplat.SetShDegreeFrom(shDegree)
+	datas, h := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(h.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	gsplat.WriteSpz(output, datas)
 	log.Println("[Info]", input, " --> ", output)
@@ -764,8 +769,8 @@ func sog2sog() {
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
-	datas, shDegree := gsplat.ReadSog(input)
-	gsplat.SetShDegreeFrom(shDegree)
+	datas, h := gsplat.ReadSog(input)
+	gsplat.SetShDegreeFrom(h.ShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)

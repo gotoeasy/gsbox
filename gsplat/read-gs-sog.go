@@ -8,7 +8,9 @@ import (
 	"sync"
 )
 
-func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
+var inputSogHeader *SogHeader
+
+func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 	isNetFile := cmn.IsNetFile(fileSogMeta)
 	if isNetFile {
 		if cmn.Endwiths(fileSogMeta, "/meta.json") {
@@ -58,7 +60,7 @@ func ReadSog(fileSogMeta string) ([]*SplatData, uint8) {
 	default:
 		cmn.ExitOnError(errors.New("unsupported sog version"))
 	}
-	return nil, 0
+	return nil, nil
 }
 
 func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalFileSize int64) {
@@ -127,7 +129,7 @@ func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalF
 	return
 }
 
-func readHttpSog(urlMetaJson string) ([]*SplatData, uint8) {
+func readHttpSog(urlMetaJson string) ([]*SplatData, *SogHeader) {
 
 	dir, err := cmn.CreateTempDir()
 	cmn.ExitOnError(err)
@@ -182,12 +184,12 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, uint8) {
 	log.Println("[Info]", "Download finish")
 
 	switch meta.Version {
-	case 0:
+	case 0, 1:
 		return ReadSogV1(meta, dir)
 	case 2:
 		return ReadSogV2(meta, dir)
 	default:
 		cmn.ExitOnError(errors.New("unsupported sog version"))
 	}
-	return nil, 0
+	return nil, nil
 }

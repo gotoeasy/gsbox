@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, uint8) {
+func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
 	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
 	scales := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
@@ -127,7 +127,12 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 		datas[i] = splatData
 	}
 
-	return datas, shDegree
+	header := &SogHeader{}
+	header.Version = 1
+	header.Count = count
+	header.ShDegree = shDegree
+	inputSogHeader = header
+	return datas, header
 }
 
 func webpRgba(fileWebp string) []byte {

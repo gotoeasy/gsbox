@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
+func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	meansl := webpRgba(filepath.Join(dir, meta.Means.Files[0]))
 	meansu := webpRgba(filepath.Join(dir, meta.Means.Files[1]))
 	scales := webpRgba(filepath.Join(dir, meta.Scales.Files[0]))
@@ -68,9 +68,9 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 
 		if shDegree > 0 {
 			label := int(labels[i*4+0]) + (int(labels[i*4+1]) << 8)
-			col := (label & 63) * 15 // 同 (n % 64) * 15
-			row := label >> 6        // 同 Math.floor(n / 64)
-			offset := row*width + col
+			col := (label & 63) // 同 (n % 64)
+			row := label >> 6   // 同 Math.floor(n / 64)
+			offset := row*width + col*15
 
 			sh1 := make([]float32, 9)
 			sh2 := make([]float32, 15)
@@ -111,5 +111,10 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, uint8) {
 		datas[i] = splatData
 	}
 
-	return datas, shDegree
+	header := &SogHeader{}
+	header.Version = 2
+	header.Count = count
+	header.ShDegree = shDegree
+	inputSogHeader = header
+	return datas, header
 }

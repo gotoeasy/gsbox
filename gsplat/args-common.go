@@ -113,9 +113,7 @@ func GetArgFlagValue(arg1 string, arg2 string) uint16 {
 
 func GetArgKmeansIterations(printLog ...bool) int {
 	val := cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 10)
-	if val < 1 || val > 50 {
-		val = 10 // 默认迭代10次
-	}
+	val = max(5, min(val, 50)) // 5~50
 	if len(printLog) > 0 && printLog[0] {
 		log.Println("[Info] (parameter) ki:", val, "(kmeans iterations)")
 	}
@@ -125,9 +123,7 @@ func GetArgKmeansIterations(printLog ...bool) int {
 func GetArgKmeansNearestNodes(printLog ...bool) int {
 	defaultKn := 15
 	val := cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), defaultKn)
-	if val < 10 || val > 100 {
-		val = defaultKn // 查找最邻近的N个节点
-	}
+	val = max(10, min(val, 200)) // 10~200
 	if len(printLog) > 0 && printLog[0] {
 		log.Println("[Info] (parameter) kn:", val, "(kmeans nearest nodes)")
 	}
