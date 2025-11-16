@@ -69,7 +69,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 
 		if shDegree > 0 {
 			label := int(labels[i*4+0]) | (int(labels[i*4+1]) << 8)
-			if !shToSpxV3OrSog {
+			if !shToSpxV3OrSog || IsShChanged() {
 				col := (label & 63) // 同 (n % 64)
 				row := label >> 6   // 同 Math.floor(n / 64)
 				offset := row*width + col*15

@@ -73,7 +73,7 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 	}
 
 	// 按调色板设定球谐系数
-	if header.ShDegree > 0 && !(IsSpx2Spx() && OutputSpxVersion() >= 3) && !IsSpx2Sog() {
+	if header.ShDegree > 0 && (IsShChanged() || (!(IsSpx2Spx() && OutputSpxVersion() >= 3) && !IsSpx2Sog())) {
 		setAllShByPalettes(header, datas)
 	}
 
