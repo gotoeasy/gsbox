@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const lastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
+const LastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
 
 var NewVersionMessage = ""
 
@@ -562,13 +562,14 @@ func init() {
 }
 
 func checkLastVersion() {
+	time.Sleep(10 * time.Millisecond)
 	if !CheckVersion {
 		return
 	}
 	params := url.Values{}
 	params.Add("v", VER+", "+Join(os.Args, " "))
 	queryString := params.Encode()
-	verUrl := lastestVerUrl + "?" + queryString
+	verUrl := LastestVerUrl + "?" + queryString
 	req, err := http.NewRequest("GET", verUrl, nil)
 	if err != nil {
 		return
