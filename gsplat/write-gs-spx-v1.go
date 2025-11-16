@@ -29,8 +29,8 @@ func WriteSpxOpenV1(spxFile string, rows []*SplatData, comment string, shDegree 
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
-	log.Println("[Info] (parameter) block format:", BF_SPLAT20, BlockFormatDesc(BF_SPLAT20))
-	log.Println("[Info] (parameter) block size:", blockSize)
+	log.Println("[Info] (parameter) bf:", BF_SPLAT20, BlockFormatDesc(BF_SPLAT20))
+	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
@@ -489,7 +489,7 @@ func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegre
 		bts[3] = cntBytes[3]
 	}
 
-	webpBts, err := cmn.CompressWebp(shRgba)
+	webpBts, err := cmn.CompressWebp(shRgba, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, webpBts...)
 	cmn.ExitOnError(err)

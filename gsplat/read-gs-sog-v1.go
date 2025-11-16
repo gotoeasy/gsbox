@@ -34,6 +34,7 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 		}
 	}
 
+	shToSpxV3OrSog := (IsSog2Spx() && OutputSpxVersion() >= 3) || IsSog2Sog()
 	for i := range count {
 		splatData := &SplatData{}
 
@@ -78,50 +79,53 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 
 		if shDegree > 0 {
 			label := int(labels[i*4+0]) + (int(labels[i*4+1]) << 8)
-			col := (label & 63) * 15 // 同 (n % 64) * 15
-			row := label >> 6        // 同 Math.floor(n / 64)
-			offset := row*width + col
+			if !shToSpxV3OrSog {
+				col := (label & 63) * 15 // 同 (n % 64) * 15
+				row := label >> 6        // 同 Math.floor(n / 64)
+				offset := row*width + col
 
-			sh1 := make([]float32, 9)
-			sh2 := make([]float32, 15)
-			sh3 := make([]float32, 21)
-			for d := range 3 {
-				if shDegree >= 1 {
-					for k := range 3 {
-						sh1[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+k)*4+d]) / 255.0) + meta.ShN.Mins
+				sh1 := make([]float32, 9)
+				sh2 := make([]float32, 15)
+				sh3 := make([]float32, 21)
+				for d := range 3 {
+					if shDegree >= 1 {
+						for k := range 3 {
+							sh1[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+k)*4+d]) / 255.0) + meta.ShN.Mins
+						}
+					}
+					if shDegree >= 2 {
+						for k := range 5 {
+							sh2[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+3+k)*4+d]) / 255.0) + meta.ShN.Mins
+						}
+					}
+					if shDegree == 3 {
+						for k := range 7 {
+							sh3[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+8+k)*4+d]) / 255.0) + meta.ShN.Mins
+						}
 					}
 				}
-				if shDegree >= 2 {
-					for k := range 5 {
-						sh2[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+3+k)*4+d]) / 255.0) + meta.ShN.Mins
-					}
+				var shs []uint8
+				for _, val := range sh1 {
+					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
 				}
-				if shDegree == 3 {
-					for k := range 7 {
-						sh3[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+8+k)*4+d]) / 255.0) + meta.ShN.Mins
-					}
+				for _, val := range sh2 {
+					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
 				}
-			}
-			var shs []uint8
-			for _, val := range sh1 {
-				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-			}
-			for _, val := range sh2 {
-				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-			}
-			for _, val := range sh3 {
-				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-			}
+				for _, val := range sh3 {
+					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
+				}
 
-			switch shDegree {
-			case 3:
-				splatData.SH2 = shs[:24]
-				splatData.SH3 = shs[24:]
-			case 2:
-				splatData.SH2 = shs[:24]
-			case 1:
-				splatData.SH1 = shs[:9]
+				switch shDegree {
+				case 3:
+					splatData.SH2 = shs[:24]
+					splatData.SH3 = shs[24:]
+				case 2:
+					splatData.SH2 = shs[:24]
+				case 1:
+					splatData.SH1 = shs[:9]
+				}
 			}
+			splatData.PaletteIdx = uint16(label)
 		}
 
 		datas[i] = splatData
@@ -131,6 +135,20 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	header.Version = 1
 	header.Count = count
 	header.ShDegree = shDegree
+
+	// 争取利用原有调色板
+	if meta.ShN != nil && IsSog2SpxOrSog() && !IsShChanged() {
+		palettes := make([]uint8, len(centroids))
+		pixCnt := len(centroids) / 4
+		for i := range pixCnt {
+			palettes[i*4] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4]) / 255.0) + meta.ShN.Mins))
+			palettes[i*4+1] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4+1]) / 255.0) + meta.ShN.Mins))
+			palettes[i*4+2] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4+2]) / 255.0) + meta.ShN.Mins))
+			palettes[i*4+3] = 255
+		}
+		header.Palettes = palettes
+	}
+
 	inputSogHeader = header
 	return datas, header
 }

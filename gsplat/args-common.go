@@ -15,6 +15,8 @@ type ArgValues struct {
 	KI      int // 聚类计算时的迭代次数（5~50，默认10），越大越精确耗时越长
 	KN      int // 聚类计算时的查找最邻近节点数量（10~200，默认15），越大越精确耗时越长
 
+	webpQuality int // webp压缩的质量参数, 80~99，根据质量级别自动选定
+
 	hasQuality bool
 	hasKI      bool
 	hasKN      bool
@@ -41,6 +43,8 @@ func InitArgs() *cmn.OsArgs {
 	if oArg.hasQuality && !oArg.hasKN {
 		oArg.KN = kns[oArg.Quality-1]
 	}
+	wqs := []int{80, 84, 86, 88, 90, 92, 94, 96, 99}
+	oArg.webpQuality = wqs[oArg.Quality-1]
 
 	return Args
 }

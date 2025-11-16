@@ -13,6 +13,50 @@ func OutputSpxVersion() int {
 	return max(1, min(ver, NewestSpxVersion))
 }
 
+func IsShChanged() bool {
+	return Args.HasArgIgnorecase("-rx", "--rotateX", "-ry", "--rotateY", "-rz", "--rotateZ")
+}
+
+func IsSpx2Spx() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("x2x", "spx2spx")
+}
+
+func IsSog2Spx() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("g2x", "sog2spx")
+}
+
+func IsSpx2Sog() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("x2g", "spx2sog")
+}
+
+func IsSog2Sog() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("g2g", "sog2sog")
+}
+
+func IsSpx2Spz() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("x2z", "spx2spz")
+}
+
+func IsSog2Spz() bool {
+	return !Args.HasCmd("join") && Args.HasCmd("g2z", "sog2spz")
+}
+
+func IsSog2SpxOrSog() bool {
+	return IsSog2Spx() || IsSog2Sog()
+}
+
+func IsSpx2SpxOrSog() bool {
+	return IsSpx2Sog() || IsSpx2Spx()
+}
+
+func IsSpxOrSog2Spx() bool {
+	return IsSpx2Spx() || IsSog2Spx()
+}
+
+func IsSpxOrSog2Sog() bool {
+	return IsSpx2Sog() || IsSog2Sog()
+}
+
 func IsOutputSpx() bool {
 	if Args.HasCmd("p2x", "ply2spx", "s2x", "splat2spx", "z2x", "spz2spx", "x2x", "spx2spx", "k2x", "ksplat2spx", "g2x", "sog2spx") {
 		return true

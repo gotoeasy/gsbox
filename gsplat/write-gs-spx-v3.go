@@ -34,11 +34,23 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 	}
 
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
-	log.Println("[Info] (parameter) block size:", blockSize)
+	if !IsShChanged() && (IsSog2Spx() || (IsSpx2Spx() && len(inputSpxHeader.Palettes) > 0)) {
+		log.Println("[Info] use origin palettes")
+	}
+	log.Println("[Info] (parameter) bf:", bf, BlockFormatDesc(bf))
+	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
+
+	var shCentroids []uint8
 	if GetArgShDegree() > 0 {
-		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+		if !IsShChanged() && IsSog2Spx() {
+			shCentroids = inputSogHeader.Palettes
+		} else if !IsShChanged() && IsSpx2Spx() && len(inputSpxHeader.Palettes) > 0 {
+			shCentroids = inputSpxHeader.Palettes
+		} else {
+			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+			shCentroids, _ = ReWriteShByKmeans(rows)
+		}
 	}
 
 	var compressType uint8 = CT_XZ // 默认xz
@@ -46,15 +58,10 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 	if bf != BF_SPLAT220_WEBP {
 		if cmn.EqualsIngoreCase(ct, "gzip") || ct == "0" {
 			compressType = CT_GZIP
-			log.Println("[Info] block compress type: gzip")
+			log.Println("[Info] (parameter) ct:", "gzip", "(block compress type)")
 		} else {
-			log.Println("[Info] block compress type: xz")
+			log.Println("[Info] (parameter) ct:", "xz", "(block compress type)")
 		}
-	}
-
-	var shCentroids []uint8
-	if GetArgShDegree() > 0 {
-		shCentroids, _ = ReWriteShByKmeans(rows)
 	}
 
 	// 分块
@@ -325,17 +332,17 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 		bs2 = append(bs2, b3x[1], b3y[1], b3z[1], 255)
 		bs3 = append(bs3, b3x[2], b3y[2], b3z[2], 255)
 	}
-	bsTmp, err := cmn.CompressWebp(bs1)
+	bsTmp, err := cmn.CompressWebp(bs1, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
 
-	bsTmp, err = cmn.CompressWebp(bs2)
+	bsTmp, err = cmn.CompressWebp(bs2, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
 
-	bsTmp, err = cmn.CompressWebp(bs3)
+	bsTmp, err = cmn.CompressWebp(bs3, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -344,7 +351,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 	for _, d := range blockDatas {
 		bsTmp = append(bsTmp, cmn.EncodeSpxScale(d.ScaleX), cmn.EncodeSpxScale(d.ScaleY), cmn.EncodeSpxScale(d.ScaleZ), 255)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -353,7 +360,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 	for _, d := range blockDatas {
 		bsTmp = append(bsTmp, d.ColorR, d.ColorG, d.ColorB, d.ColorA)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -363,7 +370,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 		r0, r1, r2, ri := cmn.SogEncodeRotations(d.RotationW, d.RotationX, d.RotationY, d.RotationZ)
 		bsTmp = append(bsTmp, r0, r1, r2, ri)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -373,7 +380,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 		for _, d := range blockDatas {
 			bsTmp = append(bsTmp, byte(d.PaletteIdx&0xFF), byte(d.PaletteIdx>>8), 0, 255)
 		}
-		bsTmp, err = cmn.CompressWebp(bsTmp)
+		bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 		cmn.ExitOnError(err)
 		bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 		bts = append(bts, bsTmp...)
@@ -411,7 +418,7 @@ func writePalettes_V3(writer *bufio.Writer, shCentroids []byte, compressType uin
 func writePalettesWebp_V3(writer *bufio.Writer, shCentroids []byte) {
 	log.Println("[Info] palettes block format:", BF_SH_PALETTES_WEBP, BlockFormatDesc(BF_SH_PALETTES_WEBP))
 
-	webpBytes, err := cmn.CompressWebpByWidthHeight(shCentroids, 960, 1024)
+	webpBytes, err := cmn.CompressWebpByWidthHeight(shCentroids, 960, 1024, oArg.webpQuality)
 	cmn.ExitOnError(err)
 
 	bts := make([]byte, 0)

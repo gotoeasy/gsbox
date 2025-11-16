@@ -36,11 +36,14 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 	if GetArgShDegree() > 0 {
 		log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
 	}
-	if oArg.Quality <= 5 && GetArgShDegree() > 0 && inputSogHeader == nil && inputSpxHeader == nil {
-		// 非x2z, g2z
-		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
-		ReWriteShByKmeans(rows)
+	if oArg.Quality <= 5 && GetArgShDegree() > 0 {
+		if (IsSpx2Spz() && len(inputSpxHeader.Palettes) > 0) || (IsSog2Spz() && len(inputSogHeader.Palettes) > 0) {
+			log.Println("[Info] use origin palettes")
+		} else {
+			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+			ReWriteShByKmeans(rows)
+		}
 	}
 
 	bts := make([]byte, 0)

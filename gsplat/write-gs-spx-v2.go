@@ -31,8 +31,8 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	if bf != BF_SPLAT19 && bf != BF_SPLAT20 && bf != BF_SPLAT190_WEBP && bf != BF_SPLAT10190_WEBP && bf != BF_SPLAT10019 {
 		bf = BF_SPLAT190_WEBP // 默认格式
 	}
-	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
-	log.Println("[Info] (parameter) block size:", blockSize)
+	log.Println("[Info] (parameter) bf:", bf, BlockFormatDesc(bf))
+	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
 
 	var compressType uint8 = CT_XZ // 默认xz
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
@@ -400,7 +400,7 @@ func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, bl
 	bsTmp = append(bsTmp, bs1...)
 	bsTmp = append(bsTmp, bs2...)
 	bsTmp = append(bsTmp, bs3...)
-	bsTmp, err := cmn.CompressWebp(bsTmp)
+	bsTmp, err := cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -409,7 +409,7 @@ func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, bl
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, cmn.EncodeSpxScale(blockDatas[n].ScaleX), cmn.EncodeSpxScale(blockDatas[n].ScaleY), cmn.EncodeSpxScale(blockDatas[n].ScaleZ), 255)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -418,7 +418,7 @@ func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, bl
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, blockDatas[n].ColorR, blockDatas[n].ColorG, blockDatas[n].ColorB, blockDatas[n].ColorA)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -427,7 +427,7 @@ func writeSpxBlockSplat190Webp(writer *bufio.Writer, blockDatas []*SplatData, bl
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ, 255)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -464,7 +464,7 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	bsTmp = append(bsTmp, bs1...)
 	bsTmp = append(bsTmp, bs2...)
 	bsTmp = append(bsTmp, bs3...)
-	bsTmp, err := cmn.CompressWebp(bsTmp)
+	bsTmp, err := cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -473,7 +473,7 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, cmn.EncodeSpxScale(blockDatas[n].ScaleX), cmn.EncodeSpxScale(blockDatas[n].ScaleY), cmn.EncodeSpxScale(blockDatas[n].ScaleZ), 255)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -482,7 +482,7 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, blockDatas[n].ColorR, blockDatas[n].ColorG, blockDatas[n].ColorB, blockDatas[n].ColorA)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
@@ -491,7 +491,7 @@ func writeSpxBlockSplat10190Webp(writer *bufio.Writer, blockDatas []*SplatData, 
 	for n := range blockSplatCount {
 		bsTmp = append(bsTmp, blockDatas[n].RotationX, blockDatas[n].RotationY, blockDatas[n].RotationZ, 255)
 	}
-	bsTmp, err = cmn.CompressWebp(bsTmp)
+	bsTmp, err = cmn.CompressWebp(bsTmp, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)

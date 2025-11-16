@@ -11,20 +11,25 @@ import (
 	"golang.org/x/image/webp"
 )
 
-func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error) {
+func CompressWebpByWidthHeight(bts []byte, width int, height int, webpQuality ...int) ([]byte, error) {
 	datas := bts
 	if len(bts)/4 < width*height {
 		datas = append(datas, bytes.Repeat([]uint8{0}, width*height*4-len(bts))...)
+	}
+
+	quality := 90
+	if len(webpQuality) > 0 {
+		quality = max(80, min(webpQuality[0], 99)) // 范围 80~99
 	}
 
 	var buf bytes.Buffer
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
 	copy(img.Pix, datas)
 	options := gen2brainWebp.Options{
-		Quality:  90,    // 质量，默认75，最大100
-		Lossless: true,  // 无损
-		Method:   6,     // 越大压缩效果越好速度最慢，默认4，最大6
-		Exact:    false, // 透明时不需要保持RGB值
+		Quality:  quality, // 质量，默认75，最大100，当100的时候明显变慢没有必要
+		Lossless: true,    // 无损
+		Method:   6,       // 越大压缩效果越好速度最慢，默认4，最大6
+		Exact:    false,   // 透明时不需要保持RGB值
 	}
 	err := gen2brainWebp.Encode(&buf, img, options)
 	if err != nil {
@@ -33,9 +38,9 @@ func CompressWebpByWidthHeight(bts []byte, width int, height int) ([]byte, error
 	return buf.Bytes(), nil
 }
 
-func CompressWebp(bts []byte) ([]byte, error) {
+func CompressWebp(bts []byte, webpQuality ...int) ([]byte, error) {
 	width, height := ComputeWidthHeight(len(bts))
-	return CompressWebpByWidthHeight(bts, width, height)
+	return CompressWebpByWidthHeight(bts, width, height, webpQuality...)
 }
 
 func DecompressWebp(webpBytes []byte) (rgbas []byte, width int, height int, err error) {

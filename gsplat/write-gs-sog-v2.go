@@ -17,9 +17,8 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	log.Println("[Info] output sog version: 2")
 	log.Println("[Info] output shDegree:", shDegree)
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-	if GetArgShDegree() > 0 {
-		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+	if (!IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0) || (IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0) {
+		log.Println("[Info] use origin palettes")
 	}
 
 	dir := cmn.Dir(sogOrJsonFile)
@@ -38,10 +37,35 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	files = append(files, writeQuats(dir, rows)...)
 	files = append(files, writeSh0(dir, rows)...)
 	if shDegree > 0 {
-		shN_centroids, shN_labels := ReWriteShByKmeans(rows)
-		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, 960, 1024)
+		var shN_centroids []uint8
+		var shN_labels []uint8
+		if !IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0 {
+			shN_centroids = inputSogHeader.Palettes
+			shN_labels = make([]uint8, len(rows)*4)
+			for i, d := range rows {
+				shN_labels[i*4] = uint8(d.PaletteIdx & 0xFF)
+				shN_labels[i*4+1] = uint8(d.PaletteIdx >> 8)
+				shN_labels[i*4+2] = 0
+				shN_labels[i*4+3] = 255
+			}
+		} else if !IsShChanged() && IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0 {
+			shN_centroids = inputSpxHeader.Palettes
+			shN_labels = make([]uint8, len(rows)*4)
+			for i, d := range rows {
+				shN_labels[i*4] = uint8(d.PaletteIdx & 0xFF)
+				shN_labels[i*4+1] = uint8(d.PaletteIdx >> 8)
+				shN_labels[i*4+2] = 0
+				shN_labels[i*4+3] = 255
+			}
+		} else {
+			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+			shN_centroids, shN_labels = ReWriteShByKmeans(rows)
+		}
+
+		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, 960, 1024, oArg.webpQuality)
 		cmn.ExitOnError(err)
-		bytsLabels, err := cmn.CompressWebp(shN_labels)
+		bytsLabels, err := cmn.CompressWebp(shN_labels, oArg.webpQuality)
 		cmn.ExitOnError(err)
 
 		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
@@ -135,14 +159,14 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 
 	fileMeansL := filepath.Join(dir, "means_l.webp")
 	log.Println("[Info] generate means_l.webp")
-	bytsMeansL, err := cmn.CompressWebp(rgbaMeansL)
+	bytsMeansL, err := cmn.CompressWebp(rgbaMeansL, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileMeansL, bytsMeansL)
 	cmn.ExitOnError(err)
 
 	fileMeansU := filepath.Join(dir, "means_u.webp")
 	log.Println("[Info] generate means_u.webp")
-	bytsMeansU, err := cmn.CompressWebp(rgbaMeansU)
+	bytsMeansU, err := cmn.CompressWebp(rgbaMeansU, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileMeansU, bytsMeansU)
 	cmn.ExitOnError(err)
@@ -154,7 +178,7 @@ func writeScales(dir string, rows []*SplatData) []string {
 	fileScales := filepath.Join(dir, "scales.webp")
 	log.Println("[Info] generate scales.webp")
 	rgbaScales := getScalesRgba(rows)
-	bytsScales, err := cmn.CompressWebp(rgbaScales)
+	bytsScales, err := cmn.CompressWebp(rgbaScales, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileScales, bytsScales)
 	cmn.ExitOnError(err)
@@ -165,7 +189,7 @@ func writeQuats(dir string, rows []*SplatData) []string {
 	fileQuats := filepath.Join(dir, "quats.webp")
 	log.Println("[Info] generate quats.webp")
 	rgbaQuats := getQuatsRgba(rows)
-	bytsQuats, err := cmn.CompressWebp(rgbaQuats)
+	bytsQuats, err := cmn.CompressWebp(rgbaQuats, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileQuats, bytsQuats)
 	cmn.ExitOnError(err)
@@ -176,7 +200,7 @@ func writeSh0(dir string, rows []*SplatData) []string {
 	fileSh0 := filepath.Join(dir, "sh0.webp")
 	log.Println("[Info] generate sh0.webp")
 	rgbaSh0 := getSh0Rgba(rows)
-	bytsSh0, err := cmn.CompressWebp(rgbaSh0)
+	bytsSh0, err := cmn.CompressWebp(rgbaSh0, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileSh0, bytsSh0)
 	cmn.ExitOnError(err)

@@ -82,19 +82,19 @@ func BlockFormatDesc(bf int) string {
 	rs := ""
 	switch bf {
 	case BF_SPLAT22:
-		rs = "(splat per 20|22 bytes)"
+		rs = "(block format, splat per 20|22 bytes)"
 	case BF_SPLAT220_WEBP:
-		rs = "(splat per 20|22 bytes, webp encoding)"
+		rs = "(block format, splat per 20|22 bytes, webp encoding)"
 	case BF_SPLAT19:
-		rs = "(splat per 19 bytes)"
+		rs = "(block format, splat per 19 bytes)"
 	case BF_SPLAT10019:
-		rs = "(splat per 19 bytes)"
+		rs = "(block format, splat per 19 bytes)"
 	case BF_SPLAT20:
-		rs = "(splat per 20 bytes)"
+		rs = "(block format, splat per 20 bytes)"
 	case BF_SPLAT190_WEBP:
-		rs = "(splat per 19 bytes, webp encoding)"
+		rs = "(block format, splat per 19 bytes, webp encoding)"
 	case BF_SPLAT10190_WEBP:
-		rs = "(splat per 19 bytes, webp encoding)"
+		rs = "(block format, splat per 19 bytes, webp encoding)"
 	case BF_SH_PALETTES:
 		rs = "(compress only)"
 	case BF_SH_PALETTES_WEBP:
