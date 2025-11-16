@@ -313,7 +313,6 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(blockDatas)))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT220_WEBP)...)        // 开放的块数据格式 220
 
-	bsTmp := make([]byte, 0)
 	bs1 := make([]byte, 0)
 	bs2 := make([]byte, 0)
 	bs3 := make([]byte, 0)
@@ -325,10 +324,17 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 		bs2 = append(bs2, b3x[1], b3y[1], b3z[1], 255)
 		bs3 = append(bs3, b3x[2], b3y[2], b3z[2], 255)
 	}
-	bsTmp = append(bsTmp, bs1...)
-	bsTmp = append(bsTmp, bs2...)
-	bsTmp = append(bsTmp, bs3...)
-	bsTmp, err := cmn.CompressWebp(bsTmp)
+	bsTmp, err := cmn.CompressWebp(bs1)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
+
+	bsTmp, err = cmn.CompressWebp(bs2)
+	cmn.ExitOnError(err)
+	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
+	bts = append(bts, bsTmp...)
+
+	bsTmp, err = cmn.CompressWebp(bs3)
 	cmn.ExitOnError(err)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)

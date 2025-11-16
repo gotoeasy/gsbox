@@ -107,9 +107,22 @@ func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *
 
 func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
+
 	size := cmn.BytesToUint32(bts[:4])
 	webps := bts[4 : size+4]
-	btsPositions, _, _, err := cmn.DecompressWebp(webps)
+	btsXyz0, _, _, err := cmn.DecompressWebp(webps)
+	cmn.ExitOnError(err)
+
+	bts = bts[size+4:]
+	size = cmn.BytesToUint32(bts[:4])
+	webps = bts[4 : size+4]
+	btsXyz1, _, _, err := cmn.DecompressWebp(webps)
+	cmn.ExitOnError(err)
+
+	bts = bts[size+4:]
+	size = cmn.BytesToUint32(bts[:4])
+	webps = bts[4 : size+4]
+	btsXyz2, _, _, err := cmn.DecompressWebp(webps)
 	cmn.ExitOnError(err)
 
 	bts = bts[size+4:]
@@ -141,19 +154,15 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 	}
 
 	for n := range blkSplatCnt {
-		x0 := btsPositions[n*4+0]
-		y0 := btsPositions[n*4+1]
-		z0 := btsPositions[n*4+2]
-		x1 := btsPositions[blkSplatCnt*4+n*4+0]
-		y1 := btsPositions[blkSplatCnt*4+n*4+1]
-		z1 := btsPositions[blkSplatCnt*4+n*4+2]
-		x2 := btsPositions[blkSplatCnt*8+n*4+0]
-		y2 := btsPositions[blkSplatCnt*8+n*4+1]
-		z2 := btsPositions[blkSplatCnt*8+n*4+2]
-		rx := btsRotations[n*4+0]
-		ry := btsRotations[n*4+1]
-		rz := btsRotations[n*4+2]
-		ri := btsRotations[n*4+3]
+		x0 := btsXyz0[n*4+0]
+		y0 := btsXyz0[n*4+1]
+		z0 := btsXyz0[n*4+2]
+		x1 := btsXyz1[n*4+0]
+		y1 := btsXyz1[n*4+1]
+		z1 := btsXyz1[n*4+2]
+		x2 := btsXyz2[n*4+0]
+		y2 := btsXyz2[n*4+1]
+		z2 := btsXyz2[n*4+2]
 
 		data := &SplatData{}
 		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), 1)
@@ -166,6 +175,10 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 		data.ColorG = btsColors[n*4+1]
 		data.ColorB = btsColors[n*4+2]
 		data.ColorA = btsColors[n*4+3]
+		rx := btsRotations[n*4+0]
+		ry := btsRotations[n*4+1]
+		rz := btsRotations[n*4+2]
+		ri := btsRotations[n*4+3]
 		data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SogDecodeRotations(rx, ry, rz, ri)
 
 		if len(btsPaletteIdxs) > 0 {
