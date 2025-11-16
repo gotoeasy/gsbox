@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-const LastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
+var LastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
 
 var NewVersionMessage = ""
 
