@@ -23,7 +23,7 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		nSh45 = append(nSh45, GetSh45Float32(rows[n]))
 	}
 	dims := []int{0, 9, 24, 45}
-	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], GetArgKmeansIterations(), GetArgKmeansNearestNodes())
+	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
 
 	if IsOutputSpz() {
 		for n := range dataCnt {

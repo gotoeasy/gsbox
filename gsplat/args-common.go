@@ -8,9 +8,40 @@ import (
 
 var Args *cmn.OsArgs
 var shDegreeFrom uint8
+var oArg *ArgValues
+
+type ArgValues struct {
+	Quality int // 质量级别（1~9，默认5），越大越精确质量越好
+	KI      int // 聚类计算时的迭代次数（5~50，默认10），越大越精确耗时越长
+	KN      int // 聚类计算时的查找最邻近节点数量（10~200，默认15），越大越精确耗时越长
+
+	hasQuality bool
+	hasKI      bool
+	hasKN      bool
+}
 
 func InitArgs() *cmn.OsArgs {
 	Args = cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
+
+	oArg = &ArgValues{}
+	oArg.Quality = max(1, min(cmn.StringToInt(Args.GetArgIgnorecase("-q", "--quality"), 5), 9))
+	oArg.KI = max(5, min(cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 10), 50))
+	oArg.KN = max(10, min(cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), 15), 200))
+
+	oArg.hasQuality = Args.HasArgIgnorecase("-q", "--quality")
+	oArg.hasKI = Args.HasArgIgnorecase("-ki", "--kmeans-iterations")
+	oArg.hasKN = Args.HasArgIgnorecase("-kn", "--kmeans-nearest-nodes")
+
+	// 按摩质量级别自动调整相关参数
+	kis := []int{5, 7, 9, 10, 10, 10, 12, 15, 20}
+	kns := []int{10, 12, 14, 15, 15, 20, 30, 50, 100}
+	if oArg.hasQuality && !oArg.hasKI {
+		oArg.KI = kis[oArg.Quality-1]
+	}
+	if oArg.hasQuality && !oArg.hasKN {
+		oArg.KN = kns[oArg.Quality-1]
+	}
+
 	return Args
 }
 
@@ -109,23 +140,4 @@ func GetArgFlagValue(arg1 string, arg2 string) uint16 {
 		}
 	}
 	return flag
-}
-
-func GetArgKmeansIterations(printLog ...bool) int {
-	val := cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 10)
-	val = max(5, min(val, 50)) // 5~50
-	if len(printLog) > 0 && printLog[0] {
-		log.Println("[Info] (parameter) ki:", val, "(kmeans iterations)")
-	}
-	return val
-}
-
-func GetArgKmeansNearestNodes(printLog ...bool) int {
-	defaultKn := 15
-	val := cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), defaultKn)
-	val = max(10, min(val, 200)) // 10~200
-	if len(printLog) > 0 && printLog[0] {
-		log.Println("[Info] (parameter) kn:", val, "(kmeans nearest nodes)")
-	}
-	return val
 }

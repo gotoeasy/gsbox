@@ -32,12 +32,13 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 	if bf != BF_SPLAT22 && bf != BF_SPLAT220_WEBP {
 		bf = BF_SPLAT22 // 参数指定的格式有误时的默认格式，偏向速度
 	}
+
+	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
 	log.Println("[Info] (parameter) block format:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (parameter) block size:", blockSize)
-
 	if GetArgShDegree() > 0 {
-		GetArgKmeansIterations(true)
-		GetArgKmeansNearestNodes(true)
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 
 	var compressType uint8 = CT_XZ // 默认xz

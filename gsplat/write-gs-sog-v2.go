@@ -16,9 +16,10 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	shDegree := GetArgShDegree()
 	log.Println("[Info] output sog version: 2")
 	log.Println("[Info] output shDegree:", shDegree)
+	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
 	if GetArgShDegree() > 0 {
-		GetArgKmeansIterations(true)
-		GetArgKmeansNearestNodes(true)
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 
 	dir := cmn.Dir(sogOrJsonFile)

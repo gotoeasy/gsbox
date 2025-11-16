@@ -32,10 +32,14 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		Reserved:       0,
 	}
 
-	if GetArgShDegree() > 0 && inputSogHeader == nil && inputSpxHeader == nil {
+	// 质量级别>5时，不使用调色板压缩球谐系数
+	if GetArgShDegree() > 0 {
+		log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
+	}
+	if oArg.Quality <= 5 && GetArgShDegree() > 0 && inputSogHeader == nil && inputSpxHeader == nil {
 		// 非x2z, g2z
-		GetArgKmeansIterations(true)
-		GetArgKmeansNearestNodes(true)
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 		ReWriteShByKmeans(rows)
 	}
 

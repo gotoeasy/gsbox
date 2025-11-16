@@ -144,7 +144,7 @@ func usage() {
 	fmt.Println("  info <file>                        display the model file information")
 	fmt.Println("  -i,  --input <file>                specify the input file")
 	fmt.Println("  -o,  --output <file>               specify the output file")
-	// fmt.Println("  -q,  --quality <num>               specify the quality(1~9) for spx|spz|sog output, default is 5") // TODO
+	fmt.Println("  -q,  --quality <num>               specify the quality(1~9) for spx|spz|sog output, default is 5")
 	fmt.Println("  -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output")
 	fmt.Println("  -c,  --comment <text>              specify the comment for ply/spx output")
 	fmt.Println("  -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data")
