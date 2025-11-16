@@ -84,6 +84,7 @@ Options:
   info <file>                        display the model file information
   -i,  --input <file>                specify the input file
   -o,  --output <file>               specify the output file
+  -q,  --quality <num>               specify the quality(1~9) for spx|spz|sog output, default is 5
   -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output
   -c,  --comment <text>              specify the comment for ply/spx output
   -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data
