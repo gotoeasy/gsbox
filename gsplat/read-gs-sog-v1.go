@@ -137,7 +137,7 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	header.ShDegree = shDegree
 
 	// 争取利用原有调色板
-	if meta.ShN != nil && IsSog2SpxOrSog() && !IsShChanged() {
+	if meta.ShN != nil && IsSog2SpxOrSogSpz() && !IsShChanged() {
 		palettes := make([]uint8, len(centroids))
 		pixCnt := len(centroids) / 4
 		for i := range pixCnt {
