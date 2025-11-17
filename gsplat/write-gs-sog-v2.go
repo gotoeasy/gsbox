@@ -21,6 +21,15 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		log.Println("[Info] use origin palettes")
 	}
 
+	if shDegree > 0 {
+		if !IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0 {
+		} else if !IsShChanged() && IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0 {
+		} else {
+			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+		}
+	}
+
 	dir := cmn.Dir(sogOrJsonFile)
 	isSog := cmn.Endwiths(sogOrJsonFile, ".sog", true)
 	if isSog {
@@ -58,8 +67,6 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 				shN_labels[i*4+3] = 255
 			}
 		} else {
-			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 			shN_centroids, shN_labels = ReWriteShByKmeans(rows)
 		}
 
