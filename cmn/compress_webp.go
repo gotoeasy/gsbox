@@ -12,11 +12,6 @@ import (
 )
 
 func CompressWebpByWidthHeight(bts []byte, width int, height int, webpQuality ...int) ([]byte, error) {
-	datas := bts
-	if len(bts)/4 < width*height {
-		datas = append(datas, bytes.Repeat([]uint8{0}, width*height*4-len(bts))...)
-	}
-
 	quality := 90
 	if len(webpQuality) > 0 {
 		quality = max(80, min(webpQuality[0], 99)) // 范围 80~99
@@ -24,7 +19,7 @@ func CompressWebpByWidthHeight(bts []byte, width int, height int, webpQuality ..
 
 	var buf bytes.Buffer
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
-	copy(img.Pix, datas)
+	copy(img.Pix, bts)
 	options := gen2brainWebp.Options{
 		Quality:  quality, // 质量，默认75，最大100，当100的时候明显变慢没有必要
 		Lossless: true,    // 无损

@@ -437,6 +437,29 @@ func GetSh45(data *SplatData) []uint8 {
 	for n := len(sh45); n < 45; n++ {
 		sh45 = append(sh45, 128) // cmn.EncodeSplatSH(0.0) = 128
 	}
+
+	// 根据质量等级调整球谐系数（第8第9级时保持原值）
+	if oArg.Quality <= 5 {
+		// 小于等于5级时，按spz默认方式整理
+		for i := range 45 {
+			if i < 9 {
+				sh45[i] = cmn.SpzEncodeSH1(sh45[i])
+			} else {
+				sh45[i] = cmn.SpzEncodeSH23(sh45[i])
+			}
+		}
+	} else if oArg.Quality == 6 {
+		// 第6级时，整理第2第3级球谐系数
+		for i := 9; i < 45; i++ {
+			sh45[i] = cmn.SpzEncodeSH23(sh45[i])
+		}
+	} else if oArg.Quality == 7 {
+		// 第7级时，整理第3级球谐系数
+		for i := 24; i < 45; i++ {
+			sh45[i] = cmn.SpzEncodeSH23(sh45[i])
+		}
+	}
+
 	return sh45
 }
 
