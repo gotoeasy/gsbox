@@ -91,6 +91,7 @@ func main() {
 		time.Sleep((1000 - time.Duration(dur)) * time.Millisecond) // wait 1 second to get latest version
 	}
 	fmt.Print(cmn.NewVersionMessage)
+	os.Exit(0)
 }
 
 func version() {
