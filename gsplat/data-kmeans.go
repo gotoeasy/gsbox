@@ -23,7 +23,8 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		nSh45 = append(nSh45, GetSh45Float32(rows[n]))
 	}
 	dims := []int{0, 9, 24, 45}
-	palettes, indexes := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
+	palettes, indexes, counts := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
+	palettes, indexes = sortCentroidsByCounts(palettes, indexes, counts) // 按质心点数量倒序排序,提高压缩效果稳定输出
 
 	if IsOutputSpz() {
 		for n := range dataCnt {
@@ -84,7 +85,35 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	return
 }
 
-func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32) {
+func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32) (sortedCentroids [][]uint8, sortedIndexes []int32) {
+	type centroidInfo struct {
+		idx   int32
+		count int32
+	}
+	centroidMap := make([]centroidInfo, len(counts))
+	for i := range counts {
+		centroidMap[i] = centroidInfo{idx: int32(i), count: counts[i]}
+	}
+
+	sort.Slice(centroidMap, func(i, j int) bool {
+		return centroidMap[i].count > centroidMap[j].count
+	})
+
+	sortedCentroids = make([][]uint8, len(centroids))
+	sortedIndexes = make([]int32, len(indexes))
+	for i, info := range centroidMap {
+		sortedCentroids[i] = centroids[info.idx]
+		for j, idx := range indexes {
+			if idx == info.idx {
+				sortedIndexes[j] = int32(i)
+			}
+		}
+	}
+
+	return sortedCentroids, sortedIndexes
+}
+
+func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32, counts []int32) {
 	n := len(nSh45)
 	paletteSize := int(math.Min(64, math.Pow(2, math.Floor(math.Log2(float64(n)/1024.0)))) * 1024)
 	labels = make([]int32, n)
@@ -121,7 +150,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 
 		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
-		counts := make([]int32, paletteSize)
+		counts = make([]int32, paletteSize)
 		for i := range paletteSize {
 			newCents[i] = make([]float32, 45)
 		}
