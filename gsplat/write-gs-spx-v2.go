@@ -19,8 +19,8 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 	blockSize := cmn.StringToInt(inputBlockSize, DefaultBlockSize)
 	if cmn.EqualsIngoreCase(inputBlockSize, "max") {
 		blockSize = MaxBlockSize // 支持 -bs max 写法
-	} else if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
-		blockSize = DefaultBlockSize // 超出范围按默认看待
+	} else {
+		blockSize = max(MinBlockSize, min(blockSize, MaxBlockSize)) // 超出范围时限定为边界值
 	}
 
 	header := genSpxHeaderV2(rows, comment, shDegree)

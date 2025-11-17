@@ -13,21 +13,19 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	ver := Args.GetArgIgnorecase("-ov", "--output-version")
 	cmn.ExitOnConditionError(ver != "" && ver != "2", errors.New("support sog version 2 only"))
 
-	shDegree := GetArgShDegree()
+	outputShDegree := GetArgShDegree()
 	log.Println("[Info] output sog version: 2")
-	log.Println("[Info] output shDegree:", shDegree)
+	log.Println("[Info] output shDegree:", min(3, outputShDegree*10)) // 在 SOG V2 中只有 0 和 3 级, 不区分 1 和 2 级
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-	if (!IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0) || (IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0) {
-		log.Println("[Info] use origin palettes")
-	}
 
-	if shDegree > 0 {
-		if !IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0 {
-		} else if !IsShChanged() && IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0 {
-		} else {
-			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
-		}
+	fromSpxV3 := IsSpx2Sog() && inputSpxHeader.Version >= 3
+	fromSog := IsSog2Sog()
+	shChanged := IsShChanged()
+	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
+		log.Println("[Info] use origin palettes")
+	} else if outputShDegree > 0 {
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 
 	dir := cmn.Dir(sogOrJsonFile)
@@ -45,10 +43,10 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	files = append(files, writeScales(dir, rows)...)
 	files = append(files, writeQuats(dir, rows)...)
 	files = append(files, writeSh0(dir, rows)...)
-	if shDegree > 0 {
+	if outputShDegree > 0 {
 		var shN_centroids []uint8
 		var shN_labels []uint8
-		if !IsShChanged() && IsSog2Sog() && len(inputSogHeader.Palettes) > 0 {
+		if !shChanged && fromSog {
 			shN_centroids = inputSogHeader.Palettes
 			shN_labels = make([]uint8, len(rows)*4)
 			for i, d := range rows {
@@ -57,7 +55,8 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 				shN_labels[i*4+2] = 0
 				shN_labels[i*4+3] = 255
 			}
-		} else if !IsShChanged() && IsSpx2Sog() && len(inputSpxHeader.Palettes) > 0 {
+
+		} else if !shChanged && fromSpxV3 {
 			shN_centroids = inputSpxHeader.Palettes
 			shN_labels = make([]uint8, len(rows)*4)
 			for i, d := range rows {
@@ -80,15 +79,13 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	files = append(files, writeMeta(dir, mm, len(rows))...)
 	cmn.PrintLibwebpInfo(true)
 
-	if !isSog {
+	if isSog {
+		cmn.ZipSogFiles(sogOrJsonFile, files)
+	} else {
 		fileSize = 0
 		for _, f := range files {
 			fileSize += cmn.GetFileSize(f)
 		}
-	}
-
-	if isSog {
-		cmn.ZipSogFiles(sogOrJsonFile, files)
 	}
 	return
 }
@@ -124,8 +121,7 @@ func writeMeta(dir string, mm *V3MinMax, count int) []string {
 	}
 	sh0.Files = []string{"sh0.webp"}
 	m.Sh0 = sh0
-	shDegree := GetArgShDegree()
-	if shDegree > 0 {
+	if GetArgShDegree() > 0 {
 		var shn ShN
 		shn.Codebook = make([]float32, 256)
 		for i := range 256 {

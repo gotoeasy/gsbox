@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShDegree uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
@@ -19,11 +19,11 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 	blockSize := cmn.StringToInt(inputBlockSize, DefaultBlockSize)
 	if cmn.EqualsIngoreCase(inputBlockSize, "max") {
 		blockSize = MaxBlockSize // 支持 -bs max 写法
-	} else if blockSize < MinCompressBlockSize || blockSize > MaxBlockSize {
-		blockSize = DefaultBlockSize // 超出范围按默认看待
+	} else {
+		blockSize = max(MinBlockSize, min(blockSize, MaxBlockSize)) // 超出范围时限定为边界值
 	}
 
-	header := genSpxHeaderV3(rows, comment, shDegree)
+	header := genSpxHeaderV3(rows, comment, outputShDegree)
 	_, err = writer.Write(header.ToBytes())
 	cmn.ExitOnError(err)
 
@@ -33,23 +33,41 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 		bf = BF_SPLAT22 // 参数指定的格式有误时的默认格式，偏向速度
 	}
 
+	fromSpxV3 := IsSpx2Spx() && inputSpxHeader.Version >= 3
+	fromSog := IsSog2Spx()
+	shChanged := IsShChanged()
+
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-	if !IsShChanged() && (IsSog2Spx() || (IsSpx2Spx() && len(inputSpxHeader.Palettes) > 0)) {
+	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
 		log.Println("[Info] use origin palettes")
+	} else if outputShDegree > 0 {
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 	log.Println("[Info] (parameter) bf:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
 
 	var shCentroids []uint8
-	if GetArgShDegree() > 0 {
-		if !IsShChanged() && IsSog2Spx() {
+	if outputShDegree > 0 {
+		if !shChanged && fromSog {
 			shCentroids = inputSogHeader.Palettes
-		} else if !IsShChanged() && IsSpx2Spx() && len(inputSpxHeader.Palettes) > 0 {
+		} else if !shChanged && fromSpxV3 {
 			shCentroids = inputSpxHeader.Palettes
 		} else {
-			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 			shCentroids, _ = ReWriteShByKmeans(rows)
+		}
+
+		// 根据输出级别相应的置零
+		if outputShDegree < 3 {
+			idxs := []int{0, 3, 8}
+			cnt := len(shCentroids) / 60
+			for i := range cnt {
+				for d := idxs[outputShDegree]; d < 15; d++ {
+					shCentroids[i*60+d*4+0] = 128
+					shCentroids[i*60+d*4+1] = 128
+					shCentroids[i*60+d*4+2] = 128
+				}
+			}
 		}
 	}
 
@@ -84,16 +102,16 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, shDegree 
 	}
 
 	// 写文件
-	palettesDone := shDegree == 0
+	palettesDone := outputShDegree == 0
 	writeCnt := 0
 	hasWebp := false
 	for _, blockDatas := range blockList {
 		if bf == BF_SPLAT220_WEBP && (len(blockDatas) >= MinWebpBlockSize || Args.HasArgIgnorecase("-bf", "--block-format")) {
 			// 默认提示WEBP编码且数据量够大，或强制参数要求WEBP编码
-			writeSpxBF220_WEBP_V3(writer, blockDatas, shDegree)
+			writeSpxBF220_WEBP_V3(writer, blockDatas, outputShDegree)
 			hasWebp = true
 		} else {
-			writeSpxBF22_V3(writer, blockDatas, shDegree, compressType)
+			writeSpxBF22_V3(writer, blockDatas, outputShDegree, compressType)
 		}
 		writeCnt += len(blockDatas)
 
@@ -213,7 +231,7 @@ func genSpxHeaderV3(datas []*SplatData, comment string, shDegree uint8) *SpxHead
 
 // 此格式在保持良好的压缩率基础上，更偏向于编码和解码速度
 // 选择gizp时最快，选xz时较快，速度优于webp，压缩率通常16倍以上，略逊于webp
-func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8, compressType uint8) {
+func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, outputShDegree uint8, compressType uint8) {
 	for _, d := range blockDatas {
 		d.RotationW, d.RotationX, d.RotationY, d.RotationZ = cmn.NormalizeRotations(d.RotationW, d.RotationX, d.RotationY, d.RotationZ)
 	}
@@ -282,7 +300,7 @@ func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uin
 		bts = append(bts, d.RotationZ)
 	}
 
-	if shDegree > 0 {
+	if outputShDegree > 0 {
 		for _, d := range blockDatas {
 			bts = append(bts, byte(d.PaletteIdx&0xFF))
 		}
@@ -316,7 +334,7 @@ func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uin
 // 此格式在保持良好的性能基础上，更偏向于压缩率
 // 使用多CPU和近似计算等优化方式，加速球谐系数调色板的提取计算过程
 // 使用webp编码压缩，本机安装libwebp时会自动调用以获取最好的压缩性能和压缩效果，压缩率通常20倍左右，最高可达25倍左右
-func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8) {
+func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, outputShDegree uint8) {
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(blockDatas)))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SPLAT220_WEBP)...)        // 开放的块数据格式 220
@@ -375,7 +393,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, shDegr
 	bts = append(bts, cmn.Uint32ToBytes(uint32(len(bsTmp)))...)
 	bts = append(bts, bsTmp...)
 
-	if shDegree > 0 {
+	if outputShDegree > 0 {
 		bsTmp = make([]byte, 0)
 		for _, d := range blockDatas {
 			bsTmp = append(bsTmp, byte(d.PaletteIdx&0xFF), byte(d.PaletteIdx>>8), 0, 255)

@@ -69,11 +69,12 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
 		}
-
 	}
 
 	// 按调色板设定球谐系数
-	if header.ShDegree > 0 && (IsShChanged() || (!(IsSpx2Spx() && OutputSpxVersion() >= 3) && !IsSpx2Sog())) {
+	toSpxV3OrSog := (IsSpx2Spx() && OutputSpxVersion() >= 3) || IsSpx2Sog()
+	shChanged := IsShChanged()
+	if header.ShDegree > 0 && (shChanged || !toSpxV3OrSog) {
 		setAllShByPalettes(header, datas)
 	}
 

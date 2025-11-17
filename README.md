@@ -88,7 +88,7 @@ Options:
   -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output
   -c,  --comment <text>              specify the comment for ply/spx output
   -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data
-  -bs, --block-size <num>            specify the block size(64~1048576) for spx output (default is 65536)
+  -bs, --block-size <num>            specify the block size(4096~524288) for spx output (default is 65536)
   -bf, --block-format <num>          specify the block data format(19~20) for spx output (default is 19)
   -sh, --shDegree <num>              specify the SH degree(0~3) for output
   -f1, --is-inverted <bool>          specify the header flag1(IsInverted) for spx output, default is false

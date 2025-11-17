@@ -83,10 +83,9 @@ func CreateOutputDir() string {
 func GetArgShDegree() uint8 {
 	shDegree := shDegreeFrom
 	if Args.HasArg("-sh", "--shDegree") {
-		sh := cmn.StringToInt(Args.GetArgIgnorecase("-sh", "--shDegree"), -1)
-		if sh >= 0 && sh <= 3 {
-			shDegree = uint8(sh)
-		}
+		sh := cmn.StringToInt(Args.GetArgIgnorecase("-sh", "--shDegree"), 3) // 默认满级输出
+		sh = max(0, min(sh, 3))                                              // 限制越界参数值到边界
+		shDegree = min(shDegreeFrom, uint8(sh))                              // 来源和输出取其小，不必输出更高级别
 	}
 	return shDegree
 }

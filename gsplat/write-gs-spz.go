@@ -12,7 +12,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 	cmn.ExitOnError(err)
 	defer file.Close()
 
-	shDegree := GetArgShDegree()
+	outputShDegree := GetArgShDegree()
 	writer := bufio.NewWriter(file)
 	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
 	if ver < 2 || ver > 3 {
@@ -20,21 +20,23 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		ver = 2
 	}
 	log.Println("[Info] output spz version:", ver)
-	log.Println("[Info] output shDegree:", shDegree)
+	log.Println("[Info] output shDegree:", outputShDegree)
 
 	h := &SpzHeader{
 		Magic:          SPZ_MAGIC,
 		Version:        uint32(ver),
 		NumPoints:      uint32(len(rows)),
-		ShDegree:       uint8(shDegree),
+		ShDegree:       uint8(outputShDegree),
 		FractionalBits: 12,
 		Flags:          0,
 		Reserved:       0,
 	}
 
-	if GetArgShDegree() > 0 {
+	if outputShDegree > 0 {
 		log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-		if (IsSpx2Spz() && len(inputSpxHeader.Palettes) > 0) || (IsSog2Spz() && len(inputSogHeader.Palettes) > 0) {
+		fromSpxV3 := IsSpx2Spz() && inputSpxHeader.Version >= 3
+		fromSog := IsSog2Spz()
+		if fromSpxV3 || fromSog {
 			log.Println("[Info] use origin palettes")
 		} else if oArg.Quality < 9 {
 			// 小于9级使用聚类，第9级按通常处理
@@ -69,7 +71,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		}
 	}
 
-	switch shDegree {
+	switch outputShDegree {
 	case 1:
 		for i := range rows {
 			if len(rows[i].SH1) > 0 {

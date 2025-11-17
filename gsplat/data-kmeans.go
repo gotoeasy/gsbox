@@ -20,7 +20,7 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	dataCnt := len(rows)
 	var nSh45 [][]float32
 	for n := range dataCnt {
-		nSh45 = append(nSh45, GetSh45Float32(rows[n]))
+		nSh45 = append(nSh45, GetSh45Float32ForKmeans(rows[n]))
 	}
 	dims := []int{0, 9, 24, 45}
 	palettes, indexes, counts := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)

@@ -41,8 +41,8 @@ func IsSog2Spz() bool {
 	return !Args.HasCmd("join") && Args.HasCmd("g2z", "sog2spz")
 }
 
-func IsSog2SpxOrSogSpz() bool {
-	return IsSog2Spx() || IsSog2Sog() || IsSog2Spz()
+func IsSog2SpxOrSog() bool {
+	return IsSog2Spx() || IsSog2Sog()
 }
 
 func IsSpx2SpxOrSog() bool {
