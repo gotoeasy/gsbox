@@ -26,7 +26,7 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 
 	header := ParseSpxHeader(spxFile)
 	inputSpxHeader = header
-	if !header.IsValid() && IsOpenCreaterId(header.CreaterId) && IsOpenExclusiveId(header.ExclusiveId) {
+	if !CheckHeaderHash(header) {
 		log.Println("[Warn] hash check failed! CreaterId:" + cmn.Uint32ToString(header.CreaterId) + ", ExclusiveId:" + cmn.Uint32ToString(header.ExclusiveId))
 	}
 

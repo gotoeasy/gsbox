@@ -38,6 +38,10 @@ func CheckSpxHeaderHash(bts []byte, hash uint32) bool {
 	return cmn.HashBytes(bts) == hash
 }
 
+func CheckHeaderHash(header *SpxHeader) bool {
+	return header.IsValid()
+}
+
 func GetLodFlag() uint8 {
 	return 0
 }
