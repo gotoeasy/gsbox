@@ -21,8 +21,6 @@ import (
 
 var LastestVerUrl = "https://reall3d.com/gsbox/open-lastest.json"
 
-var NewVersionMessage = ""
-
 const COLOR_SCALE = 0.15
 const SH_C0 float64 = 0.28209479177387814
 
@@ -31,9 +29,21 @@ const RAD2DEG = 180 / math.Pi
 
 var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
-var CheckVersion bool = true
 
 const SQRT2 = float64(1.4142135623730951) // math.Sqrt(2.0)
+
+var checkVersionStartTime time.Time
+var checkVersionDone bool = false
+var newVersionMessage = ""
+
+func PrintNewVersionAndExit() {
+	dur := time.Since(checkVersionStartTime).Milliseconds()
+	if !checkVersionDone && dur < 1000 {
+		time.Sleep((1000 - time.Duration(dur)) * time.Millisecond) // wait 1 second to get latest version
+	}
+	fmt.Print(newVersionMessage)
+	os.Exit(0)
+}
 
 // 使用标准包进行Post请求，固定Content-Type:application/x-www-form-urlencoded，其他自定义headers格式为 K:V
 func HttpPostForm(url string, formMap map[string]string, headers ...string) ([]byte, error) {
@@ -562,27 +572,29 @@ func init() {
 }
 
 func checkLastVersion() {
-	time.Sleep(10 * time.Millisecond)
-	if !CheckVersion {
-		return
-	}
+	time.Sleep(1 * time.Millisecond)
+	checkVersionStartTime = time.Now()
+
 	params := url.Values{}
 	params.Add("v", VER+", "+Join(os.Args, " "))
 	queryString := params.Encode()
 	verUrl := LastestVerUrl + "?" + queryString
 	req, err := http.NewRequest("GET", verUrl, nil)
 	if err != nil {
+		checkVersionDone = true
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	client := http.Client{Timeout: 1 * time.Second}
 	res, err := client.Do(req)
 	if err != nil {
+		checkVersionDone = true
 		return
 	}
 	defer res.Body.Close()
 	bts, err := io.ReadAll(res.Body)
 	if err != nil {
+		checkVersionDone = true
 		return
 	}
 	var data struct {
@@ -590,12 +602,14 @@ func checkLastVersion() {
 	}
 	err = json.Unmarshal(bts, &data)
 	if err != nil {
+		checkVersionDone = true
 		return
 	}
 
 	if data.Ver > VER {
-		NewVersionMessage = "\nNotice: the latest version (" + data.Ver + ") is now available.\n"
+		newVersionMessage = "\nNotice: the latest version (" + data.Ver + ") is now available.\n"
 	}
+	checkVersionDone = true
 }
 
 func ClipUint8Round(x float64) uint8 {

@@ -12,7 +12,6 @@ import (
 
 func main() {
 	args := gsplat.InitArgs()
-	startTime := time.Now()
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
@@ -86,12 +85,7 @@ func main() {
 	} else {
 		usage()
 	}
-	dur := time.Since(startTime).Milliseconds()
-	if dur < 1000 {
-		time.Sleep((1000 - time.Duration(dur)) * time.Millisecond) // wait 1 second to get latest version
-	}
-	fmt.Print(cmn.NewVersionMessage)
-	os.Exit(0)
+	cmn.PrintNewVersionAndExit()
 }
 
 func version() {

@@ -14,14 +14,6 @@ func ProcessDatas(datas []*SplatData) []*SplatData {
 	return datas
 }
 
-func GetOutputCreaterId() uint32 {
-	return CreaterIdOpen
-}
-
-func GetOutputExclusiveId() uint32 {
-	return ExclusiveIdOpen
-}
-
 func IsOpenCreaterId(id uint32) bool {
 	return id == CreaterIdOpen
 }

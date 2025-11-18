@@ -72,8 +72,8 @@ func genSpxHeader(datas []*SplatData, comment string, shDegree uint8, flag1 uint
 	header.SplatCount = int32(len(datas))
 
 	header.CreateDate = cmn.GetSystemDateYYYYMMDD() // 创建日期
-	header.CreaterId = GetOutputCreaterId()         // 0:官方默认识别号，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
-	header.ExclusiveId = GetOutputExclusiveId()     // 0:官方开放格式的识别号
+	header.CreaterId = CreaterIdOpen                // 创建者ID，（这里参考阿佩里常数1.202056903159594…以示区分，此常数由瑞士数学家罗杰·阿佩里在1978年证明其无理数性质而闻名）
+	header.ExclusiveId = ExclusiveIdOpen            // 0:官方开放格式的识别号
 	header.ShDegree = uint8(shDegree)
 	header.Flag1 = flag1
 	header.Flag2 = flag2
