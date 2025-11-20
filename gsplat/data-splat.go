@@ -90,7 +90,7 @@ func transformRotateDatas(datas []*SplatData) {
 			data.Rotate(degreeX, degreeY, degreeZ, shr)
 		}
 
-		log.Println("[Info] (Transform) rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
+		log.Println("[Info] (transform) rotate in XYZ order.", "degreeX:", degreeX, ", degreeY:", degreeY, ", degreeZ:", degreeZ)
 	}
 }
 
@@ -101,7 +101,7 @@ func transformScaleDatas(datas []*SplatData) {
 		for _, data := range datas {
 			data.Scale(scale)
 		}
-		log.Println("[Info] (Transform) scaling factor:", scale)
+		log.Println("[Info] (transform) scaling factor:", scale)
 		if scale < 0.05 {
 			log.Println("[Warn] ATTENTION: VERY SMALL SCALING FACTOR MAY CAUSE PRECISION LOSS! PROCEED WITH CAUTION!")
 		} else if scale > 20 {
@@ -117,7 +117,7 @@ func transformTranslateDatas(datas []*SplatData) {
 		for _, data := range datas {
 			data.Translate(tx, ty, tz)
 		}
-		log.Println("[Info] (Transform) make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
+		log.Println("[Info] (transform) make translate.", "translateX:", tx, ", translateY:", ty, ", translateZ:", tz)
 	}
 }
 

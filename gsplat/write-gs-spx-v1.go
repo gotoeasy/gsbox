@@ -9,7 +9,7 @@ import (
 	"sort"
 )
 
-// Deprecated
+// Deprecated，旧版将废弃，推荐使用新版本
 func WriteSpxOpenV1(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
 	file, err := os.Create(spxFile)
 	cmn.ExitOnError(err)

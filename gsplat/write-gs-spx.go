@@ -19,6 +19,9 @@ func WriteSpx(spxFile string, rows []*SplatData) {
 	comment := Args.GetArgIgnorecase("-c", "--comment")
 
 	log.Println("[Info] output spx version:", ver)
+	if ver < NewestSpxVersion {
+		log.Println("[Warn] it is highly recommended to migrate to the spx version", NewestSpxVersion)
+	}
 	log.Println("[Info] output shDegree:", shDegree)
 
 	switch ver {
