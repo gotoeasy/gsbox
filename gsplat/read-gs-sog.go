@@ -20,11 +20,11 @@ func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(fileSogMeta))
-		log.Println("[Info]", "Download start,", fileSogMeta)
+		log.Println("[Info]", "download start,", fileSogMeta)
 		err = cmn.HttpDownload(fileSogMeta, downloadFile, nil)
 		cmn.RemoveAllFileIfError(err, tmpdir)
 		cmn.ExitOnError(err)
-		log.Println("[Info]", "Download finish")
+		log.Println("[Info]", "download finish")
 		fileSogMeta = downloadFile
 	}
 
@@ -148,7 +148,7 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, *SogHeader) {
 	cmn.ExitOnError(err)
 
 	var wg sync.WaitGroup
-	log.Println("[Info]", "Download start")
+	log.Println("[Info]", "download start")
 	ary := cmn.Split(urlMetaJson, "/")
 	log.Println("[Info]", meta.Means.Files[0])
 	ary[len(ary)-1] = meta.Means.Files[0]
@@ -181,7 +181,7 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, *SogHeader) {
 		go cmn.HttpDownload(cmn.Join(ary, "/"), filepath.Join(dir, meta.ShN.Files[1]), &wg)
 	}
 	wg.Wait() // 阻塞直到所有下载完成
-	log.Println("[Info]", "Download finish")
+	log.Println("[Info]", "download finish")
 
 	switch meta.Version {
 	case 0, 1:

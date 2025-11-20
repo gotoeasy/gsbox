@@ -15,11 +15,11 @@ func ReadSpz(spzFile string) (*SpzHeader, []*SplatData) {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(spzFile))
-		log.Println("[Info]", "Download start,", spzFile)
+		log.Println("[Info]", "download start,", spzFile)
 		err = cmn.HttpDownload(spzFile, downloadFile, nil)
 		cmn.RemoveAllFileIfError(err, tmpdir)
 		cmn.ExitOnError(err)
-		log.Println("[Info]", "Download finish")
+		log.Println("[Info]", "download finish")
 		spzFile = downloadFile
 	}
 

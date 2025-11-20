@@ -15,11 +15,11 @@ func ReadSplat(splatFile string) []*SplatData {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(splatFile))
-		log.Println("[Info]", "Download start,", splatFile)
+		log.Println("[Info]", "download start,", splatFile)
 		err = cmn.HttpDownload(splatFile, downloadFile, nil)
 		cmn.RemoveAllFileIfError(err, tmpdir)
 		cmn.ExitOnError(err)
-		log.Println("[Info]", "Download finish")
+		log.Println("[Info]", "download finish")
 		splatFile = downloadFile
 	}
 

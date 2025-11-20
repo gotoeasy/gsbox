@@ -15,11 +15,11 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(spxFile))
-		log.Println("[Info]", "Download start,", spxFile)
+		log.Println("[Info]", "download start,", spxFile)
 		err = cmn.HttpDownload(spxFile, downloadFile, nil)
 		cmn.RemoveAllFileIfError(err, tmpdir)
 		cmn.ExitOnError(err)
-		log.Println("[Info]", "Download finish")
+		log.Println("[Info]", "download finish")
 		spxFile = downloadFile
 		defer cmn.RemoveAllFile(tmpdir)
 	}

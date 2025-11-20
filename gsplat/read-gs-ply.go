@@ -25,11 +25,11 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
 		downloadFile := filepath.Join(tmpdir, cmn.FileName(plyFile))
-		log.Println("[Info]", "Download start,", plyFile)
+		log.Println("[Info]", "download start,", plyFile)
 		err = cmn.HttpDownload(plyFile, downloadFile, nil)
 		cmn.RemoveAllFileIfError(err, tmpdir)
 		cmn.ExitOnError(err)
-		log.Println("[Info]", "Download finish")
+		log.Println("[Info]", "download finish")
 		plyFile = downloadFile
 	}
 
