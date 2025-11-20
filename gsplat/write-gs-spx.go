@@ -6,11 +6,11 @@ import (
 	"log"
 )
 
-const MaxBlockSize = int(524288)     // 过大会增加前端wasm解析的内存压力，会对低端设备不友好，应不断观察调整为合适值
-const MinBlockSize = int(4096)       // 过小性能反差，参数边界值应限制
-const DefaultBlockSize = int(65536)  // 应不断观察调整为合适值
+const MaxBlockSize = int(640000)     // 800*800，过大会增加前端wasm解析的内存压力，会对低端设备不友好，应不断观察调整为合适值
+const MinBlockSize = int(4096)       // 64*64，过小性能反差，参数边界值应限制
+const DefaultBlockSize = int(67600)  // 260*260，应不断观察调整为合适值
 const MinCompressBlockSize = int(64) // 再小就别压了
-const MinWebpBlockSize = int(4096)   // 再小就别webp了
+const MinWebpBlockSize = int(4096)   // 64*64，再小就别webp了
 
 func WriteSpx(spxFile string, rows []*SplatData) {
 
