@@ -71,14 +71,14 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 		}
 	}
 
-	var compressType uint8 = CT_XZ // 默认xz
+	var compressType uint8 = CT_GZIP // 默认gzip，既然不选择webp，多数是更注重编码解码性能
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
 	if bf != BF_SPLAT220_WEBP {
-		if cmn.EqualsIngoreCase(ct, "gzip") || ct == "0" {
-			compressType = CT_GZIP
-			log.Println("[Info] (parameter) ct:", "gzip", "(block compress type)")
+		if cmn.EqualsIngoreCase(ct, "xz") || ct == "1" {
+			compressType = CT_XZ
+			log.Println("[Info] (parameter) ct:", "xz", "(compress type, gzip|xz)")
 		} else {
-			log.Println("[Info] (parameter) ct:", "xz", "(block compress type)")
+			log.Println("[Info] (parameter) ct:", "gzip", "(compress type, gzip|xz)")
 		}
 	}
 
