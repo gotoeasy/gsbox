@@ -130,18 +130,22 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 	// 1. 随机选 k 个中心
 	f32Centroids := make([][]float32, paletteSize)
 	used := make([]bool, n)
+	faildCnt := 0
+	maxFaildCnt := max(paletteSize/20, 1000)
 	for i := 0; i < paletteSize; {
 		idx := rand.Intn(n)
-		if !used[idx] {
+		if !used[idx] || faildCnt >= maxFaildCnt {
 			used[idx] = true
 			f32Centroids[i] = make([]float32, 45)
 			copy(f32Centroids[i], nSh45[idx])
 			i++
+		} else {
+			faildCnt++
 		}
 	}
 
 	for it := range maxIters {
-		OnProgress(PhaseKmean, it, maxIters*2)
+		OnProgress(PhaseKmean, it, maxIters)
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
 		buildCentSoA(f32Centroids)
