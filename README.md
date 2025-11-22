@@ -88,8 +88,8 @@ Options:
   -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output
   -c,  --comment <text>              specify the comment for ply/spx output
   -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data
-  -bs, --block-size <num>            specify the block size(4096~524288) for spx output (default is 65536)
-  -bf, --block-format <num>          specify the block data format(19~20) for spx output (default is 19)
+  -bs, --block-size <num>            specify the block size(4096~640000) for spx output (default is 67600)
+  -bf, --block-format <num>          specify the block data format(22|220) for spx output (default is 220)
   -sh, --shDegree <num>              specify the SH degree(0~3) for output
   -f1, --is-inverted <bool>          specify the header flag1(IsInverted) for spx output, default is false
   -rx, --rotateX <num>               specify the rotation angle in degrees about the x-axis for transform
@@ -101,8 +101,8 @@ Options:
   -tz, --translateZ <num>            specify the translation value about the z-axis for transform
   -to, --transform-order <RST>       specify the transform order (RST/RTS/SRT/STR/TRS/TSR), default is RST
   -ov, --output-version <num>        specify the output versions for spx|spz|sog, default is newest
-  -ki, --kmeans-iterations <num>     specify the kmeans iterations, default is 10
-  -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes, default is 20
+  -ki, --kmeans-iterations <num>     specify the kmeans iterations (5~50), default is set by quality level
+  -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes (10~200), default is set by quality level
   -v,  --version                     display version information
   -h,  --help                        display help information
 
