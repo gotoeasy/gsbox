@@ -45,6 +45,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 			ReWriteShByKmeans(rows)
 		}
 	}
+	OnProgress(PhaseKmean, 100, 100)
 
 	bts := make([]byte, 0)
 	bts = append(bts, h.ToBytes()...)
@@ -54,15 +55,19 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		bts = append(bts, cmn.SpzEncodePosition(rows[i].PositionY)...)
 		bts = append(bts, cmn.SpzEncodePosition(rows[i].PositionZ)...)
 	}
+	OnProgress(PhaseWrite, 15, 100)
 	for i := range rows {
 		bts = append(bts, rows[i].ColorA)
 	}
+	OnProgress(PhaseWrite, 30, 100)
 	for i := range rows {
 		bts = append(bts, cmn.SpzEncodeColor(rows[i].ColorR), cmn.SpzEncodeColor(rows[i].ColorG), cmn.SpzEncodeColor(rows[i].ColorB))
 	}
+	OnProgress(PhaseWrite, 45, 100)
 	for i := range rows {
 		bts = append(bts, cmn.SpzEncodeScale(rows[i].ScaleX), cmn.SpzEncodeScale(rows[i].ScaleY), cmn.SpzEncodeScale(rows[i].ScaleZ))
 	}
+	OnProgress(PhaseWrite, 60, 100)
 	for i := range rows {
 		if h.Version >= 3 {
 			bts = append(bts, cmn.SpzEncodeRotationsV3(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
@@ -70,6 +75,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 			bts = append(bts, cmn.SpzEncodeRotations(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
 		}
 	}
+	OnProgress(PhaseWrite, 75, 100)
 
 	switch outputShDegree {
 	case 1:
@@ -146,6 +152,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 			}
 		}
 	}
+	OnProgress(PhaseWrite, 90, 100)
 
 	gzipDatas, err := cmn.CompressGzip(bts)
 	cmn.ExitOnError(err)
@@ -155,4 +162,5 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 
 	err = writer.Flush()
 	cmn.ExitOnError(err)
+	OnProgress(PhaseWrite, 100, 100)
 }

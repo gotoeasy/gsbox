@@ -20,6 +20,7 @@ type ArgValues struct {
 	hasQuality bool
 	hasKI      bool
 	hasKN      bool
+	isJoin     bool
 }
 
 func InitArgs() *cmn.OsArgs {
@@ -33,6 +34,7 @@ func InitArgs() *cmn.OsArgs {
 	oArg.hasQuality = Args.HasArgIgnorecase("-q", "--quality")
 	oArg.hasKI = Args.HasArgIgnorecase("-ki", "--kmeans-iterations")
 	oArg.hasKN = Args.HasArgIgnorecase("-kn", "--kmeans-nearest-nodes")
+	oArg.isJoin = Args.HasCmd("join")
 
 	// 按摩质量级别自动调整相关参数
 	kis := []int{5, 7, 9, 10, 10, 10, 12, 15, 20}

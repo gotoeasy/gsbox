@@ -40,6 +40,7 @@ func ReadSplat(splatFile string) []*SplatData {
 	var i int64 = 0
 	datas := make([]*SplatData, count)
 	for ; i < count; i++ {
+		OnProgress(PhaseRead, int(i), int(count))
 		splatBytes := make([]byte, SPLAT_DATA_SIZE)
 		_, err = file.ReadAt(splatBytes, i*SPLAT_DATA_SIZE)
 		cmn.ExitOnError(err)

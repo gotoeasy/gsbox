@@ -40,9 +40,13 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	}
 
 	files, mm := writeMeans(dir, rows)
+	OnProgress(PhaseWrite, 15, 100)
 	files = append(files, writeScales(dir, rows)...)
+	OnProgress(PhaseWrite, 30, 100)
 	files = append(files, writeQuats(dir, rows)...)
+	OnProgress(PhaseWrite, 35, 100)
 	files = append(files, writeSh0(dir, rows)...)
+	OnProgress(PhaseWrite, 45, 100)
 	if outputShDegree > 0 {
 		var shN_centroids []uint8
 		var shN_labels []uint8
@@ -73,10 +77,15 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		cmn.ExitOnError(err)
 		bytsLabels, err := cmn.CompressWebp(shN_labels, oArg.webpQuality)
 		cmn.ExitOnError(err)
+		OnProgress(PhaseWrite, 60, 100)
 
 		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
+		OnProgress(PhaseWrite, 75, 100)
 	}
+	OnProgress(PhaseKmean, 100, 100)
+
 	files = append(files, writeMeta(dir, mm, len(rows))...)
+	OnProgress(PhaseWrite, 90, 100)
 	cmn.PrintLibwebpInfo(true)
 
 	if isSog {
@@ -87,6 +96,7 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 			fileSize += cmn.GetFileSize(f)
 		}
 	}
+	OnProgress(PhaseWrite, 100, 100)
 	return
 }
 

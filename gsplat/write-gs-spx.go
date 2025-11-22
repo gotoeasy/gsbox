@@ -34,4 +34,6 @@ func WriteSpx(spxFile string, rows []*SplatData) {
 	default:
 		cmn.ExitOnError(errors.New("unknow output version: " + cmn.IntToString(ver)))
 	}
+
+	OnProgress(PhaseWrite, 100, 100)
 }

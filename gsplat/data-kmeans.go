@@ -140,7 +140,8 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		}
 	}
 
-	for range maxIters {
+	for it := range maxIters {
+		OnProgress(PhaseKmean, it, maxIters*2)
 		// 2. 建 KD-Tree
 		tree := buildKDTree(f32Centroids)
 		buildCentSoA(f32Centroids)
@@ -181,6 +182,8 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 			centroids[i][j] = 128 // 超有效维度的部分都置零（浮点数0.0编码后为128）
 		}
 	}
+
+	OnProgress(PhaseKmean, 100, 100)
 	return
 }
 

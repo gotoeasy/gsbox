@@ -62,7 +62,7 @@ func readCompressedPlyDatas(file *os.File, header *PlyHeader, datas []*SplatData
 			datas[n] = splat
 			n++
 		}
-
+		OnProgress(PhaseRead, i, length)
 	}
 
 	shDim := 0

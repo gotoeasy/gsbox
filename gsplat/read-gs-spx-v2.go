@@ -16,6 +16,7 @@ func ReadSpxOpenV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 	offset := int64(HeaderSizeSpx)
 	var n1, n2, n3 int
 	for {
+		OnProgress(PhaseRead, len(datas), int(header.SplatCount))
 		// 块数据长度、是否压缩
 		bts := make([]byte, 4)
 		_, err = file.ReadAt(bts, offset)

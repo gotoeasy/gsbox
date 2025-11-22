@@ -30,15 +30,19 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 		log.Println("[Warn] hash check failed! CreaterId:" + cmn.Uint32ToString(header.CreaterId) + ", ExclusiveId:" + cmn.Uint32ToString(header.ExclusiveId))
 	}
 
+	var datas []*SplatData
 	switch header.Version {
 	case 1:
-		return ReadSpxV1(spxFile, header)
+		header, datas = ReadSpxV1(spxFile, header)
 	case 2:
-		return ReadSpxV2(spxFile, header)
+		header, datas = ReadSpxV2(spxFile, header)
 	case 3:
-		return ReadSpxV3(spxFile, header)
+		header, datas = ReadSpxV3(spxFile, header)
 	default:
 		cmn.ExitOnError(errors.New("unsupport spx version: " + cmn.IntToString(int(header.Version))))
 		return nil, nil
 	}
+
+	OnProgress(PhaseRead, 100, 100)
+	return header, datas
 }

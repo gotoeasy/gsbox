@@ -18,12 +18,14 @@ func WritePly(plyFile string, datas []*SplatData) {
 	writer := bufio.NewWriter(file)
 	_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
 	cmn.ExitOnError(err)
-	for i := 0; i < len(datas); i++ {
+	for i := range datas {
+		OnProgress(PhaseWrite, i, len(datas))
 		_, err = writer.Write(genPlyDataBin(datas[i], shDegree))
 		cmn.ExitOnError(err)
 	}
 	err = writer.Flush()
 	cmn.ExitOnError(err)
+	OnProgress(PhaseWrite, 100, 100)
 }
 
 func genPlyDataBin(splatData *SplatData, shDegree uint8) []byte {

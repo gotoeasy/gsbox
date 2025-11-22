@@ -209,6 +209,7 @@ func ReadKsplat(ksplatFile string) (*SectionHeader, *KsplatHeader, []*SplatData)
 	datas := make([]*SplatData, mainHeader.SplatCount)
 	n := 0
 	for i := 0; i < mainHeader.SectionCount; i++ {
+		OnProgress(PhaseRead, i, mainHeader.SectionCount)
 		secHead := secHeaders[i]
 
 		bytesPerSplat := cc.centerBytes + cc.scaleBytes + cc.rotationBytes + cc.colorBytes + cc.harmonicsBytes*shComponents
@@ -351,5 +352,6 @@ func ReadKsplat(ksplatFile string) (*SectionHeader, *KsplatHeader, []*SplatData)
 		}
 	}
 
+	OnProgress(PhaseRead, 100, 100)
 	return secHeaders[0], mainHeader, datas
 }

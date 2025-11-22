@@ -1,16 +1,85 @@
 package gsplat
 
-import "gsbox/cmn"
+import (
+	"fmt"
+	"gsbox/cmn"
+	"log"
+	"time"
+)
 
 const CreaterIdOpen uint32 = 1202056903 // 创建者ID，开放版
 const ExclusiveIdOpen uint32 = 0        // 专属ID，开放版
 const CreaterIdPrd uint32 = 0           // 创建者ID，官方
 
+const printProgressLog = false
+const PhaseJoin = -1
+const PhaseRead = 0
+const PhaseProc = 1
+const PhaseWrite = 2
+const PhaseKmean = 3
+
+var Phases = []int{100, 100, 100, 100} // 0:读, 1:数据处理, 2:写, 3:聚类
+var Progress = []int{0, 0, 0, 0}
+
+func OnProgress(phase int, current int, total int) {
+	if printProgressLog {
+		if phase > 0 {
+			Phases[phase] = total
+			Progress[phase] = current
+		} else if phase == 0 {
+			// 单文件读
+			if !oArg.isJoin {
+				Phases[phase] = total
+				Progress[phase] = current
+			}
+		} else {
+			// 合并读
+			Phases[PhaseRead] = total
+			Progress[PhaseRead] = current
+		}
+	}
+}
+
+func init() {
+	if !printProgressLog {
+		return
+	}
+
+	go (func() {
+		lastProgress := ""
+		ticker := time.NewTicker(1 * time.Second)
+		for range ticker.C {
+			var phasesLen int
+			var totalProgress float64
+			for i, v := range Progress {
+				if Phases[i] > 0 {
+					totalProgress += float64(v) / float64(Phases[i])
+					phasesLen++
+				}
+			}
+			totalPercent := totalProgress / float64(phasesLen)
+			theProgress := fmt.Sprintf("%.1f%%", totalPercent*100)
+			if lastProgress != theProgress {
+				lastProgress = theProgress
+				log.Println("[Info] progress:", lastProgress)
+			}
+
+			if totalPercent >= 1.0 {
+				ticker.Stop()
+				break
+			}
+		}
+	})()
+}
+
 // 数据处理
 func ProcessDatas(datas []*SplatData) []*SplatData {
 	datas = FilterDatas(datas)
+	OnProgress(PhaseProc, 30, 100)
 	datas = TransformDatas(datas)
+	OnProgress(PhaseProc, 80, 100)
 	Sort(datas)
+	OnProgress(PhaseProc, 100, 100)
 	return datas
 }
 

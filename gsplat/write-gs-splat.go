@@ -15,6 +15,7 @@ func WriteSplat(splatFile string, rows []*SplatData) {
 	writer := bufio.NewWriter(file)
 
 	for i := range rows {
+		OnProgress(PhaseWrite, i, len(rows))
 		bts := make([]byte, 0)
 		bts = append(bts, cmn.Float32ToBytes(rows[i].PositionX)...)
 		bts = append(bts, cmn.Float32ToBytes(rows[i].PositionY)...)
@@ -29,6 +30,7 @@ func WriteSplat(splatFile string, rows []*SplatData) {
 	}
 	err = writer.Flush()
 	cmn.ExitOnError(err)
+	OnProgress(PhaseWrite, 100, 100)
 }
 
 func PrintSplat(splatFile string, rows []*SplatData) {

@@ -35,6 +35,7 @@ func WriteSpxOpenV1(spxFile string, rows []*SplatData, comment string, shDegree 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize
 	for i := range blockCnt {
+		OnProgress(PhaseWrite, i, blockCnt)
 		blockDatas := make([]*SplatData, 0)
 		max := min(i*blockSize+blockSize, int(header.SplatCount))
 		for n := i * blockSize; n < max; n++ {

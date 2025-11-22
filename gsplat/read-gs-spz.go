@@ -41,6 +41,7 @@ func ReadSpz(spzFile string) (*SpzHeader, []*SplatData) {
 
 	header := ParseSpzHeader(ungzipDatas[0:HeaderSizeSpz])
 	datas := readSpzDatas(ungzipDatas[HeaderSizeSpz:], header)
+	OnProgress(PhaseRead, 100, 100)
 	return header, datas
 }
 
@@ -83,6 +84,7 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 
 	var splatDatas []*SplatData
 	for i := range int(h.NumPoints) {
+		OnProgress(PhaseRead, i, int(h.NumPoints))
 		data := &SplatData{}
 		data.PositionX = cmn.SpzDecodePosition(positions[i*9:i*9+3], h.FractionalBits)
 		data.PositionY = cmn.SpzDecodePosition(positions[i*9+3:i*9+6], h.FractionalBits)

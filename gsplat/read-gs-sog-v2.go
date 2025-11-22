@@ -30,6 +30,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	toSpxV3OrSog := (IsSog2Spx() && OutputSpxVersion() >= 3) || IsSog2Sog()
 	shChanged := IsShChanged()
 	for i := range count {
+		OnProgress(PhaseRead, i, count)
 		splatData := &SplatData{}
 
 		fx := float32((uint16(meansu[i*4+0])<<8)|uint16(meansl[i*4+0])) / 65535.0
@@ -135,5 +136,6 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	}
 
 	inputSogHeader = header
+	OnProgress(PhaseRead, 100, 100)
 	return datas, header
 }

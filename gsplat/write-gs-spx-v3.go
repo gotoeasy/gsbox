@@ -70,6 +70,7 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 			}
 		}
 	}
+	OnProgress(PhaseKmean, 100, 100)
 
 	var compressType uint8 = CT_GZIP // 默认gzip，既然不选择webp，多数是更注重编码解码性能
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")
@@ -105,7 +106,8 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 	palettesDone := outputShDegree == 0
 	writeCnt := 0
 	hasWebp := false
-	for _, blockDatas := range blockList {
+	for i, blockDatas := range blockList {
+		OnProgress(PhaseWrite, i, blockCnt)
 		if bf == BF_SPLAT220_WEBP && (len(blockDatas) >= MinWebpBlockSize || Args.HasArgIgnorecase("-bf", "--block-format")) {
 			// 默认提示WEBP编码且数据量够大，或强制参数要求WEBP编码
 			writeSpxBF220_WEBP_V3(writer, blockDatas, outputShDegree)

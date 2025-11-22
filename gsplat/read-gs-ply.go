@@ -120,6 +120,7 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 					data.SH1 = shs[:9]
 				}
 			}
+			OnProgress(PhaseRead, i, header.VertexCount)
 		}
 
 	} else {
@@ -127,6 +128,7 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 		readCompressedPlyDatas(file, header, datas)
 	}
 
+	OnProgress(PhaseRead, 100, 100)
 	return header, datas
 }
 
