@@ -11,7 +11,7 @@ const CreaterIdOpen uint32 = 1202056903 // 创建者ID，开放版
 const ExclusiveIdOpen uint32 = 0        // 专属ID，开放版
 const CreaterIdPrd uint32 = 0           // 创建者ID，官方
 
-const printProgressLog = false
+const printProgressLog = true
 const PhaseJoin = -1
 const PhaseRead = 0
 const PhaseProc = 1

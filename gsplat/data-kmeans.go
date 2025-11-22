@@ -90,24 +90,24 @@ func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32)
 		idx   int32
 		count int32
 	}
-	centroidMap := make([]centroidInfo, len(counts))
+	centroidInfos := make([]centroidInfo, len(counts))
 	for i := range counts {
-		centroidMap[i] = centroidInfo{idx: int32(i), count: counts[i]}
+		centroidInfos[i] = centroidInfo{idx: int32(i), count: counts[i]}
 	}
 
-	sort.Slice(centroidMap, func(i, j int) bool {
-		return centroidMap[i].count > centroidMap[j].count
+	sort.Slice(centroidInfos, func(i, j int) bool {
+		return centroidInfos[i].count > centroidInfos[j].count
 	})
 
 	sortedCentroids = make([][]uint8, len(centroids))
 	sortedIndexes = make([]int32, len(indexes))
-	for i, info := range centroidMap {
+	idxToNewIdx := make(map[int32]int32)
+	for i, info := range centroidInfos {
 		sortedCentroids[i] = centroids[info.idx]
-		for j, idx := range indexes {
-			if idx == info.idx {
-				sortedIndexes[j] = int32(i)
-			}
-		}
+		idxToNewIdx[info.idx] = int32(i)
+	}
+	for i, idx := range indexes {
+		sortedIndexes[i] = idxToNewIdx[idx]
 	}
 
 	return sortedCentroids, sortedIndexes
