@@ -1,11 +1,14 @@
 package gsplat
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
 	"gsbox/cmn"
+	"io"
 	"log"
+	"math"
 	"os"
 	"path/filepath"
 )
@@ -52,7 +55,12 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 	datas := make([]*SplatData, header.VertexCount)
 	if header.ChunkCount == 0 {
 		// 标准3dgs的ply
-		const batchSize = 1024 // 每次读取的最大点数
+		_, err = file.Seek(int64(header.HeaderLength), 0)     // 定位到数据开始位置
+		cmn.ExitOnError(err)                                  // 可能出错
+		reader := bufio.NewReaderSize(file, 2*1024*1024)      // 2MB 缓冲区
+		const batchSize = 4096                                // 每次读取的最大点数
+		dataBytes := make([]byte, batchSize*header.RowLength) // 预分配缓冲区
+
 		for i := 0; i < header.VertexCount; i += batchSize {
 			// 计算本次读取的点数
 			batchCount := batchSize
@@ -60,9 +68,9 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 				batchCount = header.VertexCount - i
 			}
 
-			// 一次性读取一批数据
-			dataBytes := make([]byte, batchCount*header.RowLength)
-			_, err := file.ReadAt(dataBytes, int64(header.HeaderLength+i*header.RowLength))
+			// 一次性读取一批数据到预分配缓冲区
+			readSize := batchCount * header.RowLength
+			_, err := io.ReadFull(reader, dataBytes[:readSize])
 			cmn.ExitOnError(err)
 
 			// 按点处理这批数据
@@ -70,12 +78,12 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 				offset := j * header.RowLength
 				data := &SplatData{}
 				rowBytes := dataBytes[offset:]
-				data.PositionX = cmn.ClipFloat32(readValue(header, "x", rowBytes))
-				data.PositionY = cmn.ClipFloat32(readValue(header, "y", rowBytes))
-				data.PositionZ = cmn.ClipFloat32(readValue(header, "z", rowBytes))
-				data.ScaleX = cmn.ClipFloat32(readValue(header, "scale_0", rowBytes))
-				data.ScaleY = cmn.ClipFloat32(readValue(header, "scale_1", rowBytes))
-				data.ScaleZ = cmn.ClipFloat32(readValue(header, "scale_2", rowBytes))
+				data.PositionX = float32(readValue(header, "x", rowBytes))
+				data.PositionY = float32(readValue(header, "y", rowBytes))
+				data.PositionZ = float32(readValue(header, "z", rowBytes))
+				data.ScaleX = float32(readValue(header, "scale_0", rowBytes))
+				data.ScaleY = float32(readValue(header, "scale_1", rowBytes))
+				data.ScaleZ = float32(readValue(header, "scale_2", rowBytes))
 				data.ColorR = cmn.EncodeSplatColor(readValue(header, "f_dc_0", rowBytes))
 				data.ColorG = cmn.EncodeSplatColor(readValue(header, "f_dc_1", rowBytes))
 				data.ColorB = cmn.EncodeSplatColor(readValue(header, "f_dc_2", rowBytes))
@@ -100,9 +108,9 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 
 				shs := make([]byte, 45)
 				n := 0
-				for j := 0; j < shDim; j++ {
+				for k := 0; k < shDim; k++ {
 					for c := range 3 {
-						shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(j+c*shDim), rowBytes))
+						shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(k+c*shDim), rowBytes))
 						n++
 					}
 				}
@@ -136,9 +144,7 @@ func readValue(header *PlyHeader, property string, splatDataBytes []byte) float6
 	offset, typename := header.Property(property)
 	switch typename {
 	case "float":
-		var v float32
-		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+4]), binary.LittleEndian, &v))
-		return float64(v)
+		return float64(math.Float32frombits(binary.LittleEndian.Uint32(splatDataBytes[offset : offset+4]))) // 实际全是 float 类型
 	case "double":
 		var v float64
 		cmn.ExitOnError(binary.Read(bytes.NewReader(splatDataBytes[offset:offset+8]), binary.LittleEndian, &v))
