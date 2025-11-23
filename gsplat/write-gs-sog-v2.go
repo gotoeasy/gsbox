@@ -23,9 +23,6 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	shChanged := IsShChanged()
 	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
 		log.Println("[Info] use origin palettes")
-	} else if outputShDegree > 0 {
-		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 
 	dir := cmn.Dir(sogOrJsonFile)
@@ -82,7 +79,6 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
 		OnProgress(PhaseWrite, 75, 100)
 	}
-	OnProgress(PhaseKmean, 100, 100)
 
 	files = append(files, writeMeta(dir, mm, len(rows))...)
 	OnProgress(PhaseWrite, 90, 100)

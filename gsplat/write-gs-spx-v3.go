@@ -40,9 +40,6 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
 	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
 		log.Println("[Info] use origin palettes")
-	} else if outputShDegree > 0 {
-		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 	}
 	log.Println("[Info] (parameter) bf:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
@@ -70,7 +67,6 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 			}
 		}
 	}
-	OnProgress(PhaseKmean, 100, 100)
 
 	var compressType uint8 = CT_GZIP // 默认gzip，既然不选择webp，多数是更注重编码解码性能
 	ct := Args.GetArgIgnorecase("-ct", "--compress-type")

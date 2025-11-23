@@ -3,7 +3,9 @@ package gsplat
 import (
 	"bytes"
 	"container/heap"
+	"encoding/hex"
 	"gsbox/cmn"
+	"log"
 	"math"
 	"math/rand"
 	"runtime"
@@ -12,19 +14,26 @@ import (
 )
 
 func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8) {
+	defer OnProgress(PhaseKmean, 100, 100)
 	shDegreeOutput := GetArgShDegree()
 	if shDegreeOutput == 0 {
 		return // 不输出球谐系数时跳过
 	}
 
 	dataCnt := len(rows)
-	var nSh45 [][]float32
-	for n := range dataCnt {
-		nSh45 = append(nSh45, GetSh45Float32ForKmeans(rows[n]))
+	palettes, indexes, ok := tryFastClustering(rows)
+	if !ok {
+		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
+		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
+
+		var nSh45 [][]float32
+		for n := range dataCnt {
+			nSh45 = append(nSh45, GetSh45Float32ForKmeans(rows[n]))
+		}
+		dims := []int{0, 9, 24, 45}
+		kmPalettes, kmIndexes, counts := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
+		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts) // 按质心点数量倒序排序,提高压缩效果稳定输出
 	}
-	dims := []int{0, 9, 24, 45}
-	palettes, indexes, counts := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
-	palettes, indexes = sortCentroidsByCounts(palettes, indexes, counts) // 按质心点数量倒序排序,提高压缩效果稳定输出
 
 	if IsOutputSpz() {
 		for n := range dataCnt {
@@ -186,8 +195,6 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 			centroids[i][j] = 128 // 超有效维度的部分都置零（浮点数0.0编码后为128）
 		}
 	}
-
-	OnProgress(PhaseKmean, 100, 100)
 	return
 }
 
@@ -346,4 +353,61 @@ func parAssignDim(n int, nSh45 [][]float32, labels []int32, tree *kdTree, dim in
 		}(g)
 	}
 	wg.Wait()
+}
+
+type shsInfo struct {
+	idx   int
+	key   string
+	shs   []uint8
+	count int
+}
+
+// 去重后数量不足最大质心数量时，直接快速聚类
+func tryFastClustering(rows []*SplatData) (centroids [][]uint8, labels []int32, ok bool) {
+	// 去重
+	mapShs := make(map[string]*shsInfo)
+	paletteSize := 0
+	for _, d := range rows {
+		shs := GetSh45ForKmeans(d)
+		key := hex.EncodeToString(shs)
+
+		if mapShs[key] == nil {
+			mapShs[key] = &shsInfo{
+				key:   key,
+				shs:   shs,
+				count: 1,
+			}
+			paletteSize++
+
+			if paletteSize > 65536 {
+				break
+			}
+		} else {
+			mapShs[key].count++
+		}
+	}
+	if paletteSize > 65536 {
+		return // 放弃
+	}
+
+	// 排序
+	var palettes []*shsInfo
+	for k := range mapShs {
+		palettes = append(palettes, mapShs[k])
+	}
+	sort.Slice(palettes, func(i, j int) bool {
+		return palettes[i].count > palettes[j].count
+	})
+
+	// 整理返回
+	centroids = make([][]uint8, paletteSize)
+	for i, v := range palettes {
+		v.idx = i
+		centroids[i] = v.shs
+	}
+	labels = make([]int32, len(rows))
+	for i, d := range rows {
+		labels[i] = int32(mapShs[hex.EncodeToString(GetSh45ForKmeans(d))].idx)
+	}
+	return centroids, labels, true
 }

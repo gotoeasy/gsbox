@@ -40,12 +40,9 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 			log.Println("[Info] use origin palettes")
 		} else if oArg.Quality < 9 {
 			// 小于9级使用聚类，第9级按通常处理
-			log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
-			log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
 			ReWriteShByKmeans(rows)
 		}
 	}
-	OnProgress(PhaseKmean, 100, 100)
 
 	bts := make([]byte, 0)
 	bts = append(bts, h.ToBytes()...)
