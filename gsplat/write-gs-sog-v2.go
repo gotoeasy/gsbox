@@ -165,6 +165,7 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 		rgbaMeansU[i*4+2] = uint8(z >> 8)
 		rgbaMeansU[i*4+3] = 255
 	}
+	OnProgress(PhaseWrite, 5, 100)
 
 	fileMeansL := filepath.Join(dir, "means_l.webp")
 	log.Println("[Info] generate means_l.webp")
@@ -172,6 +173,7 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileMeansL, bytsMeansL)
 	cmn.ExitOnError(err)
+	OnProgress(PhaseWrite, 10, 100)
 
 	fileMeansU := filepath.Join(dir, "means_u.webp")
 	log.Println("[Info] generate means_u.webp")
