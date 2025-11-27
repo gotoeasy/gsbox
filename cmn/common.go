@@ -947,3 +947,12 @@ func SogEncodeLog(value float32) float32 {
 	}
 	return ClipFloat32(logVal)
 }
+
+func ClipInt(val int, minVal int, maxVal int) int {
+	if val < minVal {
+		return minVal
+	} else if val > maxVal {
+		return maxVal
+	}
+	return val
+}
