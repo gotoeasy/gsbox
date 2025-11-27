@@ -32,6 +32,11 @@ type SplatData struct {
 	FlagValue   uint16
 	PaletteIdx  uint16
 	Lod         uint16
+
+	// 临时字段
+	TempSi float32
+	TempPi float32
+	TempMi uint32
 }
 
 func TransformDatas(datas []*SplatData) []*SplatData {
@@ -247,16 +252,21 @@ func Sort(rows []*SplatData) {
 
 func SortSplat(rows []*SplatData) {
 	// from https://github.com/antimatter15/splat/blob/main/convert.py
+	for _, row := range rows {
+		row.TempSi = float32(math.Exp(float64(cmn.EncodeSplatScale(row.ScaleX)+cmn.EncodeSplatScale(row.ScaleY)+cmn.EncodeSplatScale(row.ScaleZ))) / (1.0 + math.Exp(float64(row.ColorA))))
+	}
 	sort.Slice(rows, func(i, j int) bool {
-		return math.Exp(float64(cmn.EncodeSplatScale(rows[i].ScaleX)+cmn.EncodeSplatScale(rows[i].ScaleY)+cmn.EncodeSplatScale(rows[i].ScaleZ)))/(1.0+math.Exp(float64(rows[i].ColorA))) <
-			math.Exp(float64(cmn.EncodeSplatScale(rows[j].ScaleX)+cmn.EncodeSplatScale(rows[j].ScaleY)+cmn.EncodeSplatScale(rows[j].ScaleZ)))/(1.0+math.Exp(float64(rows[i].ColorA)))
+		return rows[i].TempSi < rows[j].TempSi
 	})
 }
 
 func SortMorton(rows []*SplatData) {
 	mm := ComputeXyzMinMax(rows)
+	for _, row := range rows {
+		row.TempMi = EncodeMorton3(row.PositionX, row.PositionY, row.PositionZ, mm)
+	}
 	sort.Slice(rows, func(i, j int) bool {
-		return EncodeMorton3(rows[i].PositionX, rows[i].PositionY, rows[i].PositionZ, mm) < EncodeMorton3(rows[j].PositionX, rows[j].PositionY, rows[j].PositionZ, mm)
+		return rows[i].TempMi < rows[j].TempMi
 	})
 }
 
