@@ -310,7 +310,7 @@ func join() {
 	datas := make([]*gsplat.SplatData, 0)
 	var maxFromShDegree uint8
 	for i, file := range inputs {
-		gsplat.OnProgress(gsplat.PhaseJoin, i, len(inputs)-1)
+		gsplat.OnProgress(gsplat.PhaseJoin, i, len(inputs))
 		if cmn.Endwiths(file, ".ply", true) {
 			header, ds := gsplat.ReadPly(file)
 			maxFromShDegree = max(uint8(header.MaxShDegree()), maxFromShDegree)
@@ -336,6 +336,7 @@ func join() {
 			datas = append(datas, ds...)
 		}
 	}
+	gsplat.OnProgress(gsplat.PhaseJoin, 100, 100)
 	gsplat.SetShDegreeFrom(maxFromShDegree)
 	datas = gsplat.ProcessDatas(datas)
 	var fileSize int64
