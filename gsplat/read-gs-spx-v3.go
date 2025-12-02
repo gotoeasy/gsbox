@@ -209,25 +209,17 @@ func readSpxPalettesWebp_V3(header *SpxHeader, blockBts []byte) {
 func setAllShByPalettes(header *SpxHeader, rows []*SplatData) {
 	if len(header.Palettes) > 0 {
 		for _, d := range rows {
-			setShByPalettes(d, header.Palettes, header.ShDegree)
+			setShByPalettes(d, header.Palettes)
 		}
 	}
 }
 
-func setShByPalettes(d *SplatData, palettes []uint8, shDegree uint8) {
+func setShByPalettes(d *SplatData, palettes []uint8) {
 	var shs []uint8
 	for i := range 15 {
 		for j := range 3 {
 			shs = append(shs, palettes[int(d.PaletteIdx)*60+i*4+j])
 		}
 	}
-	switch shDegree {
-	case 3:
-		d.SH2 = shs[:24]
-		d.SH3 = shs[24:]
-	case 2:
-		d.SH2 = shs[:24]
-	case 1:
-		d.SH1 = shs[:9]
-	}
+	d.SH45 = shs
 }

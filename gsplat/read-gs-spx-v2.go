@@ -79,7 +79,7 @@ func ReadSpxOpenV2(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 			readSpxBF_SH3(blockBts, blkSplatCnt, &datas, n3)
 			n3 += blkSplatCnt
 		case BF_SH3_WEBP:
-			readSpxBF_SH3_WEBP(blockBts, blkSplatCnt, &datas, n3, header)
+			readSpxBF_SH3_WEBP(blockBts, blkSplatCnt, &datas, n3)
 			n1 += blkSplatCnt
 			n2 += blkSplatCnt
 			n3 += blkSplatCnt
@@ -275,7 +275,11 @@ func readSpxBF_SH1(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n1 int
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		splatData := (*datas)[n1+n]
-		splatData.SH1 = dataBytes[n*9 : n*9+9]
+		if len(splatData.SH45) == 0 {
+			splatData.SH45 = InitZeroSH45()
+		}
+		sh1 := dataBytes[n*9 : n*9+9]
+		copy(splatData.SH45, sh1)
 	}
 }
 
@@ -284,7 +288,11 @@ func readSpxBF_SH2(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n2 int
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		splatData := (*datas)[n2+n]
-		splatData.SH2 = dataBytes[n*24 : n*24+24]
+		if len(splatData.SH45) == 0 {
+			splatData.SH45 = InitZeroSH45()
+		}
+		sh2 := dataBytes[n*24 : n*24+24]
+		copy(splatData.SH45, sh2)
 	}
 }
 
@@ -293,11 +301,17 @@ func readSpxBF_SH3(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n3 int
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		splatData := (*datas)[n3+n]
-		splatData.SH3 = dataBytes[n*21 : n*21+21]
+		if len(splatData.SH45) == 0 {
+			splatData.SH45 = InitZeroSH45()
+		}
+		sh3 := dataBytes[n*21 : n*21+21]
+		for i, v := range sh3 {
+			splatData.SH45[i+24] = v
+		}
 	}
 }
 
-func readSpxBF_SH3_WEBP(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n3 int, header *SpxHeader) {
+func readSpxBF_SH3_WEBP(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n3 int) {
 	// SH1~SH3
 	dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 	rgba, _, _, err := cmn.DecompressWebp(dataBytes)
@@ -306,14 +320,6 @@ func readSpxBF_SH3_WEBP(blockBts []byte, blkSplatCnt int, datas *[]*SplatData, n
 
 	for n := range blkSplatCnt {
 		splatData := (*datas)[n3+n]
-		switch header.ShDegree {
-		case 1:
-			splatData.SH1 = dataBytes[n*45 : n*45+9]
-		case 2:
-			splatData.SH2 = dataBytes[n*45 : n*45+24]
-		case 3:
-			splatData.SH2 = dataBytes[n*45 : n*45+24]
-			splatData.SH3 = dataBytes[n*45+24 : n*45+45]
-		}
+		splatData.SH45 = dataBytes[n*45 : n*45+45]
 	}
 }

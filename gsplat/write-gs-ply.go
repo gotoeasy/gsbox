@@ -40,42 +40,14 @@ func genPlyDataBin(splatData *SplatData, shDegree uint8) []byte {
 	bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatColor(splatData.ColorB))...) // f_dc_2
 
 	if shDegree > 0 {
-		shDim := 0
-		var shs []byte
-		switch shDegree {
-		case 1:
-			shDim = 3
-			if len(splatData.SH1) > 0 {
-				shs = append(shs, splatData.SH1...)
-			} else if len(splatData.SH2) > 0 {
-				shs = append(shs, splatData.SH2[:9]...)
-			}
-		case 2:
-			shDim = 8
-			if len(splatData.SH1) > 0 {
-				shs = append(shs, splatData.SH1...)
-			} else if len(splatData.SH2) > 0 {
-				shs = append(shs, splatData.SH2...)
-			}
-		case 3:
-			shDim = 15
-			if len(splatData.SH3) > 0 {
-				shs = append(shs, splatData.SH2...)
-				shs = append(shs, splatData.SH3...)
-			} else if len(splatData.SH2) > 0 {
-				shs = append(shs, splatData.SH2...)
-			} else if len(splatData.SH1) > 0 {
-				shs = append(shs, splatData.SH1...)
-			}
-		}
-
-		for i := len(shs); i < 45; i++ {
-			shs = append(shs, 128) // cmn.EncodeSplatSH(0.0) = 128
+		shDims := []int{0, 3, 8, 15}
+		if len(splatData.SH45) == 0 {
+			splatData.SH45 = InitZeroSH45()
 		}
 
 		for c := range 3 {
-			for i := range shDim {
-				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatSH(shs[c+i*3]))...) // f_rest_0 ... f_rest_n
+			for i := range shDims[shDegree] {
+				bts = append(bts, cmn.Float32ToBytes(cmn.DecodeSplatSH(splatData.SH45[c+i*3]))...) // f_rest_0 ... f_rest_n
 			}
 		}
 	}

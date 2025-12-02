@@ -20,7 +20,7 @@ func WriteSpx(spxFile string, rows []*SplatData) {
 
 	log.Println("[Info] output spx version:", ver)
 	if ver < NewestSpxVersion {
-		log.Println("[Warn] it is highly recommended to migrate to the spx version", NewestSpxVersion)
+		log.Println("[Warn] IT IS HIGHLY RECOMMENDED TO MIGRATE TO THE SPX VERSION", NewestSpxVersion)
 	}
 	log.Println("[Info] output shDegree:", shDegree)
 

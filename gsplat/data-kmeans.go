@@ -38,25 +38,7 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	if IsOutputSpz() {
 		for n := range dataCnt {
 			data := rows[n]
-			shs := palettes[indexes[n]]
-			switch shDegreeOutput {
-			case 1:
-				data.SH1 = shs[:9]
-				data.SH2 = []uint8(nil)
-				data.SH3 = []uint8(nil)
-			case 2:
-				data.SH1 = []uint8(nil)
-				data.SH2 = shs[:24]
-				data.SH3 = []uint8(nil)
-			case 3:
-				data.SH1 = []uint8(nil)
-				data.SH2 = shs[:24]
-				data.SH3 = shs[24:]
-			default:
-				data.SH1 = []uint8(nil)
-				data.SH2 = []uint8(nil)
-				data.SH3 = []uint8(nil)
-			}
+			data.SH45 = palettes[indexes[n]]
 		}
 		return
 	}

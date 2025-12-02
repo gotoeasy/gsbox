@@ -117,15 +117,7 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
 				}
 
-				switch shDegree {
-				case 3:
-					splatData.SH2 = shs[:24]
-					splatData.SH3 = shs[24:]
-				case 2:
-					splatData.SH2 = shs[:24]
-				case 1:
-					splatData.SH1 = shs[:9]
-				}
+				splatData.SH45 = shs
 			}
 			splatData.PaletteIdx = uint16(label)
 		}

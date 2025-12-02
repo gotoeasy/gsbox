@@ -103,12 +103,14 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 		}
 		switch h.ShDegree {
 		case 1:
-			data.SH1 = shs[i*9 : i*9+9]
+			data.SH45 = InitZeroSH45()
+			copy(data.SH45, shs[i*9:i*9+9])
 		case 2:
-			data.SH2 = shs[i*24 : i*24+24]
+			data.SH45 = InitZeroSH45()
+			copy(data.SH45, shs[i*24:i*24+24])
 		case 3:
-			data.SH2 = shs[i*45 : i*45+24]
-			data.SH3 = shs[i*45+24 : i*45+45]
+			data.SH45 = InitZeroSH45()
+			copy(data.SH45, shs[i*45:i*45+45])
 		}
 
 		splatDatas = append(splatDatas, data)

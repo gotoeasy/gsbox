@@ -335,15 +335,7 @@ func ReadKsplat(ksplatFile string) (*SectionHeader, *KsplatHeader, []*SplatData)
 				for ; cnt < 45; cnt++ {
 					shs[cnt] = 128 // cmn.EncodeSplatSH(0)=128
 				}
-				switch mainHeader.ShDegree {
-				case 3:
-					data.SH2 = shs[:24]
-					data.SH3 = shs[24:]
-				case 2:
-					data.SH2 = shs[:24]
-				case 1:
-					data.SH1 = shs[:9]
-				}
+				data.SH45 = shs
 			}
 
 			// 存放数据

@@ -95,37 +95,29 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 
 				datas[i+j] = data
 
-				shDim := 0
 				maxShDegree := header.MaxShDegree()
-				switch maxShDegree {
-				case 1:
-					shDim = 3
-				case 2:
-					shDim = 8
-				case 3:
-					shDim = 15
-				}
-
-				shs := make([]byte, 45)
-				n := 0
-				for k := 0; k < shDim; k++ {
-					for c := range 3 {
-						shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(k+c*shDim), rowBytes))
-						n++
+				if maxShDegree > 0 {
+					shDim := 0
+					switch maxShDegree {
+					case 1:
+						shDim = 3
+					case 2:
+						shDim = 8
+					case 3:
+						shDim = 15
 					}
-				}
-				for ; n < 45; n++ {
-					shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
-				}
 
-				switch maxShDegree {
-				case 3:
-					data.SH2 = shs[:24]
-					data.SH3 = shs[24:]
-				case 2:
-					data.SH2 = shs[:24]
-				case 1:
-					data.SH1 = shs[:9]
+					shs := make([]byte, 45)
+					n := 0
+					for k := 0; k < shDim; k++ {
+						for c := range 3 {
+							shs[n] = cmn.EncodeSplatSH(readValue(header, "f_rest_"+cmn.IntToString(k+c*shDim), rowBytes))
+							n++
+						}
+					}
+					for ; n < 45; n++ {
+						shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
+					}
 				}
 			}
 			OnProgress(PhaseRead, i, header.VertexCount)

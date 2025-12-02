@@ -41,24 +41,10 @@ func PrintSplat(splatFile string, rows []*SplatData) {
 	writer := bufio.NewWriter(file)
 
 	for i := range rows {
-		shs := []uint8{128, 128, 128, 128, 128, 128, 128, 128, 128,
-			128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
-			128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128}
-		if len(rows[i].SH1) > 0 {
-			for j := range 9 {
-				shs[j] = rows[i].SH1[j]
-			}
+		if len(rows[i].SH45) == 0 {
+			rows[i].SH45 = InitZeroSH45()
 		}
-		if len(rows[i].SH2) > 0 {
-			for j := range 24 {
-				shs[j] = rows[i].SH2[j]
-			}
-		}
-		if len(rows[i].SH3) > 0 {
-			for j := range 21 {
-				shs[24+j] = rows[i].SH3[j]
-			}
-		}
+		shs := rows[i].SH45
 
 		shDegree := GetArgShDegree()
 		switch shDegree {

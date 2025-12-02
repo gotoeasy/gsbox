@@ -71,7 +71,11 @@ func ReadSpxOpenV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
 				splatData := datas[n1+n]
-				splatData.SH1 = dataBytes[n*9 : n*9+9]
+				if len(splatData.SH45) == 0 {
+					splatData.SH45 = InitZeroSH45()
+				}
+				sh1 := dataBytes[n*9 : n*9+9]
+				copy(splatData.SH45, sh1)
 			}
 			n1 += blkSplatCnt
 		case BF_SH2:
@@ -79,7 +83,11 @@ func ReadSpxOpenV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
 				splatData := datas[n2+n]
-				splatData.SH2 = dataBytes[n*24 : n*24+24]
+				if len(splatData.SH45) == 0 {
+					splatData.SH45 = InitZeroSH45()
+				}
+				sh2 := dataBytes[n*24 : n*24+24]
+				copy(splatData.SH45, sh2)
 			}
 			n2 += blkSplatCnt
 		case BF_SH3:
@@ -87,14 +95,19 @@ func ReadSpxOpenV1(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 			dataBytes := blockBts[8:] // 除去前8字节（数量，格式）
 			for n := range blkSplatCnt {
 				splatData := datas[n3+n]
-				splatData.SH3 = dataBytes[n*21 : n*21+21]
+				if len(splatData.SH45) == 0 {
+					splatData.SH45 = InitZeroSH45()
+				}
+				sh3 := dataBytes[n*21 : n*21+21]
+				for i, v := range sh3 {
+					splatData.SH45[i+24] = v
+				}
 			}
 			n3 += blkSplatCnt
 		default:
 			// 存在无法识别读取的专有格式数据
 			cmn.ExitOnError(errors.New("unknow block data format exists: " + cmn.Uint32ToString(formatId)))
 		}
-
 	}
 
 	return header, datas

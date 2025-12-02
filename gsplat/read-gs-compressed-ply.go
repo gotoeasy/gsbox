@@ -99,15 +99,7 @@ func readCompressedPlyDatas(file *os.File, header *PlyHeader, datas []*SplatData
 				shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
 			}
 
-			switch maxShDegree {
-			case 3:
-				datas[i].SH2 = shs[:24]
-				datas[i].SH3 = shs[24:]
-			case 2:
-				datas[i].SH2 = shs[:24]
-			case 1:
-				datas[i].SH1 = shs[:9]
-			}
+			datas[i].SH45 = shs
 		}
 	}
 }

@@ -25,9 +25,7 @@ type SplatData struct {
 	RotationX   uint8
 	RotationY   uint8
 	RotationZ   uint8
-	SH1         []uint8 // sh1 only
-	SH2         []uint8 // sh1 + sh2
-	SH3         []uint8 // sh3 only
+	SH45        []uint8
 	IsWaterMark bool
 	FlagValue   uint16
 	PaletteIdx  uint16
@@ -178,60 +176,20 @@ func (s *SplatData) Rotate(degreeX, degreeY, degreeZ float32, SHR *SHRotation) {
 	s.PositionX, s.PositionY, s.PositionZ = cmn.ClipFloat32(point.X), cmn.ClipFloat32(point.Y), cmn.ClipFloat32(point.Z)
 
 	// SH
-	if len(s.SH3) > 0 {
+	if len(s.SH45) > 0 {
 		var sh1r, sh1g, sh1b []float32
-		for i := range 8 {
-			sh1r = append(sh1r, cmn.DecodeSplatSH(s.SH2[i*3]))
-			sh1g = append(sh1g, cmn.DecodeSplatSH(s.SH2[i*3+1]))
-			sh1b = append(sh1b, cmn.DecodeSplatSH(s.SH2[i*3+2]))
-		}
-		for i := range 7 {
-			sh1r = append(sh1r, cmn.DecodeSplatSH(s.SH3[i*3]))
-			sh1g = append(sh1g, cmn.DecodeSplatSH(s.SH3[i*3+1]))
-			sh1b = append(sh1b, cmn.DecodeSplatSH(s.SH3[i*3+2]))
+		for i := range 15 {
+			sh1r = append(sh1r, cmn.DecodeSplatSH(s.SH45[i*3]))
+			sh1g = append(sh1g, cmn.DecodeSplatSH(s.SH45[i*3+1]))
+			sh1b = append(sh1b, cmn.DecodeSplatSH(s.SH45[i*3+2]))
 		}
 		SHR.Apply(sh1r)
 		SHR.Apply(sh1g)
 		SHR.Apply(sh1b)
-		for i := range 8 {
-			s.SH2[i*3] = cmn.EncodeSplatSH(float64(sh1r[i]))
-			s.SH2[i*3+1] = cmn.EncodeSplatSH(float64(sh1g[i]))
-			s.SH2[i*3+2] = cmn.EncodeSplatSH(float64(sh1b[i]))
-		}
-		for i := range 7 {
-			s.SH3[i*3] = cmn.EncodeSplatSH(float64(sh1r[8+i]))
-			s.SH3[i*3+1] = cmn.EncodeSplatSH(float64(sh1g[8+i]))
-			s.SH3[i*3+2] = cmn.EncodeSplatSH(float64(sh1b[8+i]))
-		}
-	} else if len(s.SH2) > 0 {
-		var sh1r, sh1g, sh1b []float32
-		for i := range 8 {
-			sh1r = append(sh1r, cmn.DecodeSplatSH(s.SH2[i*3]))
-			sh1g = append(sh1g, cmn.DecodeSplatSH(s.SH2[i*3+1]))
-			sh1b = append(sh1b, cmn.DecodeSplatSH(s.SH2[i*3+2]))
-		}
-		SHR.Apply(sh1r)
-		SHR.Apply(sh1g)
-		SHR.Apply(sh1b)
-		for i := range 8 {
-			s.SH2[i*3] = cmn.EncodeSplatSH(float64(sh1r[i]))
-			s.SH2[i*3+1] = cmn.EncodeSplatSH(float64(sh1g[i]))
-			s.SH2[i*3+2] = cmn.EncodeSplatSH(float64(sh1b[i]))
-		}
-	} else if len(s.SH1) > 0 {
-		var sh1r, sh1g, sh1b []float32
-		for i := range 3 {
-			sh1r = append(sh1r, cmn.DecodeSplatSH(s.SH1[i*3]))
-			sh1g = append(sh1g, cmn.DecodeSplatSH(s.SH1[i*3+1]))
-			sh1b = append(sh1b, cmn.DecodeSplatSH(s.SH1[i*3+2]))
-		}
-		SHR.Apply(sh1r)
-		SHR.Apply(sh1g)
-		SHR.Apply(sh1b)
-		for i := range 3 {
-			s.SH1[i*3] = cmn.EncodeSplatSH(float64(sh1r[i]))
-			s.SH1[i*3+1] = cmn.EncodeSplatSH(float64(sh1g[i]))
-			s.SH1[i*3+2] = cmn.EncodeSplatSH(float64(sh1b[i]))
+		for i := range 15 {
+			s.SH45[i*3] = cmn.EncodeSplatSH(float64(sh1r[i]))
+			s.SH45[i*3+1] = cmn.EncodeSplatSH(float64(sh1g[i]))
+			s.SH45[i*3+2] = cmn.EncodeSplatSH(float64(sh1b[i]))
 		}
 	}
 }
@@ -427,27 +385,10 @@ func CompressionInfo(filePath string, num int, inFileSize ...int64) string {
 }
 
 func GetSh45ForKmeans(data *SplatData) []uint8 {
-	var sh45 []uint8
-	if len(data.SH3) > 0 {
-		for i := range 24 {
-			sh45 = append(sh45, data.SH2[i])
-		}
-		for i := range 21 {
-			sh45 = append(sh45, data.SH3[i])
-		}
-	} else if len(data.SH2) > 0 {
-		for i := range 24 {
-			sh45 = append(sh45, data.SH2[i])
-		}
-	} else if len(data.SH1) > 0 {
-		for i := range 9 {
-			sh45 = append(sh45, data.SH1[i])
-		}
+	if len(data.SH45) == 0 {
+		data.SH45 = InitZeroSH45()
 	}
-
-	for n := len(sh45); n < 45; n++ {
-		sh45 = append(sh45, 128) // cmn.EncodeSplatSH(0.0) = 128
-	}
+	sh45 := data.SH45
 
 	// 根据质量等级调整球谐系数（第8第9级时保持原值）
 	if oArg.Quality <= 5 {
@@ -500,6 +441,14 @@ func ToSh45(shs []float32) []uint8 {
 	sh45 := make([]uint8, 45)
 	for i := range 45 {
 		sh45[i] = cmn.EncodeSplatSH(float64(shs[i]))
+	}
+	return sh45
+}
+
+func InitZeroSH45() []uint8 {
+	sh45 := make([]uint8, 45)
+	for i := range 45 {
+		sh45[i] = 128
 	}
 	return sh45
 }

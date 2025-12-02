@@ -91,7 +91,7 @@ func WriteSpxOpenV2(spxFile string, rows []*SplatData, comment string, shDegree 
 
 	if shDegree > 0 && bf == BF_SPLAT190_WEBP {
 		for i := range blockDatasList {
-			writeSpxBlockSH3Webp(writer, blockDatasList[i], shDegree)
+			writeSpxBlockSH3Webp(writer, blockDatasList[i])
 		}
 	} else {
 

@@ -222,17 +222,13 @@ func writeSpxBlockSH1(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			continue
 		}
 		splatCnt++
-		if len(blockDatas[n].SH1) > 0 {
+		if len(blockDatas[n].SH45) > 0 {
 			for i := range 9 {
-				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
-			}
-		} else if len(blockDatas[n].SH2) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH45[i]))
 			}
 		} else {
 			for range 9 {
-				bts = append(bts, cmn.EncodeSplatSH(0.0))
+				bts = append(bts, 128)
 			}
 		}
 	}
@@ -281,20 +277,13 @@ func writeSpxBlockSH2(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			continue
 		}
 		splatCnt++
-		if len(blockDatas[n].SH1) > 0 {
-			for i := range 9 {
-				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH1[i]))
-			}
-			for range 15 {
-				bts = append(bts, cmn.EncodeSplatSH(0.0))
-			}
-		} else if len(blockDatas[n].SH2) > 0 {
+		if len(blockDatas[n].SH45) > 0 {
 			for i := range 24 {
-				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH2[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH45[i]))
 			}
 		} else {
 			for range 24 {
-				bts = append(bts, cmn.EncodeSplatSH(0.0))
+				bts = append(bts, 128)
 			}
 		}
 	}
@@ -343,13 +332,13 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 			continue
 		}
 		splatCnt++
-		if len(blockDatas[n].SH3) > 0 {
+		if len(blockDatas[n].SH45) > 0 {
 			for i := range 21 {
-				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH3[i]))
+				bts = append(bts, cmn.EncodeSpxSH(blockDatas[n].SH45[i+24]))
 			}
 		} else {
 			for range 21 {
-				bts = append(bts, cmn.EncodeSplatSH(0.0))
+				bts = append(bts, 128)
 			}
 		}
 	}
@@ -386,97 +375,31 @@ func writeSpxBlockSH3(writer *bufio.Writer, blockDatas []*SplatData, compressTyp
 	}
 }
 
-func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData, shDegree uint8) {
+func writeSpxBlockSH3Webp(writer *bufio.Writer, blockDatas []*SplatData) {
 	blockSplatCount := len(blockDatas)
 	bts := make([]byte, 0)
 	bts = append(bts, cmn.Uint32ToBytes(uint32(blockSplatCount))...) // 块中的高斯点个数
 	bts = append(bts, cmn.Uint32ToBytes(BF_SH3_WEBP)...)             // 开放的块数据格式 4:球谐系数3级（共15个）
 
 	splatCnt := 0
-	color0 := cmn.EncodeSplatSH(0.0)
 	shRgba := make([]byte, 0)
 	for n := range blockSplatCount {
 		if blockDatas[n].IsWaterMark {
 			continue
 		}
 		splatCnt++
-		if len(blockDatas[n].SH1) > 0 {
-			// 只有1级数据，输出1、2、3级别都是一样的结果
-			for i := range 3 {
-				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH1[i*3+0]))
-				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH1[i*3+1]))
-				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH1[i*3+2]))
+		if len(blockDatas[n].SH45) > 0 {
+			// 有数据
+			for i := range 15 {
+				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH45[i*3+0]))
+				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH45[i*3+1]))
+				shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH45[i*3+2]))
 				shRgba = append(shRgba, 255)
-			}
-			for range 12 {
-				shRgba = append(shRgba, color0, color0, color0, 255)
-			}
-		} else if len(blockDatas[n].SH3) > 0 {
-			// 有全部3级数据
-			switch shDegree {
-			case 1:
-				for i := range 3 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-				for range 12 {
-					shRgba = append(shRgba, color0, color0, color0, 255)
-				}
-			case 2:
-				for i := range 8 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-				for range 7 {
-					shRgba = append(shRgba, color0, color0, color0, 255)
-				}
-			default:
-				for i := range 8 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-				for i := range 7 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH3[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH3[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH3[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-			}
-
-		} else if len(blockDatas[n].SH2) > 0 {
-			// 只有1、2级数据
-			switch shDegree {
-			case 1:
-				for i := range 3 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-				for range 12 {
-					shRgba = append(shRgba, color0, color0, color0, 255)
-				}
-			default:
-				for i := range 8 {
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+0]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+1]))
-					shRgba = append(shRgba, cmn.EncodeSpxSH(blockDatas[n].SH2[i*3+2]))
-					shRgba = append(shRgba, 255)
-				}
-				for range 7 {
-					shRgba = append(shRgba, color0, color0, color0, 255)
-				}
 			}
 		} else {
 			// 无
 			for range 15 {
-				shRgba = append(shRgba, color0, color0, color0, 255)
+				shRgba = append(shRgba, 128, 128, 128, 255)
 			}
 		}
 	}

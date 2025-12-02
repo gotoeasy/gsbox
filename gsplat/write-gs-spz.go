@@ -77,74 +77,43 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 	switch outputShDegree {
 	case 1:
 		for i := range rows {
-			if len(rows[i].SH1) > 0 {
-				for n := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
-				}
-			} else if len(rows[i].SH2) > 0 {
-				for n := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[n]))
+			if len(rows[i].SH45) > 0 {
+				for j := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH45[j]))
 				}
 			} else {
 				for range 9 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
+					bts = append(bts, 128)
 				}
 			}
 		}
 	case 2:
 		for i := range rows {
-			if len(rows[i].SH1) > 0 {
-				for n := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
-				}
-				for range 15 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
-				}
-			} else if len(rows[i].SH2) > 0 {
-				for n := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[n]))
+			if len(rows[i].SH45) > 0 {
+				for j := range 9 {
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH45[j]))
 				}
 				for j := 9; j < 24; j++ {
-					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH2[j]))
+					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH45[j]))
 				}
 			} else {
 				for range 24 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
+					bts = append(bts, 128)
 				}
 			}
 		}
 	case 3:
 		for i := range rows {
-			if len(rows[i].SH3) > 0 {
+			if len(rows[i].SH45) > 0 {
 				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[j]))
+					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH45[j]))
 				}
-				for j := 9; j < 24; j++ {
-					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH2[j]))
-				}
-				for j := range 21 {
-					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH3[j]))
-				}
-			} else if len(rows[i].SH2) > 0 {
-				for j := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH2[j]))
-				}
-				for j := 9; j < 24; j++ {
-					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH2[j]))
-				}
-				for range 21 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
-				}
-			} else if len(rows[i].SH1) > 0 {
-				for n := range 9 {
-					bts = append(bts, cmn.SpzEncodeSH1(rows[i].SH1[n]))
-				}
-				for range 36 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
+				for j := 9; j < 45; j++ {
+					bts = append(bts, cmn.SpzEncodeSH23(rows[i].SH45[j]))
 				}
 			} else {
 				for range 45 {
-					bts = append(bts, 128) // cmn.EncodeSplatSH(0.0) = 128
+					bts = append(bts, 128)
 				}
 			}
 		}
