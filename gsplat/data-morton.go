@@ -18,6 +18,7 @@ type V3MinMax struct {
 	CenterX float32
 	CenterY float32
 	CenterZ float32
+	Radius  float32
 }
 
 func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
@@ -48,6 +49,11 @@ func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
 	xyzRange.CenterX = (xyzRange.MaxX + xyzRange.MinX) / 2.0
 	xyzRange.CenterY = (xyzRange.MaxY + xyzRange.MinY) / 2.0
 	xyzRange.CenterZ = (xyzRange.MaxZ + xyzRange.MinZ) / 2.0
+
+	halfLenX := xyzRange.LenX * 0.5
+	halfLenY := xyzRange.LenY * 0.5
+	halfLenZ := xyzRange.LenZ * 0.5
+	xyzRange.Radius = float32(math.Sqrt(float64(halfLenX*halfLenX + halfLenY*halfLenY + halfLenZ*halfLenZ)))
 
 	return xyzRange
 }
@@ -80,6 +86,11 @@ func ComputeXyzLogMinMax(datas []*SplatData) *V3MinMax {
 	xyzRange.CenterX = (xyzRange.MaxX + xyzRange.MinX) / 2.0
 	xyzRange.CenterY = (xyzRange.MaxY + xyzRange.MinY) / 2.0
 	xyzRange.CenterZ = (xyzRange.MaxZ + xyzRange.MinZ) / 2.0
+
+	halfLenX := xyzRange.LenX * 0.5
+	halfLenY := xyzRange.LenY * 0.5
+	halfLenZ := xyzRange.LenZ * 0.5
+	xyzRange.Radius = float32(math.Sqrt(float64(halfLenX*halfLenX + halfLenY*halfLenY + halfLenZ*halfLenZ)))
 
 	return xyzRange
 }
