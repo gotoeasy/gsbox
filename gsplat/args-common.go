@@ -4,6 +4,7 @@ import (
 	"errors"
 	"gsbox/cmn"
 	"log"
+	"sort"
 )
 
 var Args *cmn.OsArgs
@@ -11,9 +12,10 @@ var shDegreeFrom uint8
 var oArg *ArgValues
 
 type ArgValues struct {
-	Quality int // 质量级别（1~9，默认5），越大越精确质量越好
-	KI      int // 聚类计算时的迭代次数（5~50，默认10），越大越精确耗时越长
-	KN      int // 聚类计算时的查找最邻近节点数量（10~200，默认15），越大越精确耗时越长
+	Quality   int // 质量级别（1~9，默认5），越大越精确质量越好
+	KI        int // 聚类计算时的迭代次数（5~50，默认10），越大越精确耗时越长
+	KN        int // 聚类计算时的查找最邻近节点数量（10~200，默认15），越大越精确耗时越长
+	BlockSize int // 数据块大小
 
 	webpQuality int // webp压缩的质量参数, 80~99，根据质量级别自动选定
 
@@ -30,6 +32,15 @@ func InitArgs() *cmn.OsArgs {
 	oArg.Quality = max(1, min(cmn.StringToInt(Args.GetArgIgnorecase("-q", "--quality"), 5), 9))
 	oArg.KI = max(5, min(cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 10), 50))
 	oArg.KN = max(10, min(cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), 15), 200))
+
+	inputBlockSize := Args.GetArgIgnorecase("-bs", "--block-size")
+	blockSize := cmn.StringToInt(inputBlockSize, DefaultBlockSize)
+	if cmn.EqualsIngoreCase(inputBlockSize, "max") {
+		blockSize = MaxBlockSize // 支持 -bs max 写法
+	} else {
+		blockSize = max(MinBlockSize, min(blockSize, MaxBlockSize)) // 超出范围时限定为边界值
+	}
+	oArg.BlockSize = blockSize
 
 	oArg.hasQuality = Args.HasArgIgnorecase("-q", "--quality")
 	oArg.hasKI = Args.HasArgIgnorecase("-ki", "--kmeans-iterations")
@@ -64,6 +75,60 @@ func GetAndCheckInputFiles() []string {
 		}
 	}
 	return inputs
+}
+
+func GetInputLods() []uint16 {
+	if !Args.HasArgIgnorecase("-l", "--lod") {
+		return []uint16{}
+	}
+
+	inputs := Args.GetArgsIgnorecase("-i", "--input")
+	lods := Args.GetArgsIgnorecase("-l", "--lod")
+
+	if len(lods) > 0 && len(lods) != len(inputs) {
+		cmn.ExitOnError(errors.New("please specify the lod for all input files"))
+	}
+
+	var rs []uint16
+	for i := range lods {
+		cmn.ExitOnConditionError(lods[i] == "", errors.New(`please specify the lod`))
+		if lods[i] != "0" && lods[i] != "1" && lods[i] != "2" {
+			cmn.ExitOnError(errors.New("invalod lod: " + lods[i]))
+		}
+		rs = append(rs, uint16(cmn.StringToInt(lods[i])))
+	}
+
+	if len(lods) == 0 {
+		for range inputs {
+			rs = append(rs, 0)
+		}
+	}
+
+	return rs
+}
+
+func GetInputLodDistances(maxLod uint16) []float32 {
+	lds := Args.GetArgsIgnorecase("-ld", "--lod-distance")
+
+	if len(lds) != int(maxLod+1) {
+		// log.Println("len(lds)=", len(lds), "maxLod+1=", maxLod+1)
+		cmn.ExitOnError(errors.New("invalid lod distances (distances len != level count)"))
+	}
+
+	var rs []float32
+	for i := range lds {
+		distance := cmn.StringToFloat32(lds[i], -1)
+		if distance < 0 {
+			cmn.ExitOnError(errors.New("invalid lod distances (value < 0)"))
+		}
+		rs = append(rs, distance)
+	}
+
+	sort.Slice(rs, func(i, j int) bool {
+		return rs[i] > rs[j] // 降序排序
+	})
+
+	return rs
 }
 
 func GetAndCheckInputFile() string {

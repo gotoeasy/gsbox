@@ -26,7 +26,7 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	}
 
 	dir := cmn.Dir(sogOrJsonFile)
-	isSog := cmn.Endwiths(sogOrJsonFile, ".sog", true)
+	isSog := !cmn.Endwiths(sogOrJsonFile, "meta.json", true)
 	if isSog {
 		tmpdir, err := cmn.CreateTempDir()
 		cmn.ExitOnError(err)
