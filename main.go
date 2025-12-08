@@ -236,13 +236,14 @@ func info(args *cmn.OsArgs) {
 			fmt.Println("SplatCount :", fileSize/32)
 		}
 	} else if isSog || isMetaJson {
-		version, cnt, degree, fileSize := gsplat.ReadSogInfo(input)
+		version, cnt, degree, paletteSize, fileSize := gsplat.ReadSogInfo(input)
 		count = cnt
 		shDegree = degree
 		sogFileSize = fileSize
-		fmt.Println("Sog Version :", version)
-		fmt.Println("Splat Count :", count)
-		fmt.Println("SH Degree   :", shDegree)
+		fmt.Println("Sog Version     :", version)
+		fmt.Println("Splat Count     :", count)
+		fmt.Println("SH Degree       :", shDegree)
+		fmt.Println("SH Palette Size :", paletteSize)
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}

@@ -81,44 +81,43 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 
 		if shDegree > 0 {
 			label := int(labels[i*4+0]) + (int(labels[i*4+1]) << 8)
-			if !toSpxV3OrSog || shChanged {
-				col := (label & 63) * 15 // 同 (n % 64) * 15
-				row := label >> 6        // 同 Math.floor(n / 64)
-				offset := row*width + col
 
-				sh1 := make([]float32, 9)
-				sh2 := make([]float32, 15)
-				sh3 := make([]float32, 21)
-				for d := range 3 {
-					if shDegree >= 1 {
-						for k := range 3 {
-							sh1[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+k)*4+d]) / 255.0) + meta.ShN.Mins
-						}
-					}
-					if shDegree >= 2 {
-						for k := range 5 {
-							sh2[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+3+k)*4+d]) / 255.0) + meta.ShN.Mins
-						}
-					}
-					if shDegree == 3 {
-						for k := range 7 {
-							sh3[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+8+k)*4+d]) / 255.0) + meta.ShN.Mins
-						}
-					}
-				}
-				var shs []uint8
-				for _, val := range sh1 {
-					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-				}
-				for _, val := range sh2 {
-					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-				}
-				for _, val := range sh3 {
-					shs = append(shs, cmn.EncodeSplatSH(float64(val)))
-				}
+			col := (label & 63)          // 同 (n % 64) * 15
+			row := label >> 6            // 同 Math.floor(n / 64)
+			offset := row*width + col*15 // 实际只考虑sh 3 级
 
-				splatData.SH45 = shs
+			sh1 := make([]float32, 9)
+			sh2 := make([]float32, 15)
+			sh3 := make([]float32, 21)
+			for d := range 3 {
+				if shDegree >= 1 {
+					for k := range 3 {
+						sh1[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+k)*4+d]) / 255.0) + meta.ShN.Mins
+					}
+				}
+				if shDegree >= 2 {
+					for k := range 5 {
+						sh2[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+3+k)*4+d]) / 255.0) + meta.ShN.Mins
+					}
+				}
+				if shDegree == 3 {
+					for k := range 7 {
+						sh3[k*3+d] = ((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[(offset+8+k)*4+d]) / 255.0) + meta.ShN.Mins
+					}
+				}
 			}
+			var shs []uint8
+			for _, val := range sh1 {
+				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
+			}
+			for _, val := range sh2 {
+				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
+			}
+			for _, val := range sh3 {
+				shs = append(shs, cmn.EncodeSplatSH(float64(val)))
+			}
+
+			splatData.SH45 = shs
 			splatData.PaletteIdx = uint16(label)
 		}
 
@@ -143,7 +142,6 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 		header.Palettes = palettes
 	}
 
-	inputSogHeader = header
 	OnProgress(PhaseRead, 100, 100)
 	return datas, header
 }

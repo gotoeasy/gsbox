@@ -8,7 +8,6 @@ import (
 	"sync"
 )
 
-var inputSogHeader *SogHeader
 
 func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 	isNetFile := cmn.IsNetFile(fileSogMeta)
@@ -63,7 +62,7 @@ func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 	return nil, nil
 }
 
-func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalFileSize int64) {
+func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, paletteSize int, totalFileSize int64) {
 
 	dir := cmn.Dir(fileSogMeta)
 	isSog := cmn.Endwiths(fileSogMeta, ".sog", true)
@@ -102,6 +101,7 @@ func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalF
 			case 9, 3:
 				shDegree = 1
 			}
+			paletteSize = 65536 // 版本1弃用，按最大值写
 		}
 	} else {
 		version = meta.Version
@@ -109,7 +109,16 @@ func ReadSogInfo(fileSogMeta string) (version, count int, shDegree uint8, totalF
 		if meta.ShN == nil {
 			shDegree = 0
 		} else {
-			shDegree = 3
+			paletteSize = 65536
+			if meta.ShN.Count > 0 {
+				paletteSize = int(meta.ShN.Count) // 版本2早期无显式字段
+			}
+
+			if meta.ShN.Bands > 0 {
+				shDegree = meta.ShN.Bands // 版本2早期无显式字段
+			} else {
+				shDegree = 3
+			}
 		}
 	}
 

@@ -33,31 +33,19 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 		bf = BF_SPLAT22 // 参数指定的格式有误时的默认格式，偏向速度
 	}
 
-	fromSpxV3 := IsSpx2Spx() && inputSpxHeader.Version >= 3
-	fromSog := IsSog2Spx()
-	shChanged := IsShChanged()
-
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
-		log.Println("[Info] use origin palettes")
-	}
 	log.Println("[Info] (parameter) bf:", bf, BlockFormatDesc(bf))
 	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
 
 	var shCentroids []uint8
+	var paletteSize int
 	if outputShDegree > 0 {
-		if !shChanged && fromSog {
-			shCentroids = inputSogHeader.Palettes
-		} else if !shChanged && fromSpxV3 {
-			shCentroids = inputSpxHeader.Palettes
-		} else {
-			shCentroids, _ = ReWriteShByKmeans(rows)
-		}
+		shCentroids, _, paletteSize = ReWriteShByKmeans(rows)
 
 		// 根据输出级别相应的置零
 		if outputShDegree < 3 {
 			idxs := []int{0, 3, 8}
-			cnt := len(shCentroids) / 60
+			cnt := len(shCentroids) / 60 // 60=15*4
 			for i := range cnt {
 				for d := idxs[outputShDegree]; d < 15; d++ {
 					shCentroids[i*60+d*4+0] = 128
@@ -133,6 +121,10 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 		} else {
 			writePalettes_V3(writer, shCentroids, compressType)
 		}
+	}
+
+	if outputShDegree > 0 {
+		log.Println("[Info] sh palette size", paletteSize)
 	}
 
 	err = writer.Flush()

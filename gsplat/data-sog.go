@@ -79,7 +79,8 @@ type SogShN struct {
 	Maxs         float32 `json:"maxs,omitempty"`
 	Quantization int     `json:"quantization,omitempty"`
 	/** v2 */
+	Count    int       `json:"count"`
+	Bands    uint8     `json:"bands"`
 	Codebook []float32 `json:"codebook,omitempty"`
-	/** v2 */
-	Files []string `json:"files,omitempty"`
+	Files    []string  `json:"files,omitempty"`
 }

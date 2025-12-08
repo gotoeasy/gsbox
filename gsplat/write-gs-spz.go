@@ -34,13 +34,10 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 
 	if outputShDegree > 0 {
 		log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-		fromSpxV3 := IsSpx2Spz() && inputSpxHeader.Version >= 3
-		fromSog := IsSog2Spz()
-		if fromSpxV3 || fromSog {
-			log.Println("[Info] use origin palettes")
-		} else if oArg.Quality < 9 {
+		if oArg.Quality < 9 {
 			// 小于9级使用聚类，第9级按通常处理
-			ReWriteShByKmeans(rows)
+			_, _, paletteSize := ReWriteShByKmeans(rows)
+			log.Println("[Info] sh palette size", paletteSize)
 		}
 	}
 

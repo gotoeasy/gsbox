@@ -13,7 +13,7 @@ import (
 	"sync"
 )
 
-func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8) {
+func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []uint8, paletteSize int) {
 	defer OnProgress(PhaseKmean, 100, 100)
 	shDegreeOutput := GetArgShDegree()
 	if shDegreeOutput == 0 {
@@ -35,6 +35,8 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts) // 按质心点数量倒序排序,提高压缩效果稳定输出
 	}
 
+	paletteSize = len(palettes)
+
 	if IsOutputSpz() {
 		for n := range dataCnt {
 			data := rows[n]
@@ -43,7 +45,6 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		return
 	}
 
-	paletteSize := len(palettes)
 	shN_centroids = make([]uint8, paletteSize*15*4)
 	for i := range paletteSize {
 		shs := palettes[i]
@@ -118,6 +119,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		return
 	}
 
+	// TODO 考虑去重
 	// 1. 随机选 k 个中心
 	f32Centroids := make([][]float32, paletteSize)
 	used := make([]bool, n)

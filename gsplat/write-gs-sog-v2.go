@@ -15,15 +15,8 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 
 	outputShDegree := GetArgShDegree()
 	log.Println("[Info] output sog version: 2")
-	log.Println("[Info] output shDegree:", min(3, outputShDegree*10)) // 在 SOG V2 中只有 0 和 3 级, 不区分 1 和 2 级
+	log.Println("[Info] output shDegree:", outputShDegree)
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
-
-	fromSpxV3 := IsSpx2Sog() && inputSpxHeader.Version >= 3
-	fromSog := IsSog2Sog()
-	shChanged := IsShChanged()
-	if outputShDegree > 0 && !shChanged && (fromSpxV3 || fromSog) {
-		log.Println("[Info] use origin palettes")
-	}
 
 	dir := cmn.Dir(sogOrJsonFile)
 	isSog := !cmn.Endwiths(sogOrJsonFile, "meta.json", true)
@@ -44,33 +37,13 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	OnProgress(PhaseWrite, 35, 100)
 	files = append(files, writeSh0(dir, rows)...)
 	OnProgress(PhaseWrite, 45, 100)
+	var paletteSize int
 	if outputShDegree > 0 {
 		var shN_centroids []uint8
 		var shN_labels []uint8
-		if !shChanged && fromSog {
-			shN_centroids = inputSogHeader.Palettes
-			shN_labels = make([]uint8, len(rows)*4)
-			for i, d := range rows {
-				shN_labels[i*4] = uint8(d.PaletteIdx & 0xFF)
-				shN_labels[i*4+1] = uint8(d.PaletteIdx >> 8)
-				shN_labels[i*4+2] = 0
-				shN_labels[i*4+3] = 255
-			}
-
-		} else if !shChanged && fromSpxV3 {
-			shN_centroids = inputSpxHeader.Palettes
-			shN_labels = make([]uint8, len(rows)*4)
-			for i, d := range rows {
-				shN_labels[i*4] = uint8(d.PaletteIdx & 0xFF)
-				shN_labels[i*4+1] = uint8(d.PaletteIdx >> 8)
-				shN_labels[i*4+2] = 0
-				shN_labels[i*4+3] = 255
-			}
-		} else {
-			shN_centroids, shN_labels = ReWriteShByKmeans(rows)
-		}
-
-		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, 960, 1024, oArg.webpQuality)
+		shN_centroids, shN_labels, paletteSize = ReWriteShByKmeans(rows)
+		widths := []int{0, 96, 512, 960}
+		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, widths[outputShDegree], 1024, oArg.webpQuality)
 		cmn.ExitOnError(err)
 		bytsLabels, err := cmn.CompressWebp(shN_labels, oArg.webpQuality)
 		cmn.ExitOnError(err)
@@ -80,7 +53,10 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		OnProgress(PhaseWrite, 75, 100)
 	}
 
-	files = append(files, writeMeta(dir, mm, len(rows))...)
+	files = append(files, writeMeta(dir, mm, paletteSize, len(rows))...)
+	if outputShDegree > 0 {
+		log.Println("[Info] sh palette size", paletteSize)
+	}
 	OnProgress(PhaseWrite, 90, 100)
 	cmn.PrintLibwebpInfo(true)
 
@@ -96,7 +72,7 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	return
 }
 
-func writeMeta(dir string, mm *V3MinMax, count int) []string {
+func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int) []string {
 	m := new(Meta)
 	m.Version = 2
 	m.Count = count
@@ -129,6 +105,8 @@ func writeMeta(dir string, mm *V3MinMax, count int) []string {
 	m.Sh0 = sh0
 	if GetArgShDegree() > 0 {
 		var shn ShN
+		shn.Count = paletteSize
+		shn.Bands = GetArgShDegree()
 		shn.Codebook = make([]float32, 256)
 		for i := range 256 {
 			shn.Codebook[i] = cmn.DecodeSplatSH(uint8(i))
@@ -307,7 +285,7 @@ type Sh0 struct {
 
 type ShN struct {
 	Count    int       `json:"count"`
-	Bands    int       `json:"bands"`
+	Bands    uint8     `json:"bands"`
 	Codebook []float32 `json:"codebook"`
 	Files    []string  `json:"files"`
 }

@@ -118,6 +118,7 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 					for ; n < 45; n++ {
 						shs[n] = 128 // cmn.EncodeSplatSH(0) = 128
 					}
+					data.SH45 = shs
 				}
 			}
 			OnProgress(PhaseRead, i, header.VertexCount)
