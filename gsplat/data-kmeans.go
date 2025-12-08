@@ -20,8 +20,10 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		return // 不输出球谐系数时跳过
 	}
 
+	dims := []int{0, 9, 24, 45}
+	dim := dims[shDegreeOutput]
 	dataCnt := len(rows)
-	palettes, indexes, ok := tryFastClustering(rows)
+	palettes, indexes, ok := tryFastClustering(rows, dim)
 	if !ok {
 		log.Println("[Info] (parameter) ki:", oArg.KI, "(kmeans iterations)")
 		log.Println("[Info] (parameter) kn:", oArg.KN, "(kmeans nearest nodes)")
@@ -30,9 +32,9 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		for n := range dataCnt {
 			nSh45 = append(nSh45, GetSh45Float32ForKmeans(rows[n]))
 		}
-		dims := []int{0, 9, 24, 45}
-		kmPalettes, kmIndexes, counts := kmeansSh45(nSh45, dims[min(shDegreeFrom, shDegreeOutput)], oArg.KI, oArg.KN)
-		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts) // 按质心点数量倒序排序,提高压缩效果稳定输出
+		kmPalettes, kmIndexes := kmeansSh45(nSh45, dim, oArg.KI, oArg.KN)                 // 聚类计算
+		kmPalettes, kmIndexes, counts := removeEmptyCentroids(kmPalettes, kmIndexes, dim) // 空族清理
+		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts)          // 排序优化
 	}
 
 	paletteSize = len(palettes)
@@ -77,6 +79,41 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	return
 }
 
+func removeEmptyCentroids(centroids [][]uint8, labels []int32, dim int) ([][]uint8, []int32, []int32) {
+	// 空族清理
+	cenMap := make(map[string]*shsInfo)
+	var centroidInfos []*shsInfo
+	var n int32
+	for i, v := range labels {
+		sh45 := centroids[v]
+		key := hex.EncodeToString(sh45[:dim])
+
+		info := cenMap[key]
+		if info == nil {
+			// 新加有效质心
+			info = &shsInfo{key: key, shs: sh45, idx: n, count: 1}
+			centroidInfos = append(centroidInfos, info) // 新加
+			labels[i] = n                               // 调整指向
+			cenMap[key] = info
+			n++
+		} else {
+			// 重复的质心
+			labels[i] = info.idx // 调整索引指向
+			info.count++         // 数量累加
+		}
+	}
+
+	// 整理返回
+	var newCentroids [][]uint8
+	var newCounts []int32
+	for _, info := range centroidInfos {
+		newCentroids = append(newCentroids, info.shs)
+		newCounts = append(newCounts, info.count)
+	}
+
+	return newCentroids, labels, newCounts
+}
+
 func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32) (sortedCentroids [][]uint8, sortedIndexes []int32) {
 	type centroidInfo struct {
 		idx   int32
@@ -105,7 +142,7 @@ func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32)
 	return sortedCentroids, sortedIndexes
 }
 
-func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32, counts []int32) {
+func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32) {
 	n := len(nSh45)
 	paletteSize := int(math.Min(64, math.Pow(2, math.Floor(math.Log2(float64(n)/1024.0)))) * 1024)
 	labels = make([]int32, n)
@@ -119,7 +156,6 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 		return
 	}
 
-	// TODO 考虑去重
 	// 1. 随机选 k 个中心
 	f32Centroids := make([][]float32, paletteSize)
 	used := make([]bool, n)
@@ -148,13 +184,13 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 
 		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
-		counts = make([]int32, paletteSize)
+		counts := make([]int32, paletteSize)
 		for i := range paletteSize {
 			newCents[i] = make([]float32, 45)
 		}
 		for i := range n {
 			c := labels[i]
-			for d := range 45 {
+			for d := range dim {
 				newCents[c][d] += nSh45[i][d]
 			}
 			counts[c]++
@@ -164,7 +200,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 			if counts[c] == 0 {
 				copy(newCents[c], nSh45[rand.Intn(n)])
 			} else {
-				for d := range 45 {
+				for d := range dim {
 					newCents[c][d] /= float32(counts[c])
 				}
 			}
@@ -340,20 +376,20 @@ func parAssignDim(n int, nSh45 [][]float32, labels []int32, tree *kdTree, dim in
 }
 
 type shsInfo struct {
-	idx   int
+	idx   int32
 	key   string
 	shs   []uint8
-	count int
+	count int32
 }
 
 // 去重后数量不足最大质心数量时，直接快速聚类
-func tryFastClustering(rows []*SplatData) (centroids [][]uint8, labels []int32, ok bool) {
+func tryFastClustering(rows []*SplatData, dim int) (centroids [][]uint8, labels []int32, ok bool) {
 	// 去重
 	mapShs := make(map[string]*shsInfo)
 	paletteSize := 0
 	for _, d := range rows {
 		shs := GetSh45ForKmeans(d)
-		key := hex.EncodeToString(shs)
+		key := hex.EncodeToString(shs[:dim])
 
 		if mapShs[key] == nil {
 			mapShs[key] = &shsInfo{
@@ -386,12 +422,15 @@ func tryFastClustering(rows []*SplatData) (centroids [][]uint8, labels []int32, 
 	// 整理返回
 	centroids = make([][]uint8, paletteSize)
 	for i, v := range palettes {
-		v.idx = i
+		v.idx = int32(i)
 		centroids[i] = v.shs
 	}
 	labels = make([]int32, len(rows))
 	for i, d := range rows {
-		labels[i] = int32(mapShs[hex.EncodeToString(GetSh45ForKmeans(d))].idx)
+		shs := GetSh45ForKmeans(d)
+		key := hex.EncodeToString(shs[:dim])
+
+		labels[i] = int32(mapShs[key].idx)
 	}
 	return centroids, labels, true
 }

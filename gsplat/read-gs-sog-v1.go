@@ -34,8 +34,6 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 		}
 	}
 
-	toSpxV3OrSog := (IsSog2Spx() && OutputSpxVersion() >= 3) || IsSog2Sog()
-	shChanged := IsShChanged()
 	for i := range count {
 		OnProgress(PhaseRead, i, count)
 		splatData := &SplatData{}
@@ -129,32 +127,6 @@ func ReadSogV1(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	header.Count = count
 	header.ShDegree = shDegree
 
-	// 争取利用原有调色板
-	if meta.ShN != nil && toSpxV3OrSog && !shChanged {
-		palettes := make([]uint8, len(centroids))
-		pixCnt := len(centroids) / 4
-		for i := range pixCnt {
-			palettes[i*4] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4]) / 255.0) + meta.ShN.Mins))
-			palettes[i*4+1] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4+1]) / 255.0) + meta.ShN.Mins))
-			palettes[i*4+2] = cmn.EncodeSplatSH(float64(((meta.ShN.Maxs - meta.ShN.Mins) * float32(centroids[i*4+2]) / 255.0) + meta.ShN.Mins))
-			palettes[i*4+3] = 255
-		}
-		header.Palettes = palettes
-	}
-
 	OnProgress(PhaseRead, 100, 100)
 	return datas, header
-}
-
-func webpRgba(fileWebp string) []byte {
-	rgba, _ := webpRgbaWidth(fileWebp)
-	return rgba
-}
-
-func webpRgbaWidth(fileWebp string) ([]byte, int) {
-	webpBytes, err := cmn.ReadFileBytes(fileWebp)
-	cmn.ExitOnError(err)
-	rgba, width, _, err := cmn.DecompressWebp(webpBytes)
-	cmn.ExitOnError(err)
-	return rgba, width
 }

@@ -37,8 +37,6 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 		}
 	}
 
-	toSpxV3OrSog := (IsSog2Spx() && OutputSpxVersion() >= 3) || IsSog2Sog()
-	shChanged := IsShChanged()
 	for i := range count {
 		OnProgress(PhaseRead, i, count)
 		splatData := &SplatData{}
@@ -113,19 +111,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	header.Version = 2
 	header.Count = count
 	header.ShDegree = shDegree
-
-	// 争取利用原有调色板
-	if meta.ShN != nil && toSpxV3OrSog && !shChanged {
-		palettes := make([]uint8, len(centroids))
-		pixCnt := len(centroids) / 4
-		for i := range pixCnt {
-			palettes[i*4] = cmn.EncodeSplatSH(float64(meta.ShN.Codebook[centroids[i*4]]))
-			palettes[i*4+1] = cmn.EncodeSplatSH(float64(meta.ShN.Codebook[centroids[i*4+1]]))
-			palettes[i*4+2] = cmn.EncodeSplatSH(float64(meta.ShN.Codebook[centroids[i*4+2]]))
-			palettes[i*4+3] = 255
-		}
-		header.Palettes = palettes
-	}
+	header.PaletteSize = paletteSize
 
 	OnProgress(PhaseRead, 100, 100)
 	return datas, header

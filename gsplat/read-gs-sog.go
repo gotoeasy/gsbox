@@ -8,7 +8,6 @@ import (
 	"sync"
 )
 
-
 func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 	isNetFile := cmn.IsNetFile(fileSogMeta)
 	if isNetFile {
@@ -201,4 +200,17 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, *SogHeader) {
 		cmn.ExitOnError(errors.New("unsupported sog version"))
 	}
 	return nil, nil
+}
+
+func webpRgba(fileWebp string) []byte {
+	rgba, _ := webpRgbaWidth(fileWebp)
+	return rgba
+}
+
+func webpRgbaWidth(fileWebp string) ([]byte, int) {
+	webpBytes, err := cmn.ReadFileBytes(fileWebp)
+	cmn.ExitOnError(err)
+	rgba, width, _, err := cmn.DecompressWebp(webpBytes)
+	cmn.ExitOnError(err)
+	return rgba, width
 }
