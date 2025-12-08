@@ -19,7 +19,7 @@ func ReadSogV2(meta *SogMeta, dir string) ([]*SplatData, *SogHeader) {
 	if meta.ShN != nil {
 		centroids, width = webpRgbaWidth(filepath.Join(dir, meta.ShN.Files[0]))
 		labels = webpRgba(filepath.Join(dir, meta.ShN.Files[1]))
-		if meta.ShN.Count >= 0 {
+		if meta.ShN.Count > 0 {
 			paletteSize = meta.ShN.Count // v2 新设计新添字段
 		} else {
 			paletteSize = 65536 // v2 旧设计无调色板数量字段，按最大值记
