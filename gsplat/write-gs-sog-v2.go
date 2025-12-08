@@ -51,12 +51,10 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 
 		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
 		OnProgress(PhaseWrite, 75, 100)
+		log.Println("[Info] sh palette size", paletteSize)
 	}
 
 	files = append(files, writeMeta(dir, mm, paletteSize, len(rows))...)
-	if outputShDegree > 0 {
-		log.Println("[Info] sh palette size", paletteSize)
-	}
 	OnProgress(PhaseWrite, 90, 100)
 	cmn.PrintLibwebpInfo(true)
 
