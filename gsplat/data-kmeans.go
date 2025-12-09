@@ -32,9 +32,8 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		for n := range dataCnt {
 			nSh45 = append(nSh45, GetSh45Float32ForKmeans(rows[n]))
 		}
-		kmPalettes, kmIndexes := kmeansSh45(nSh45, dim, oArg.KI, oArg.KN)                 // 聚类计算
-		kmPalettes, kmIndexes, counts := removeEmptyCentroids(kmPalettes, kmIndexes, dim) // 空族清理
-		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts)          // 排序优化
+		kmPalettes, kmIndexes, counts := kmeansSh45(nSh45, dim, oArg.KI, oArg.KN) // 聚类计算
+		palettes, indexes = sortCentroidsByCounts(kmPalettes, kmIndexes, counts)  // 排序优化
 	}
 
 	paletteSize = len(palettes)
@@ -47,14 +46,18 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		return
 	}
 
-	shN_centroids = make([]uint8, paletteSize*15*4)
+	shDim := 15
+	if IsOutputSog() {
+		shDim = dim / 3 // sog格式是自适应保存实际所需球谐系数
+	}
+	shN_centroids = make([]uint8, paletteSize*shDim*4)
 	for i := range paletteSize {
 		shs := palettes[i]
-		for k := range 15 {
-			shN_centroids[i*15*4+k*4+0] = shs[k*3+0]
-			shN_centroids[i*15*4+k*4+1] = shs[k*3+1]
-			shN_centroids[i*15*4+k*4+2] = shs[k*3+2]
-			shN_centroids[i*15*4+k*4+3] = 255
+		for k := range shDim {
+			shN_centroids[i*shDim*4+k*4+0] = shs[k*3+0]
+			shN_centroids[i*shDim*4+k*4+1] = shs[k*3+1]
+			shN_centroids[i*shDim*4+k*4+2] = shs[k*3+2]
+			shN_centroids[i*shDim*4+k*4+3] = 255
 		}
 	}
 
@@ -79,41 +82,6 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 	return
 }
 
-func removeEmptyCentroids(centroids [][]uint8, labels []int32, dim int) ([][]uint8, []int32, []int32) {
-	// 空族清理
-	cenMap := make(map[string]*shsInfo)
-	var centroidInfos []*shsInfo
-	var n int32
-	for i, v := range labels {
-		sh45 := centroids[v]
-		key := hex.EncodeToString(sh45[:dim])
-
-		info := cenMap[key]
-		if info == nil {
-			// 新加有效质心
-			info = &shsInfo{key: key, shs: sh45, idx: n, count: 1}
-			centroidInfos = append(centroidInfos, info) // 新加
-			labels[i] = n                               // 调整指向
-			cenMap[key] = info
-			n++
-		} else {
-			// 重复的质心
-			labels[i] = info.idx // 调整索引指向
-			info.count++         // 数量累加
-		}
-	}
-
-	// 整理返回
-	var newCentroids [][]uint8
-	var newCounts []int32
-	for _, info := range centroidInfos {
-		newCentroids = append(newCentroids, info.shs)
-		newCounts = append(newCounts, info.count)
-	}
-
-	return newCentroids, labels, newCounts
-}
-
 func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32) (sortedCentroids [][]uint8, sortedIndexes []int32) {
 	type centroidInfo struct {
 		idx   int32
@@ -128,11 +96,14 @@ func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32)
 		return centroidInfos[i].count > centroidInfos[j].count
 	})
 
-	sortedCentroids = make([][]uint8, len(centroids))
+	sortedCentroids = make([][]uint8, 0)
 	sortedIndexes = make([]int32, len(indexes))
 	idxToNewIdx := make(map[int32]int32)
 	for i, info := range centroidInfos {
-		sortedCentroids[i] = centroids[info.idx]
+		if info.count == 0 {
+			break // 空族清理
+		}
+		sortedCentroids = append(sortedCentroids, centroids[info.idx])
 		idxToNewIdx[info.idx] = int32(i)
 	}
 	for i, idx := range indexes {
@@ -142,7 +113,7 @@ func sortCentroidsByCounts(centroids [][]uint8, indexes []int32, counts []int32)
 	return sortedCentroids, sortedIndexes
 }
 
-func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32) {
+func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (centroids [][]uint8, labels []int32, counts []int32) {
 	n := len(nSh45)
 	paletteSize := int(math.Min(64, math.Pow(2, math.Floor(math.Log2(float64(n)/1024.0)))) * 1024)
 	labels = make([]int32, n)
@@ -184,7 +155,7 @@ func kmeansSh45(nSh45 [][]float32, dim int, maxIters int, maxBBFNodes int) (cent
 
 		// 4. 累加新中心（全 45 维，不累加 0 维即可）
 		newCents := make([][]float32, paletteSize)
-		counts := make([]int32, paletteSize)
+		counts = make([]int32, paletteSize)
 		for i := range paletteSize {
 			newCents[i] = make([]float32, 45)
 		}
