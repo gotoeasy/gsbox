@@ -307,6 +307,7 @@ func writeSpxBF22_V3(writer *bufio.Writer, blockDatas []*SplatData, outputShDegr
 			bts, err = cmn.CompressGzip(bts)
 		}
 		cmn.ExitOnError(err)
+		cmn.CheckBlockDataLength(len(bts))
 		blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
 		_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 		cmn.ExitOnError(err)
@@ -394,6 +395,7 @@ func writeSpxBF220_WEBP_V3(writer *bufio.Writer, blockDatas []*SplatData, output
 		bts = append(bts, bsTmp...)
 	}
 
+	cmn.CheckBlockDataLength(len(bts))
 	blockByteLength := int32(len(bts))
 	_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 	cmn.ExitOnError(err)

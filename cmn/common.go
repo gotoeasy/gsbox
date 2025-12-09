@@ -956,3 +956,9 @@ func ClipInt(val int, minVal int, maxVal int) int {
 	}
 	return val
 }
+
+func CheckBlockDataLength(byteLength int) {
+	if byteLength >= 1<<28 {
+		ExitOnError(errors.New("block size too big"))
+	}
+}
