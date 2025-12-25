@@ -92,7 +92,7 @@ func GetInputLods() []uint16 {
 	var rs []uint16
 	for i := range lods {
 		cmn.ExitOnConditionError(lods[i] == "", errors.New(`please specify the lod`))
-		if lods[i] != "0" && lods[i] != "1" && lods[i] != "2" {
+		if cmn.StringToInt(lods[i]) > 7 {
 			cmn.ExitOnError(errors.New("invalod lod: " + lods[i]))
 		}
 		rs = append(rs, uint16(cmn.StringToInt(lods[i])))
@@ -107,11 +107,10 @@ func GetInputLods() []uint16 {
 	return rs
 }
 
-func GetInputLodDistances(maxLod uint16) []float32 {
+func GetInputLodDistances(lodLevels uint16) []float32 {
 	lds := Args.GetArgsIgnorecase("-ld", "--lod-distance")
 
-	if len(lds) != int(maxLod+1) {
-		// log.Println("len(lds)=", len(lds), "maxLod+1=", maxLod+1)
+	if len(lds) != int(lodLevels) {
 		cmn.ExitOnError(errors.New("invalid lod distances (distances len != level count)"))
 	}
 

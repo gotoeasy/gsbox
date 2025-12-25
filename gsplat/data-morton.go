@@ -22,13 +22,17 @@ type V3MinMax struct {
 }
 
 func ComputeXyzMinMax(datas []*SplatData) *V3MinMax {
+	if len(datas) == 0 {
+		return &V3MinMax{}
+	}
+
 	xyzRange := &V3MinMax{
-		MinX: math.MaxFloat32,
-		MinY: math.MaxFloat32,
-		MinZ: math.MaxFloat32,
-		MaxX: -math.MaxFloat32,
-		MaxY: -math.MaxFloat32,
-		MaxZ: -math.MaxFloat32,
+		MinX: datas[0].PositionX,
+		MinY: datas[0].PositionY,
+		MinZ: datas[0].PositionZ,
+		MaxX: datas[0].PositionX,
+		MaxY: datas[0].PositionY,
+		MaxZ: datas[0].PositionZ,
 	}
 
 	for i := range datas {
