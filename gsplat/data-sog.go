@@ -84,3 +84,27 @@ type SogShN struct {
 	Codebook []float32 `json:"codebook,omitempty"`
 	Files    []string  `json:"files,omitempty"`
 }
+
+type LodMeta struct {
+	LodLevels   int      `json:"lodLevels"`
+	Filenames   []string `json:"filenames"`
+	Environment string   `json:"environment"`
+	Tree        *LodNode `json:"tree"`
+}
+
+type LodNode struct {
+	Bound    *Bound         `json:"bound"`
+	Children *[]*Bound      `json:"children,omitempty"`
+	Lods     *[]*LodMapping `json:"lods,omitempty"`
+}
+
+type Bound struct {
+	Min []float32 `json:"min"`
+	Max []float32 `json:"max"`
+}
+
+type LodMapping struct {
+	File   int `json:"file"`
+	Offset int `json:"offset"`
+	Count  int `json:"count"`
+}

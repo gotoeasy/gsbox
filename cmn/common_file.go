@@ -158,6 +158,12 @@ func CreateTempDir() (string, error) {
 	return dir, MkdirAll(dir)
 }
 
+// 当前目录下创建临时子目录
+func CreateCurrentTempDir() (string, error) {
+	dir := filepath.Join("./", RandomString(16))
+	return dir, MkdirAll(dir)
+}
+
 // 创建多级目录（存在时不报错）
 func MkdirAll(dir string) error {
 	return os.MkdirAll(dir, os.ModePerm)
