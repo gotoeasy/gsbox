@@ -4,7 +4,6 @@ import (
 	"errors"
 	"gsbox/cmn"
 	"log"
-	"sort"
 )
 
 var Args *cmn.OsArgs
@@ -103,29 +102,6 @@ func GetInputLods() []uint16 {
 			rs = append(rs, 0)
 		}
 	}
-
-	return rs
-}
-
-func GetInputLodDistances(lodLevels uint16) []float32 {
-	lds := Args.GetArgsIgnorecase("-ld", "--lod-distance")
-
-	if len(lds) != int(lodLevels) {
-		cmn.ExitOnError(errors.New("invalid lod distances (distances len != level count)"))
-	}
-
-	var rs []float32
-	for i := range lds {
-		distance := cmn.StringToFloat32(lds[i], -1)
-		if distance < 0 {
-			cmn.ExitOnError(errors.New("invalid lod distances (value < 0)"))
-		}
-		rs = append(rs, distance)
-	}
-
-	sort.Slice(rs, func(i, j int) bool {
-		return rs[i] > rs[j] // 降序排序
-	})
 
 	return rs
 }
