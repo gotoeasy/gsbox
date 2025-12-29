@@ -9,8 +9,11 @@ import (
 )
 
 // 打包成一个sog文件
-func ZipSogFiles(zipAsSogFile string, files []string) {
-	log.Println("[Info] save as sog")
+func ZipSogFiles(zipAsSogFile string, files []string, printLogs ...bool) {
+	printLog := len(printLogs) == 0 || printLogs[0]
+	if printLog {
+		log.Println("[Info] save as sog")
+	}
 	os.MkdirAll(filepath.Dir(zipAsSogFile), 0666)
 
 	zipFile, err := os.Create(zipAsSogFile)

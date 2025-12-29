@@ -70,7 +70,8 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	return
 }
 
-func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int) []string {
+func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int, printLogs ...bool) []string {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	m := new(Meta)
 	m.Version = 2
 	m.Count = count
@@ -116,13 +117,16 @@ func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int) []string {
 	bytsJson, err := m.ToJSON()
 	cmn.ExitOnError(err)
 	fileMeta := filepath.Join(dir, "meta.json")
-	log.Println("[Info] generate meta.json")
+	if printLog {
+		log.Println("[Info] generate meta.json")
+	}
 	err = cmn.WriteFileBytes(fileMeta, bytsJson)
 	cmn.ExitOnError(err)
 	return []string{fileMeta}
 }
 
-func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
+func writeMeans(dir string, rows []*SplatData, printLogs ...bool) ([]string, *V3MinMax) {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	dataCnt := len(rows)
 	mm := ComputeXyzLogMinMax(rows)
 	rgbaMeansL := make([]uint8, dataCnt*4)
@@ -144,7 +148,9 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 	OnProgress(PhaseWrite, 5, 100)
 
 	fileMeansL := filepath.Join(dir, "means_l.webp")
-	log.Println("[Info] generate means_l.webp")
+	if printLog {
+		log.Println("[Info] generate means_l.webp")
+	}
 	bytsMeansL, err := cmn.CompressWebp(rgbaMeansL, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileMeansL, bytsMeansL)
@@ -152,7 +158,9 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 	OnProgress(PhaseWrite, 10, 100)
 
 	fileMeansU := filepath.Join(dir, "means_u.webp")
-	log.Println("[Info] generate means_u.webp")
+	if printLog {
+		log.Println("[Info] generate means_u.webp")
+	}
 	bytsMeansU, err := cmn.CompressWebp(rgbaMeansU, oArg.webpQuality)
 	cmn.ExitOnError(err)
 	err = cmn.WriteFileBytes(fileMeansU, bytsMeansU)
@@ -161,9 +169,12 @@ func writeMeans(dir string, rows []*SplatData) ([]string, *V3MinMax) {
 	return []string{fileMeansL, fileMeansU}, mm
 }
 
-func writeScales(dir string, rows []*SplatData) []string {
+func writeScales(dir string, rows []*SplatData, printLogs ...bool) []string {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	fileScales := filepath.Join(dir, "scales.webp")
-	log.Println("[Info] generate scales.webp")
+	if printLog {
+		log.Println("[Info] generate scales.webp")
+	}
 	rgbaScales := getScalesRgba(rows)
 	bytsScales, err := cmn.CompressWebp(rgbaScales, oArg.webpQuality)
 	cmn.ExitOnError(err)
@@ -172,9 +183,12 @@ func writeScales(dir string, rows []*SplatData) []string {
 	return []string{fileScales}
 }
 
-func writeQuats(dir string, rows []*SplatData) []string {
+func writeQuats(dir string, rows []*SplatData, printLogs ...bool) []string {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	fileQuats := filepath.Join(dir, "quats.webp")
-	log.Println("[Info] generate quats.webp")
+	if printLog {
+		log.Println("[Info] generate quats.webp")
+	}
 	rgbaQuats := getQuatsRgba(rows)
 	bytsQuats, err := cmn.CompressWebp(rgbaQuats, oArg.webpQuality)
 	cmn.ExitOnError(err)
@@ -183,9 +197,12 @@ func writeQuats(dir string, rows []*SplatData) []string {
 	return []string{fileQuats}
 }
 
-func writeSh0(dir string, rows []*SplatData) []string {
+func writeSh0(dir string, rows []*SplatData, printLogs ...bool) []string {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	fileSh0 := filepath.Join(dir, "sh0.webp")
-	log.Println("[Info] generate sh0.webp")
+	if printLog {
+		log.Println("[Info] generate sh0.webp")
+	}
 	rgbaSh0 := getSh0Rgba(rows)
 	bytsSh0, err := cmn.CompressWebp(rgbaSh0, oArg.webpQuality)
 	cmn.ExitOnError(err)
@@ -194,14 +211,19 @@ func writeSh0(dir string, rows []*SplatData) []string {
 	return []string{fileSh0}
 }
 
-func writeShN(dir string, bytsCentroids []uint8, bytsLabels []uint8) []string {
+func writeShN(dir string, bytsCentroids []uint8, bytsLabels []uint8, printLogs ...bool) []string {
+	printLog := len(printLogs) == 0 || printLogs[0]
 	fileCentroids := filepath.Join(dir, "shN_centroids.webp")
-	log.Println("[Info] generate shN_centroids.webp")
+	if printLog {
+		log.Println("[Info] generate shN_centroids.webp")
+	}
 	err := cmn.WriteFileBytes(fileCentroids, bytsCentroids)
 	cmn.ExitOnError(err)
 
 	fileLabels := filepath.Join(dir, "shN_labels.webp")
-	log.Println("[Info] generate shN_labels.webp")
+	if printLog {
+		log.Println("[Info] generate shN_labels.webp")
+	}
 	err = cmn.WriteFileBytes(fileLabels, bytsLabels)
 	cmn.ExitOnError(err)
 	return []string{fileCentroids, fileLabels}
