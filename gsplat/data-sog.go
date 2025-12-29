@@ -93,9 +93,9 @@ type LodMeta struct {
 }
 
 type LodNode struct {
-	Bound    *Bound         `json:"bound"`
-	Children *[]*Bound      `json:"children,omitempty"`
-	Lods     *[]*LodMapping `json:"lods,omitempty"`
+	Bound    *Bound                  `json:"bound"`
+	Children *[]*LodNode             `json:"children,omitempty"`
+	Lods     *map[string]*LodMapping `json:"lods,omitempty"`
 }
 
 type Bound struct {
