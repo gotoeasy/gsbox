@@ -8,7 +8,7 @@ import (
 
 const MaxBlockSize = int(1600 * 10000) // 不做特别限制，注意过大对低端设备不友好，需自行注意
 const MinBlockSize = int(4096)         // 64*64，过小性能反差，参数边界值应限制
-const DefaultBlockSize = int(67600)    // 260*260，应不断观察调整为合适值
+const DefaultBlockSize = int(90000)    // 300*300，应不断观察调整为合适值
 const MinCompressBlockSize = int(64)   // 再小就别压了
 const MinWebpBlockSize = int(4096)     // 64*64，再小就别webp了
 

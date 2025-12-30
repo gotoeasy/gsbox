@@ -59,9 +59,13 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 		formatId := cmn.BytesToUint32(blockBts[4:8]) // 格式ID
 		switch formatId {
 		case BF_SPLAT22:
-			readSpxBF22_V3(blockBts, blkSplatCnt, header, &datas)
+			readSpxV3(blockBts, blkSplatCnt, header, &datas, 1)
+		case BF_SPLAT23:
+			readSpxV3(blockBts, blkSplatCnt, header, &datas, 0)
 		case BF_SPLAT220_WEBP:
-			readSpxBF220_WEBP_V3(blockBts, blkSplatCnt, header, &datas)
+			readSpxWebpV3(blockBts, blkSplatCnt, header, &datas, 1)
+		case BF_SPLAT230_WEBP:
+			readSpxWebpV3(blockBts, blkSplatCnt, header, &datas, 0)
 		case BF_SH_PALETTES:
 			readSpxPalettes_V3(header, blockBts)
 		case BF_SH_PALETTES_WEBP:
@@ -80,13 +84,13 @@ func ReadSpxOpenV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData)
 	return header, datas
 }
 
-func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
+func readSpxV3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData, logTimes int) {
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
 	for n := range blkSplatCnt {
 		data := &SplatData{}
-		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), 1)
-		data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), 1)
-		data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), 1)
+		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*0+n], bts[blkSplatCnt*3+n], bts[blkSplatCnt*6+n]), logTimes)
+		data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*1+n], bts[blkSplatCnt*4+n], bts[blkSplatCnt*7+n]), logTimes)
+		data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(bts[blkSplatCnt*2+n], bts[blkSplatCnt*5+n], bts[blkSplatCnt*8+n]), logTimes)
 		data.ScaleX = cmn.DecodeSpxScale(bts[blkSplatCnt*9+n])
 		data.ScaleY = cmn.DecodeSpxScale(bts[blkSplatCnt*10+n])
 		data.ScaleZ = cmn.DecodeSpxScale(bts[blkSplatCnt*11+n])
@@ -107,7 +111,7 @@ func readSpxBF22_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *
 
 }
 
-func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData) {
+func readSpxWebpV3(blockBts []byte, blkSplatCnt int, header *SpxHeader, datas *[]*SplatData, logTimes int) {
 	bts := blockBts[8:] // 除去前8字节（数量，格式）
 
 	size := cmn.BytesToUint32(bts[:4])
@@ -167,9 +171,9 @@ func readSpxBF220_WEBP_V3(blockBts []byte, blkSplatCnt int, header *SpxHeader, d
 		z2 := btsXyz2[n*4+2]
 
 		data := &SplatData{}
-		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), 1)
-		data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(y0, y1, y2), 1)
-		data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(z0, z1, z2), 1)
+		data.PositionX = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(x0, x1, x2), logTimes)
+		data.PositionY = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(y0, y1, y2), logTimes)
+		data.PositionZ = cmn.DecodeLog(cmn.DecodeSpxPositionUint24(z0, z1, z2), logTimes)
 		data.ScaleX = cmn.DecodeSpxScale(btsScales[n*4+0])
 		data.ScaleY = cmn.DecodeSpxScale(btsScales[n*4+1])
 		data.ScaleZ = cmn.DecodeSpxScale(btsScales[n*4+2])

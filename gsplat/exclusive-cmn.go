@@ -148,7 +148,11 @@ func BlockFormatDesc(bf int) string {
 	switch bf {
 	case BF_SPLAT22:
 		rs = "(block format, splat per 20|22 bytes)"
+	case BF_SPLAT23:
+		rs = "(block format, splat per 20|22 bytes)"
 	case BF_SPLAT220_WEBP:
+		rs = "(block format, splat per 20|22 bytes, webp encoding)"
+	case BF_SPLAT230_WEBP:
 		rs = "(block format, splat per 20|22 bytes, webp encoding)"
 	case BF_SPLAT19:
 		rs = "(block format, splat per 19 bytes)"

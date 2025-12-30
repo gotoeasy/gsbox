@@ -143,7 +143,7 @@ func usage() {
 	fmt.Println("  -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output")
 	fmt.Println("  -c,  --comment <text>              specify the comment for ply/spx output")
 	fmt.Println("  -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data")
-	fmt.Println("  -bs, --block-size <num>            specify the block size(4096~16000000) for spx output (default is 67600)")
+	fmt.Println("  -bs, --block-size <num>            specify the block size(4096~16000000) for spx output (default is 90000)")
 	fmt.Println("  -bf, --block-format <num>          specify the block data format(22|220) for spx output (default is 220)")
 	fmt.Println("  -sh, --shDegree <num>              specify the SH degree(0~3) for output")
 	fmt.Println("  -f1, --is-inverted <bool>          specify the header flag1(IsInverted) for spx output, default is false")
