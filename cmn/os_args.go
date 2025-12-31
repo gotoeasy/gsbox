@@ -1,6 +1,7 @@
 package cmn
 
 import (
+	"errors"
 	"os"
 	"runtime"
 	"strconv"
@@ -76,6 +77,19 @@ func ParseArgs(customCmds ...string) *OsArgs {
 	}
 
 	return args
+}
+
+// 对命令参数做简单校验
+func (o *OsArgs) ValidateCmd(cmds ...string) {
+	cnt := 0
+	for _, v := range cmds {
+		if o.HasCmd(v) {
+			if cnt > 0 {
+				ExitOnError(errors.New("invalid command line arguments or syntax"))
+			}
+			cnt++
+		}
+	}
 }
 
 // 取指定参数名对应的值切片，值去重

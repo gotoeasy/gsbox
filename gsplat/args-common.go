@@ -22,10 +22,12 @@ type ArgValues struct {
 	hasKI      bool
 	hasKN      bool
 	isJoin     bool
+	isCut      bool
 }
 
 func InitArgs() *cmn.OsArgs {
 	Args = cmn.ParseArgs("-v", "-version", "--version", "-h", "-help", "--help")
+	Args.ValidateCmd("g2p", "sog2ply", "g2s", "sog2splat", "g2x", "sog2spx", "g2z", "sog2spz", "g2g", "sog2sog", "ps", "printSplat", "info", "k2p", "ksplat2ply", "k2s", "ksplat2splat", "k2x", "ksplat2spx", "k2z", "ksplat2spz", "k2g", "ksplat2sog", "z2p", "spz2ply", "z2s", "spz2splat", "z2x", "spz2spx", "z2g", "spz2sog", "z2z", "spz2spz", "x2p", "spx2ply", "x2s", "spx2splat", "x2z", "spx2spz", "x2g", "spx2sog", "x2x", "spx2spx", "cut", "s2p", "splat2ply", "s2x", "splat2spx", "s2z", "splat2spz", "s2g", "splat2sog", "s2s", "splat2splat", "p2s", "ply2splat", "p2x", "ply2spx", "p2z", "ply2spz", "p2g", "ply2sog", "p2p", "ply2ply", "-v", "-version", "--version", "-h", "-help", "--help")
 
 	oArg = &ArgValues{}
 	oArg.Quality = max(1, min(cmn.StringToInt(Args.GetArgIgnorecase("-q", "--quality"), 5), 9))
@@ -45,6 +47,7 @@ func InitArgs() *cmn.OsArgs {
 	oArg.hasKI = Args.HasArgIgnorecase("-ki", "--kmeans-iterations")
 	oArg.hasKN = Args.HasArgIgnorecase("-kn", "--kmeans-nearest-nodes")
 	oArg.isJoin = Args.HasCmd("join")
+	oArg.isCut = Args.HasCmd("cut")
 
 	// 按摩质量级别自动调整相关参数
 	kis := []int{5, 7, 9, 10, 10, 10, 12, 15, 20}
