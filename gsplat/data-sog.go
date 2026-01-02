@@ -108,3 +108,12 @@ type LodMapping struct {
 	Offset int `json:"offset"`
 	Count  int `json:"count"`
 }
+
+func (s *LodMeta) ToJson() string {
+	// data, err := json.MarshalIndent(s, "", "  ")
+	data, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}

@@ -102,7 +102,7 @@ func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int, printLogs .
 	}
 	sh0.Files = []string{"sh0.webp"}
 	m.Sh0 = sh0
-	if GetArgShDegree() > 0 {
+	if paletteSize > 0 && GetArgShDegree() > 0 {
 		var shn ShN
 		shn.Count = paletteSize
 		shn.Bands = GetArgShDegree()

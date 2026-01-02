@@ -15,14 +15,16 @@ type ArgValues struct {
 	KI        int // 聚类计算时的迭代次数（5~50，默认10），越大越精确耗时越长
 	KN        int // 聚类计算时的查找最邻近节点数量（10~200，默认15），越大越精确耗时越长
 	BlockSize int // 数据块大小
+	CutSize   int // LOD叶节点最大点数
 
 	webpQuality int // webp压缩的质量参数, 80~99，根据质量级别自动选定
 
-	hasQuality bool
-	hasKI      bool
-	hasKN      bool
-	isJoin     bool
-	isCut      bool
+	hasQuality      bool
+	hasKI           bool
+	hasKN           bool
+	isJoin          bool
+	isCut           bool
+	isOutputLodMeta bool
 }
 
 func InitArgs() *cmn.OsArgs {
@@ -48,6 +50,8 @@ func InitArgs() *cmn.OsArgs {
 	oArg.hasKN = Args.HasArgIgnorecase("-kn", "--kmeans-nearest-nodes")
 	oArg.isJoin = Args.HasCmd("join")
 	oArg.isCut = Args.HasCmd("cut")
+	oArg.isOutputLodMeta = cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), "lod-meta.json")
+	oArg.CutSize = max(1000, min(cmn.StringToInt(Args.GetArgIgnorecase("-cs", "--cut-size"), 30000), 100000)) // 有效范围 1千~10万
 
 	// 按摩质量级别自动调整相关参数
 	kis := []int{5, 7, 9, 10, 10, 10, 12, 15, 20}

@@ -61,6 +61,10 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 		}
 	}
 
+	for i, d := range rows {
+		d.PaletteIdx = uint16(indexes[i])
+	}
+
 	if IsOutputSog() {
 		w, h := cmn.ComputeWidthHeight(dataCnt)
 		labelsPixCnt := w * h
@@ -73,12 +77,23 @@ func ReWriteShByKmeans(rows []*SplatData) (shN_centroids []uint8, shN_labels []u
 			shN_labels[i*4+2] = 0
 			shN_labels[i*4+3] = 255
 		}
-	} else if IsOutputSpx() {
-		for i, d := range rows {
-			d.PaletteIdx = uint16(indexes[i])
-		}
 	}
 
+	return
+}
+
+func GetShnLablesByPaletteIdx(datas []*SplatData) (shN_labels []uint8) {
+	dataCnt := len(datas)
+	w, h := cmn.ComputeWidthHeight(dataCnt)
+	labelsPixCnt := w * h
+	shN_labels = make([]uint8, labelsPixCnt*4)
+	for i := range dataCnt {
+		d := datas[i]
+		shN_labels[i*4+0] = uint8(d.PaletteIdx & 0xFF)
+		shN_labels[i*4+1] = uint8(d.PaletteIdx >> 8)
+		shN_labels[i*4+2] = 0
+		shN_labels[i*4+3] = 255
+	}
 	return
 }
 
