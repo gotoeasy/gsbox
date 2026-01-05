@@ -176,6 +176,7 @@ func usage() {
 	fmt.Println("  gsbox k2z -i /path/to/input.ksplat -o /path/to/output.spz -ov 3")
 	fmt.Println("  gsbox g2x -i /path/to/input.sog -o /path/to/output.spx")
 	fmt.Println("  gsbox g2x -i /path/to/meta.json -o /path/to/output.spx")
+	fmt.Println("  gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o output/lod-meta.json")
 	fmt.Println("  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx")
 	fmt.Println("  gsbox ps -i /path/to/input.spx -o /path/to/output.txt")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
