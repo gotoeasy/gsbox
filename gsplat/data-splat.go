@@ -452,3 +452,71 @@ func InitZeroSH45() []uint8 {
 	}
 	return sh45
 }
+
+func CalcSplatBound(d *SplatData) (mins []float32, maxs []float32) {
+	x := d.PositionX
+	y := d.PositionY
+	z := d.PositionZ
+	rw := cmn.DecodeSplatRotation(d.RotationW)
+	rx := cmn.DecodeSplatRotation(d.RotationX)
+	ry := cmn.DecodeSplatRotation(d.RotationY)
+	rz := cmn.DecodeSplatRotation(d.RotationZ)
+	sx := cmn.EncodeSplatScale(d.ScaleX)
+	sy := cmn.EncodeSplatScale(d.ScaleY)
+	sz := cmn.EncodeSplatScale(d.ScaleZ)
+
+	return CalcSplatAABB(x, y, z, rx, ry, rz, rw, sx, sy, sz)
+}
+
+func CalcSplatAABB(x, y, z, rx, ry, rz, rw, sx, sy, sz float32) (mins []float32, maxs []float32) {
+	// 归一化四元数
+	lenSq := rx*rx + ry*ry + rz*rz + rw*rw
+	if lenSq > 0 {
+		lenInv := 1 / float32(math.Sqrt(float64(lenSq)))
+		rx *= lenInv
+		ry *= lenInv
+		rz *= lenInv
+		rw *= lenInv
+	}
+
+	// 从四元数计算旋转矩阵的3x3部分
+	xx, yy, zz := rx*rx, ry*ry, rz*rz
+	xy, xz, yz := rx*ry, rx*rz, ry*rz
+	wx, wy, wz := rw*rx, rw*ry, rw*rz
+
+	m00 := 1 - 2*(yy+zz)
+	m01 := 2 * (xy - wz)
+	m02 := 2 * (xz + wy)
+
+	m10 := 2 * (xy + wz)
+	m11 := 1 - 2*(xx+zz)
+	m12 := 2 * (yz - wx)
+
+	m20 := 2 * (xz - wy)
+	m21 := 2 * (yz + wx)
+	m22 := 1 - 2*(xx+yy)
+
+	// 计算变换后的包围盒半长
+	halfX := float32(math.Abs(float64(m00)))*sx + float32(math.Abs(float64(m01)))*sy + float32(math.Abs(float64(m02)))*sz
+	halfY := float32(math.Abs(float64(m10)))*sx + float32(math.Abs(float64(m11)))*sy + float32(math.Abs(float64(m12)))*sz
+	halfZ := float32(math.Abs(float64(m20)))*sx + float32(math.Abs(float64(m21)))*sy + float32(math.Abs(float64(m22)))*sz
+
+	// 计算最小和最大点
+	return []float32{x - halfX, y - halfY, z - halfZ}, []float32{x + halfX, y + halfY, z + halfZ}
+}
+
+func SetLod(datas []*SplatData, lods []uint16, idx int) []*SplatData {
+	if !oArg.isCut || idx >= len(lods) {
+		return datas
+	}
+
+	lod := lods[idx]
+	if lod < 8 {
+		for _, d := range datas {
+			if !d.IsWaterMark {
+				d.Lod = lod
+			}
+		}
+	}
+	return datas
+}

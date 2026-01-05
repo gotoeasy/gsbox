@@ -98,9 +98,6 @@ func GetInputLods() []uint16 {
 	var rs []uint16
 	for i := range lods {
 		cmn.ExitOnConditionError(lods[i] == "", errors.New(`please specify the lod`))
-		if cmn.StringToInt(lods[i]) > 7 {
-			cmn.ExitOnError(errors.New("invalod lod: " + lods[i]))
-		}
 		rs = append(rs, uint16(cmn.StringToInt(lods[i])))
 	}
 
