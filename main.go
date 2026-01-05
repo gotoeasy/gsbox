@@ -343,6 +343,10 @@ func join() {
 			ds, h := gsplat.ReadSog(file)
 			maxFromShDegree = max(h.ShDegree, maxFromShDegree)
 			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, "lod-meta.json", true) {
+			dataShDegree, _, ds, _ := gsplat.ReadLodMeta(file)
+			maxFromShDegree = max(dataShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
 		}
 	}
 	gsplat.OnProgress(gsplat.PhaseJoin, 100, 100)
