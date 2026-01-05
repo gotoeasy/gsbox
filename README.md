@@ -25,11 +25,17 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 <br>
 
 
-|       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` | `.sog`                | `lod-meta.json`       |
-|-------|----------|-------------------|----------|----------|---------|-----------|-----------------------|-----------------------|
-| Read  | &#9745;  |  &#9745;          | &#9745;  | &#9745;  | &#9745; | &#9745;   | &#9745;               | &#9745; (v4.6.0+ 🌟)  |
-| Write | &#9745;  |                   | &#9745;  | &#9745;  | &#9745; |           | &#9745; (v4.2.0+ 🌟)  | &#9745; (v4.6.0+ 🌟)  |
-| Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/">Link</a> | <a href="https://developer.playcanvas.com/user-manual/gaussian-splatting/building/engine-features/lod-streaming/">Link</a> |
+| Format            | Read                  | Write                | Reference                                                                             |
+|-------------------|-----------------------|----------------------|---------------------------------------------------------------------------------------|
+| `.ply`            | &#9745;               | &#9745;              | [Link](https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/)                     |
+| `.compressed.ply` | &#9745;               |                      | [Link](https://github.com/playcanvas/supersplat)                                      |
+| `.splat`          | &#9745;               | &#9745;              | [Link](https://github.com/antimatter15/splat)                                         |
+| `.spx`            | &#9745;               | &#9745;              | [Link](https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md)              |
+| `.spz`            | &#9745;               | &#9745;              | [Link](https://github.com/nianticlabs/spz)                                            |
+| `.ksplat`         | &#9745;               |                      | [Link](https://github.com/mkkellogg/GaussianSplats3D)                                 |
+| `.sog`            | &#9745;               | &#9745; (v4.2.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)  |
+| `lod-meta.json`   | &#9745; (v4.6.0+ 🌟)  | &#9745; (v4.6.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/engine-features/lod-streaming/)  |
+
 
 <br>
 
