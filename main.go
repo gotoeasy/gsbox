@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	args := gsplat.InitArgs()
+	args := gsplat.OnMainStart()
 	if args.HasCmd("-v", "-version", "--version") && args.ArgCount == 2 {
 		version()
 	} else if args.HasCmd("-h", "-help", "--help") && args.ArgCount == 2 {
@@ -80,12 +80,14 @@ func main() {
 		printSplat()
 	} else if args.HasCmd("join") {
 		join()
+	} else if args.HasCmd("cut") {
+		cut()
 	} else if args.HasCmd("info") {
 		info(args)
 	} else {
 		usage()
 	}
-	cmn.PrintNewVersionAndExit()
+	gsplat.OnMainEnd()
 }
 
 func version() {
@@ -135,6 +137,7 @@ func usage() {
 	fmt.Println("  g2z, sog2spz                       convert sog to spz")
 	fmt.Println("  g2g, sog2sog                       convert sog to sog")
 	fmt.Println("  ps,  printsplat                    print data to text file like splat format layout")
+	fmt.Println("  cut                                cut the input model files into LOD format")
 	fmt.Println("  join                               join the input model files into a single output file")
 	fmt.Println("  info <file>                        display the model file information")
 	fmt.Println("  -i,  --input <file>                specify the input file")
@@ -158,6 +161,10 @@ func usage() {
 	fmt.Println("  -ov, --output-version <num>        specify the output versions for spx|spz|sog, default is newest")
 	fmt.Println("  -ki, --kmeans-iterations <num>     specify the kmeans iterations (5~50), default is set by quality level")
 	fmt.Println("  -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes (10~200), default is set by quality level")
+	fmt.Println("  -l,  --lod <num>                   specify the LOD level of the input file")
+	fmt.Println("  -cs, --cut-size <num>              specify the cut size(1000~100000) of each node, default is 30000")
+	fmt.Println("  -of, --output-format <string>      specify the output format(sog|meta.json) for LOD, default is sog")
+	fmt.Println("  -e,  --environment <file>          specify the environment file for LOD")
 	fmt.Println("  -v,  --version                     display version information")
 	fmt.Println("  -h,  --help                        display help information")
 	fmt.Println("")
@@ -774,5 +781,70 @@ func sog2sog() {
 	fileSize := gsplat.WriteSog(output, datas)
 	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
+	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+
+func cut() {
+	log.Println("[Info] cut the input models into tiles")
+	startTime := time.Now()
+	inputs := gsplat.GetAndCheckInputFiles()
+	output := gsplat.CreateOutputDir()
+	isOutLodJson := cmn.Endwiths(output, ".lod.json", true) || cmn.Endwiths(output, "lod-meta.json", true)
+	lods := gsplat.GetInputLods()
+
+	ok := isOutLodJson
+	cmn.ExitOnConditionError(!ok, errors.New("output file must be *.lod.json or lod-meta.json"))
+
+	datas := make([]*gsplat.SplatData, 0)
+	var environmentDatas []*gsplat.SplatData
+	var maxFromShDegree uint8
+	for i, file := range inputs {
+		gsplat.OnProgress(gsplat.PhaseJoin, i, len(inputs))
+		if cmn.Endwiths(file, ".ply", true) {
+			header, ds := gsplat.ReadPly(file)
+			maxFromShDegree = max(uint8(header.MaxShDegree()), maxFromShDegree)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".splat", true) {
+			ds := gsplat.ReadSplat(file)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spx", true) {
+			header, ds := gsplat.ReadSpx(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spz", true) {
+			header, ds := gsplat.ReadSpz(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".ksplat", true) {
+			_, header, ds := gsplat.ReadKsplat(file)
+			maxFromShDegree = max(uint8(header.ShDegree), maxFromShDegree)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" {
+			ds, h := gsplat.ReadSog(file)
+			maxFromShDegree = max(h.ShDegree, maxFromShDegree)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, "lod-meta.json", true) {
+			dataShDegree, _, ds, envDs := gsplat.ReadLodMeta(file)
+			maxFromShDegree = max(dataShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
+			environmentDatas = envDs
+		}
+		gsplat.OnProgress(gsplat.PhaseRead, i, len(inputs))
+	}
+	gsplat.OnProgress(gsplat.PhaseRead, 100, 100)
+	gsplat.SetShDegreeFrom(maxFromShDegree)
+	datas = gsplat.ProcessDatas(datas)
+
+	splatTiles, lodMeta := gsplat.BuildLodMetaSplatTiles(datas)
+	splatTiles.EnvironmentDatas = environmentDatas
+	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
+
+	log.Println("[Info]", inputs, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
