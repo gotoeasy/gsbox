@@ -20,15 +20,16 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 - [x] Viewing file information for `.ply`, `.splat`, `.spx`, `.spz`, `.sog`, and `.ksplat` files
 - [x] Supports data transformation (Rotation, Scale, Translation)
 - [x] Supports merging multiple model files into one
+- [x] Supports generating LOD (lod-meta.json) format
 
 <br>
 
 
-|       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` | `.sog`    |
-|-------|----------|-------------------|----------|----------|---------|-----------|-----------|
-| Read  | &#9745;  |  &#9745;          | &#9745;  | &#9745;  | &#9745; | &#9745;   | &#9745;   |
-| Write | &#9745;  |                   | &#9745;  | &#9745;  | &#9745; |           | &#9745; (v4.2.0+ 🌟)  |
-| Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/">Link</a> |
+|       | `.ply`   | `.compressed.ply` | `.splat` | `.spx`   | `.spz`  | `.ksplat` | `.sog`                | `lod-meta.json`       |
+|-------|----------|-------------------|----------|----------|---------|-----------|-----------------------|-----------------------|
+| Read  | &#9745;  |  &#9745;          | &#9745;  | &#9745;  | &#9745; | &#9745;   | &#9745;               | &#9745; (v4.6.0+ 🌟)  |
+| Write | &#9745;  |                   | &#9745;  | &#9745;  | &#9745; |           | &#9745; (v4.2.0+ 🌟)  | &#9745; (v4.6.0+ 🌟)  |
+| Ref   |  <a href="https://repo-sam.inria.fr/fungraph/3d-gaussian-splatting/">Link</a> |  <a href="https://github.com/playcanvas/supersplat">Link</a> | <a href="https://github.com/antimatter15/splat">Link</a> | <a href="https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md">Link</a> | <a href="https://github.com/nianticlabs/spz">Link</a> | <a href="https://github.com/mkkellogg/GaussianSplats3D">Link</a> | <a href="https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/">Link</a> | <a href="https://developer.playcanvas.com/user-manual/gaussian-splatting/building/engine-features/lod-streaming/">Link</a> |
 
 <br>
 
@@ -80,6 +81,7 @@ Options:
   g2z, sog2spz                       convert sog to spz
   g2g, sog2sog                       convert sog to sog
   ps,  printsplat                    print data to text file like splat format layout
+  cut                                cut the input model files into LOD format
   join                               join the input model files into a single output file
   info <file>                        display the model file information
   -i,  --input <file>                specify the input file
@@ -88,8 +90,8 @@ Options:
   -ct, --compression-type <type>     specify the compression type(0:gzip,1:xz) for spx output
   -c,  --comment <text>              specify the comment for ply/spx output
   -a,  --alpha <num>                 specify the minimum alpha(0~255) to filter the output splat data
-  -bs, --block-size <num>            specify the block size(90000~16000000) for spx output (default is 90000)
-  -bf, --block-format <num>          specify the block data format(22|220) for spx output (default is 220)
+  -bs, --block-size <num>            specify the block size(4096~16000000) for spx output (default is 90000)
+  -bf, --block-format <num>          specify the block data format(22|23|220|230) for spx output (default is 220)
   -sh, --shDegree <num>              specify the SH degree(0~3) for output
   -f1, --is-inverted <bool>          specify the header flag1(IsInverted) for spx output, default is false
   -rx, --rotateX <num>               specify the rotation angle in degrees about the x-axis for transform
@@ -103,6 +105,9 @@ Options:
   -ov, --output-version <num>        specify the output versions for spx|spz|sog, default is newest
   -ki, --kmeans-iterations <num>     specify the kmeans iterations (5~50), default is set by quality level
   -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes (10~200), default is set by quality level
+  -l,  --lod <num>                   specify the LOD level of the input file
+  -of, --output-format <string>      specify the output format(sog|meta.json) for LOD, default is sog
+  -e,  --environment <file>          specify the environment file for LOD
   -v,  --version                     display version information
   -h,  --help                        display help information
 
@@ -127,6 +132,9 @@ gsbox p2z -i /path/to/input.ply -o /path/to/output.spz -ov 3
 
 # Convert the ply to sog.
 gsbox p2g -i /path/to/input.ply -o /path/to/output.sog
+
+# Generating LOD format.
+gsbox cut -i /path/to/lod0.ply -l 0 -i /path/to/lod1.ply -l 1 -i /path/to/lod2.ply -l 2  -o /path/to/lod-meta.json
 
 # Inspect the header information of the spx file
 gsbox info -i /path/to/file.spx
