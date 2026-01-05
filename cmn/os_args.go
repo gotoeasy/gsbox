@@ -92,21 +92,21 @@ func (o *OsArgs) ValidateCmd(cmds ...string) {
 	}
 }
 
-// 取指定参数名对应的值切片，值去重
+// 取指定参数名对应的值切片
 func (o *OsArgs) GetArgs(names ...string) []string {
 	for i := range names {
 		if o.mapParam[names[i]] != "" {
-			return UniqueStrings(Split(o.mapParam["\t"+names[i]], "\t"))
+			return UniqueStrings(Split(o.mapParam["\t"+names[i]], "\t"), false) // 值不去重
 		}
 	}
 	return []string{}
 }
 
-// 取指定参数名对应的值切片(忽略参数名大小写)，值去重
+// 取指定参数名对应的值切片(忽略参数名大小写)
 func (o *OsArgs) GetArgsIgnorecase(names ...string) []string {
 	for i := range names {
 		if o.mapParam[names[i]] != "" {
-			return UniqueStrings(Split(o.mapParam[ToLower("\t"+names[i])], "\t"))
+			return UniqueStrings(Split(o.mapParam[ToLower("\t"+names[i])], "\t"), false) // 值不去重
 		}
 	}
 	return []string{}

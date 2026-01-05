@@ -17,9 +17,19 @@ const PhaseRead = 0
 const PhaseProc = 1
 const PhaseWrite = 2
 const PhaseKmean = 3
+const PhaseCut = 4
 
-var Phases = []int{100, 100, 100, 100} // 0:读, 1:数据处理, 2:写, 3:聚类
-var Progress = []int{0, 0, 0, 0}
+var Phases = []int{100, 100, 100, 100, 100} // 0:读, 1:数据处理, 2:写, 3:聚类, 4:切割
+var Progress = []int{0, 0, 0, 0, 0}
+var PrintProgressLog = true // false
+
+func OnMainStart() *cmn.OsArgs {
+	return InitArgs()
+}
+
+func OnMainEnd() {
+	cmn.PrintNewVersionAndExit()
+}
 
 func OnProgress(phase int, current int, total int) {
 	if printProgressLog {

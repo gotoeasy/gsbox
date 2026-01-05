@@ -39,7 +39,7 @@ var newVersionMessage = ""
 func PrintNewVersionAndExit() {
 	dur := time.Since(checkVersionStartTime).Milliseconds()
 	if !checkVersionDone && dur < 1000 {
-		time.Sleep((1000 - time.Duration(dur)) * time.Millisecond) // wait 1 second to get latest version
+		time.Sleep((1000 - time.Duration(dur)) * time.Millisecond)
 	}
 	fmt.Print(newVersionMessage)
 	os.Exit(0)
@@ -135,8 +135,13 @@ func FormatFloat32(f float32) string {
 	return formatted
 }
 
-// 去重
-func UniqueStrings(slice []string) []string {
+// 默认去重
+func UniqueStrings(slice []string, delDuplicates ...bool) []string {
+	delDuplicate := true
+	if len(delDuplicates) > 0 {
+		delDuplicate = delDuplicates[0]
+	}
+
 	seen := make(map[string]bool)
 	var result []string
 
@@ -144,6 +149,10 @@ func UniqueStrings(slice []string) []string {
 		if !seen[v] {
 			seen[v] = true
 			result = append(result, v)
+		} else {
+			if !delDuplicate {
+				result = append(result, v)
+			}
 		}
 	}
 	return result
