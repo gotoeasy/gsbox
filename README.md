@@ -140,7 +140,7 @@ gsbox p2z -i /path/to/input.ply -o /path/to/output.spz -ov 3
 gsbox p2g -i /path/to/input.ply -o /path/to/output.sog
 
 # Generating LOD format.
-gsbox cut -i /path/to/lod0.ply -l 0 -i /path/to/lod1.ply -l 1 -i /path/to/lod2.ply -l 2  -o /path/to/lod-meta.json
+gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o /path/to/lod-meta.json
 
 # Inspect the header information of the spx file
 gsbox info -i /path/to/file.spx
