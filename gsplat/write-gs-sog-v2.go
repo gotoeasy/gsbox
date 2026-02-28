@@ -74,11 +74,9 @@ func writeMeta(dir string, mm *V3MinMax, paletteSize int, count int, printLogs .
 	printLog := len(printLogs) == 0 || printLogs[0]
 	m := new(Meta)
 	m.Version = 2
+	m.Asset = &Asset{Generator: "gsbox " + cmn.VER}
 	m.Count = count
 	_, comment := cmn.RemoveNonASCII(Args.GetArgIgnorecase("-c", "--comment"))
-	if comment == "" {
-		comment = DefaultSpxComment()
-	}
 	m.Comment = comment
 	var means Means
 	means.Mins = []float32{mm.MinX, mm.MinY, mm.MinZ}
@@ -269,7 +267,9 @@ func getQuatsRgba(rows []*SplatData) []uint8 {
 // 当前仅针对 sog version 2
 type Meta struct {
 	Version int    `json:"version"`
+	Asset   *Asset `json:"asset,omitempty"`
 	Count   int    `json:"count"`
+	// Antialias bool   `json:"antialias,omitempty"` // True if scene was trained with anti-aliasing
 	Comment string `json:"comment,omitempty"`
 	Means   Means  `json:"means"`
 	Scales  Scales `json:"scales"`
@@ -308,4 +308,8 @@ type ShN struct {
 	Bands    uint8     `json:"bands"`
 	Codebook []float32 `json:"codebook"`
 	Files    []string  `json:"files"`
+}
+
+type Asset struct {
+	Generator string `json:"generator,omitempty"`
 }
