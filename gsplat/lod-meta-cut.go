@@ -30,7 +30,7 @@ type SplatNode struct {
 	Radius   float32         `json:"radius"`
 	Children *[]*SplatNode   `json:"children,omitempty"`
 	Lods     *[]*TileMapping `json:"lods,omitempty"`
-	bound    *Bound          `json:"-"`
+	Bound    *Bound          `json:"bound,omitempty"`
 }
 
 type SplatFile struct {
@@ -420,7 +420,7 @@ func copyToSplatTreeLod(treeNode *BTreeNode, splatNode *SplatNode) {
 		*splatNode.Lods = append(*splatNode.Lods, treeNode.lods...)
 
 		if oArg.isOutputLodMeta {
-			splatNode.bound = treeNode.bound
+			splatNode.Bound = treeNode.bound
 		}
 	} else {
 		var children []*SplatNode
@@ -460,7 +460,7 @@ func calcLodMetaBound(datas []*SplatData) *Bound {
 }
 
 func setSplatTreeBound(node *SplatNode) *Bound {
-	if node.bound == nil {
+	if node.Bound == nil {
 		var bounds []*Bound
 		for _, cld := range *node.Children {
 			bounds = append(bounds, setSplatTreeBound(cld))
@@ -478,9 +478,9 @@ func setSplatTreeBound(node *SplatNode) *Bound {
 			bound.Max[1] = max(bound.Max[1], bd.Max[1])
 			bound.Max[2] = max(bound.Max[2], bd.Max[2])
 		}
-		node.bound = bound
+		node.Bound = bound
 	}
-	return node.bound
+	return node.Bound
 }
 
 func copyToLodMeta(splatTiles *SplatTiles) (*SplatTiles, *LodMeta) {
@@ -530,7 +530,7 @@ func setSplatFileIndex(splatTiles *SplatTiles) []string {
 }
 
 func copyToSplatTreeLodMeta(splatTiles *SplatTiles, splatNode *SplatNode, lodNode *LodNode) {
-	lodNode.Bound = splatNode.bound
+	lodNode.Bound = splatNode.Bound
 
 	if splatNode.Lods != nil {
 		lods := make(map[string]*LodMapping)
