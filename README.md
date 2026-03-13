@@ -34,7 +34,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 | `.spz`            | &#9745;               | &#9745;              | [Link](https://github.com/nianticlabs/spz)                                            |
 | `.ksplat`         | &#9745;               |                      | [Link](https://github.com/mkkellogg/GaussianSplats3D)                                 |
 | `.sog`            | &#9745;               | &#9745; (v4.2.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)  |
-| `lod-meta.json`   | &#9745; (v4.6.0+ 🌟)  | &#9745; (v4.6.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/engine-features/lod-streaming/)  |
+| `lod-meta.json`   | &#9745; (v4.6.0+ 🌟)  | &#9745; (v4.6.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/unified-rendering/lod-streaming/)  |
 
 
 <br>
