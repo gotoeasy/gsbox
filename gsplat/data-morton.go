@@ -101,20 +101,18 @@ func ComputeXyzLogMinMax(datas []*SplatData) *V3MinMax {
 
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
 func EncodeMorton3(x, y, z float32, mm *V3MinMax) uint32 {
-	ix := min(1023, uint32(math.Floor(float64(1024.0*(x-mm.MinX)/mm.LenX))))
-	iy := min(1023, uint32(math.Floor(float64(1024.0*(y-mm.MinY)/mm.LenY))))
-	iz := min(1023, uint32(math.Floor(float64(1024.0*(z-mm.MinZ)/mm.LenZ))))
+	var ix, iy, iz uint32
+	if mm.LenX > 0 {
+		ix = min(1023, uint32(math.Floor(float64(1024.0*(max(0, x-mm.MinX))/mm.LenX))))
+	}
+	if mm.LenY > 0 {
+		iy = min(1023, uint32(math.Floor(float64(1024.0*(max(0, y-mm.MinY))/mm.LenY))))
+	}
+	if mm.LenZ > 0 {
+		iz = min(1023, uint32(math.Floor(float64(1024.0*(max(0, z-mm.MinZ))/mm.LenZ))))
+	}
 
 	return (Part1By2(iz) << 2) + (Part1By2(iy) << 1) + Part1By2(ix)
-}
-
-func Part1By1(x uint32) uint32 {
-	x &= 0x0000ffff                 // x = ---- ---- ---- ---- fedc ba98 7654 3210
-	x = (x ^ (x << 8)) & 0x00ff00ff // x = ---- ---- fedc ba98 ---- ---- 7654 3210
-	x = (x ^ (x << 4)) & 0x0f0f0f0f // x = ---- fedc ---- ba98 ---- 7654 ---- 3210
-	x = (x ^ (x << 2)) & 0x33333333 // x = --fe --dc --ba --98 --76 --54 --32 --10
-	x = (x ^ (x << 1)) & 0x55555555 // x = -f-e -d-c -b-a -9-8 -7-6 -5-4 -3-2 -1-0
-	return x
 }
 
 func Part1By2(x uint32) uint32 {
