@@ -84,6 +84,8 @@ func main() {
 		cut()
 	} else if args.HasCmd("info") {
 		info(args)
+	} else if args.HasCmd("obj2obj", "o2o") {
+		obj2obj()
 	} else {
 		usage()
 	}
@@ -851,5 +853,15 @@ func cut() {
 	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
 
 	log.Println("[Info]", inputs, " --> ", output)
+	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+
+func obj2obj() {
+	log.Println("[Info] convert obj to obj.")
+	startTime := time.Now()
+	input := gsplat.GetAndCheckInputFile()
+	output := gsplat.CreateOutputDir()
+	gsplat.Obj2Obj(input, output)
+	log.Println("[Info]", input, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
