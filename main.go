@@ -205,6 +205,7 @@ func info(args *cmn.OsArgs) {
 	isKsplat := cmn.Endwiths(input, ".ksplat", true)
 	isSog := cmn.Endwiths(input, ".sog", true)
 	isMetaJson := cmn.FileName(input) == "meta.json"
+	isGlb := cmn.Endwiths(input, ".glb", true)
 	count := 0
 
 	shDegree := uint8(0)
@@ -254,6 +255,9 @@ func info(args *cmn.OsArgs) {
 		fmt.Println("Splat Count     :", count)
 		fmt.Println("SH Degree       :", shDegree)
 		fmt.Println("SH Palette Size :", paletteSize)
+	} else if isGlb {
+		str := gsplat.ReadGlbJson(input)
+		fmt.Println(str)
 	} else {
 		cmn.ExitOnError(errors.New("the input file must be (ply | splat | spx | spz | ksplat | sog) format"))
 	}
