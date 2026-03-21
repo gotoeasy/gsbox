@@ -62,31 +62,37 @@ Options:
   p2z, ply2spz                       convert ply to spz
   p2g, ply2sog                       convert ply to sog
   p2p, ply2ply                       convert ply to ply
+  ply2glb                            convert ply to glb (KHR_gaussian_splatting)
   s2p, splat2ply                     convert splat to ply
   s2x, splat2spx                     convert splat to spx
   s2z, splat2spz                     convert splat to spz
   s2g, splat2sog                     convert splat to sog
   s2s, splat2splat                   convert splat to splat
+  splat2glb                          convert splat to glb (KHR_gaussian_splatting)
   x2p, spx2ply                       convert spx to ply
   x2s, spx2splat                     convert spx to splat
   x2z, spx2spz                       convert spx to spz
   x2g, spx2sog                       convert spx to sog
   x2x, spx2spx                       convert spx to spx
+  spx2glb                            convert spx to glb (KHR_gaussian_splatting)
   z2p, spz2ply                       convert spz to ply
   z2s, spz2splat                     convert spz to splat
   z2x, spz2spx                       convert spz to spx
   z2g, spz2sog                       convert spz to sog
   z2z, spz2spz                       convert spz to spz
+  spz2glb                            convert spz to glb (KHR_gaussian_splatting)
   k2p, ksplat2ply                    convert ksplat to ply
   k2s, ksplat2splat                  convert ksplat to splat
   k2x, ksplat2spx                    convert ksplat to spx
   k2z, ksplat2spx                    convert ksplat to spz
   k2g, ksplat2sog                    convert ksplat to sog
+  ksplat2glb                         convert ksplat to glb (KHR_gaussian_splatting)
   g2p, sog2ply                       convert sog to ply
   g2s, sog2splat                     convert sog to splat
   g2x, sog2spx                       convert sog to spx
   g2z, sog2spz                       convert sog to spz
   g2g, sog2sog                       convert sog to sog
+  sog2glb                            convert sog to glb (KHR_gaussian_splatting)
   ps,  printsplat                    print data to text file like splat format layout
   cut                                cut the input model files into LOD format
   join                               join the input model files into a single output file
@@ -113,6 +119,7 @@ Options:
   -ki, --kmeans-iterations <num>     specify the kmeans iterations (5~50), default is set by quality level
   -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes (10~200), default is set by quality level
   -l,  --lod <num>                   specify the LOD level of the input file
+  -cs, --cut-size <num>              specify the cut size(1000~100000) of each node, default is 30000
   -of, --output-format <string>      specify the output format(sog|meta.json) for LOD, default is sog
   -e,  --environment <file>          specify the environment file for LOD
   -v,  --version                     display version information
@@ -126,6 +133,7 @@ Examples:
   gsbox k2z -i /path/to/input.ksplat -o /path/to/output.spz -ov 3
   gsbox g2x -i /path/to/input.sog -o /path/to/output.spx
   gsbox g2x -i /path/to/meta.json -o /path/to/output.spx
+  gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o output/lod-meta.json
   gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx
   gsbox ps -i /path/to/input.spx -o /path/to/output.txt
   gsbox info -i /path/to/file.spx
@@ -139,6 +147,12 @@ gsbox p2z -i /path/to/input.ply -o /path/to/output.spz -ov 3
 
 # Convert the ply to sog.
 gsbox p2g -i /path/to/input.ply -o /path/to/output.sog
+
+# Convert the ply to glb with KHR_gaussian_splatting extension.
+gsbox ply2glb -i /path/to/input.ply -o /path/to/output.glb
+
+# Convert the ply to glb with KHR_gaussian_splatting_compression_spz_2 extension.
+gsbox ply2glb -i /path/to/input.ply -o /path/to/output.glb -of spz
 
 # Generating LOD format.
 gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o /path/to/lod-meta.json
