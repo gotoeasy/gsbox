@@ -104,6 +104,12 @@ func writeGlb_KHR_gaussian_splatting(glbFile string, rows []*SplatData) int64 {
 	}
 
 	if outputShDegree > 0 {
+		for _, d := range rows {
+			if len(d.SH45) == 0 {
+				d.SH45 = InitZeroSH45()
+			}
+		}
+
 		for i := range 3 {
 			for _, d := range rows {
 				writer.Write(cmn.Float32ToBytes(cmn.DecodeSplatSH(d.SH45[i*3+0])))
