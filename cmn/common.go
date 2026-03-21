@@ -971,3 +971,18 @@ func CheckBlockDataLength(byteLength int) {
 		ExitOnError(errors.New("block size too big"))
 	}
 }
+
+func JsonStringify(strJson string, beauty ...bool) string {
+	var data any
+	ExitOnError(json.Unmarshal([]byte(strJson), &data))
+
+	if len(beauty) > 0 && beauty[0] {
+		bts, err := json.MarshalIndent(data, "", "  ")
+		ExitOnError(err)
+		return BytesToString(bts)
+	}
+
+	bts, err := json.Marshal(data)
+	ExitOnError(err)
+	return BytesToString(bts)
+}
