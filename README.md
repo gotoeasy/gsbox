@@ -33,8 +33,9 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 | `.spx`            | &#9745;               | &#9745;              | [Link](https://github.com/reall3d-com/Reall3dViewer/blob/main/SPX_EN.md)              |
 | `.spz`            | &#9745;               | &#9745;              | [Link](https://github.com/nianticlabs/spz)                                            |
 | `.ksplat`         | &#9745;               |                      | [Link](https://github.com/mkkellogg/GaussianSplats3D)                                 |
-| `.sog`            | &#9745;               | &#9745; (v4.2.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)  |
-| `lod-meta.json`   | &#9745; (v4.6.0+ 🌟)  | &#9745; (v4.6.0+ 🌟) | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/unified-rendering/lod-streaming/)  |
+| `.sog`            | &#9745;               | &#9745; (v4.2.0+)    | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)  |
+| `lod-meta.json`   | &#9745; (v4.6.0+)     | &#9745; (v4.6.0+)    | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/unified-rendering/lod-streaming/)  |
+| `.glb`            | &#9745; (v4.7.0+ 🌟)  | &#9745; (v4.7.0+ 🌟) | [Link](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_gaussian_splatting)  [Link](https://github.com/KhronosGroup/glTF/pull/2531)  |
 
 
 <br>
