@@ -62,37 +62,43 @@ Options:
   p2z, ply2spz                       convert ply to spz
   p2g, ply2sog                       convert ply to sog
   p2p, ply2ply                       convert ply to ply
-  ply2glb                            convert ply to glb (KHR_gaussian_splatting)
+  ply2glb                            convert ply to glb (3DGS)
   s2p, splat2ply                     convert splat to ply
   s2x, splat2spx                     convert splat to spx
   s2z, splat2spz                     convert splat to spz
   s2g, splat2sog                     convert splat to sog
   s2s, splat2splat                   convert splat to splat
-  splat2glb                          convert splat to glb (KHR_gaussian_splatting)
+  splat2glb                          convert splat to glb (3DGS)
   x2p, spx2ply                       convert spx to ply
   x2s, spx2splat                     convert spx to splat
   x2z, spx2spz                       convert spx to spz
   x2g, spx2sog                       convert spx to sog
   x2x, spx2spx                       convert spx to spx
-  spx2glb                            convert spx to glb (KHR_gaussian_splatting)
+  spx2glb                            convert spx to glb (3DGS)
   z2p, spz2ply                       convert spz to ply
   z2s, spz2splat                     convert spz to splat
   z2x, spz2spx                       convert spz to spx
   z2g, spz2sog                       convert spz to sog
   z2z, spz2spz                       convert spz to spz
-  spz2glb                            convert spz to glb (KHR_gaussian_splatting)
+  spz2glb                            convert spz to glb (3DGS)
   k2p, ksplat2ply                    convert ksplat to ply
   k2s, ksplat2splat                  convert ksplat to splat
   k2x, ksplat2spx                    convert ksplat to spx
   k2z, ksplat2spx                    convert ksplat to spz
   k2g, ksplat2sog                    convert ksplat to sog
-  ksplat2glb                         convert ksplat to glb (KHR_gaussian_splatting)
+  ksplat2glb                         convert ksplat to glb (3DGS)
   g2p, sog2ply                       convert sog to ply
   g2s, sog2splat                     convert sog to splat
   g2x, sog2spx                       convert sog to spx
   g2z, sog2spz                       convert sog to spz
   g2g, sog2sog                       convert sog to sog
-  sog2glb                            convert sog to glb (KHR_gaussian_splatting)
+  sog2glb                            convert sog to glb (3DGS)
+  glb2ply                            convert glb (3DGS) to ply
+  glb2splat                          convert glb (3DGS) to splat
+  glb2spx                            convert glb (3DGS) to spx
+  glb2spz                            convert glb (3DGS) to spz
+  glb2sog                            convert glb (3DGS) to sog
+  glb2glb                            convert glb (3DGS) to glb (3DGS)
   ps,  printsplat                    print data to text file like splat format layout
   cut                                cut the input model files into LOD format
   join                               join the input model files into a single output file
