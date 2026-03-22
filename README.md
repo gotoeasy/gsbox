@@ -16,7 +16,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 <p>
 
 ## Features
-- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, `.spz`, `.sog`, and `.glb` (Only GLB files with KHR_gaussian_splatting extension are supported)
+- [x] Conversion between file formats, supporting `.ply`, `.splat`, `.spx`, `.spz`, `.sog`, and `.glb` (only glb files with `KHR_gaussian_splatting` extension are supported)
 - [x] Viewing file information for `.ply`, `.splat`, `.spx`, `.spz`, `.sog`, `.ksplat`, and `.glb` files
 - [x] Supports data transformation (Rotation, Scale, Translation)
 - [x] Supports merging multiple model files into one
