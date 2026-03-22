@@ -35,7 +35,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 | `.ksplat`         | &#9745;               |                      | [Link](https://github.com/mkkellogg/GaussianSplats3D)                                 |
 | `.sog`            | &#9745;               | &#9745;              | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/formats/sog/)  |
 | `lod-meta.json`   | &#9745;               | &#9745;              | [Link](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/unified-rendering/lod-streaming/)  |
-| `.glb`            |                       | &#9745; v4.7.0+ 🌟   | [Link1](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_gaussian_splatting)  [Link2](https://github.com/KhronosGroup/glTF/pull/2531)  |
+| `.glb`            | &#9745; v4.7.1+ 🌟    | &#9745; v4.7.0+ 🌟   | [Link1](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_gaussian_splatting)  [Link2](https://github.com/KhronosGroup/glTF/pull/2531)  |
 
 
 <br>
