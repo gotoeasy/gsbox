@@ -50,7 +50,8 @@ func writeGlb_KHR_gaussian_splatting(glbFile string, rows []*SplatData) int64 {
 		binLength += len(rows) * (12 * 7)
 	}
 
-	jsonLength4 := (len(strJson) + 3) &^ 3               // 4字节对齐
+	jsonLength := len(strJson)
+	jsonLength4 := (jsonLength + 3) &^ 3                 // 4字节对齐
 	binLength4 := (binLength + 3) &^ 3                   // 4字节对齐
 	totalLength := 12 + 8 + jsonLength4 + 8 + binLength4 // 文件总长
 
@@ -60,15 +61,15 @@ func writeGlb_KHR_gaussian_splatting(glbFile string, rows []*SplatData) int64 {
 	writer.Write(cmn.Uint32ToBytes(uint32(totalLength))) // Length
 
 	// JSON Chunk
-	writer.Write(cmn.Uint32ToBytes(uint32(jsonLength4))) // Length（对齐长度）
+	writer.Write(cmn.Uint32ToBytes(uint32(jsonLength4))) // Length（对齐长度，对于json填充的空格不影响解析）
 	writer.WriteString("JSON")                           // Type: 0x4E4F534A ("JSON")
 	writer.Write(cmn.StringToBytes(strJson))             // JSON Data
-	for range jsonLength4 - len(strJson) {
+	for range jsonLength4 - jsonLength {
 		writer.WriteByte(' ') // 填充
 	}
 
 	// BIN Chunk
-	writer.Write(cmn.Uint32ToBytes(uint32(binLength))) // Length（对齐长度）
+	writer.Write(cmn.Uint32ToBytes(uint32(binLength))) // Length（非对齐长度）
 	writer.Write([]byte{'B', 'I', 'N', 0})             // Type: 0x004E4942 ("BIN")
 
 	// BIN Data
@@ -156,9 +157,11 @@ func writeGlb_genGlbJson_KHR_gaussian_splatting_compression_spz_2(glbFile string
 	bts := genSpzVer3Bytes(rows)
 	strJson := genJson_KHR_gaussian_splatting_compression_spz_2(len(bts))
 
-	jsonLength := (len(strJson) + 3) &^ 3              // 4字节对齐
-	binLength := (len(bts) + 3) &^ 3                   // 4字节对齐
-	totalLength := 12 + 8 + jsonLength + 8 + binLength // 文件总长
+	jsonLength := len(strJson)
+	binLength := len(bts)
+	jsonLength4 := (len(strJson) + 3) &^ 3               // 4字节对齐
+	binLength4 := (binLength + 3) &^ 3                   // 4字节对齐
+	totalLength := 12 + 8 + jsonLength4 + 8 + binLength4 // 文件总长
 
 	// Header
 	writer.WriteString("glTF")                           // Magic
@@ -166,18 +169,18 @@ func writeGlb_genGlbJson_KHR_gaussian_splatting_compression_spz_2(glbFile string
 	writer.Write(cmn.Uint32ToBytes(uint32(totalLength))) // Length
 
 	// JSON Chunk
-	writer.Write(cmn.Uint32ToBytes(uint32(jsonLength))) // Length（对齐长度）
-	writer.WriteString("JSON")                          // Type: 0x4E4F534A ("JSON")
-	writer.Write(cmn.StringToBytes(strJson))            // JSON Data
-	for i := len(strJson); i < jsonLength; i++ {
+	writer.Write(cmn.Uint32ToBytes(uint32(jsonLength4))) // Length（对齐长度）
+	writer.WriteString("JSON")                           // Type: 0x4E4F534A ("JSON")
+	writer.Write(cmn.StringToBytes(strJson))             // JSON Data
+	for range jsonLength4 - jsonLength {
 		writer.WriteByte(' ') // 填充
 	}
 
 	// BIN Chunk
-	writer.Write(cmn.Uint32ToBytes(uint32(binLength))) // Length（对齐长度）
+	writer.Write(cmn.Uint32ToBytes(uint32(binLength))) // Length（非对齐长度）
 	writer.Write([]byte{'B', 'I', 'N', 0})             // Type: 0x004E4942 ("BIN")
 	writer.Write(bts)                                  // BIN Data
-	for i := len(bts); i < binLength; i++ {
+	for range binLength4 - binLength {
 		writer.WriteByte(0) // 填充
 	}
 
