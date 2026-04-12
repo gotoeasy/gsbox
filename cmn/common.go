@@ -901,6 +901,12 @@ func NormalizeRotationsFloat64(rw uint8, rx uint8, ry uint8, rz uint8) []float64
 	return []float64{r0 / qlen, r1 / qlen, r2 / qlen, r3 / qlen}
 }
 
+func NormalizeRotationsFloat32(r0 float64, r1 float64, r2 float64, r3 float64) (rw uint8, rx uint8, ry uint8, rz uint8) {
+	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
+
+}
+
 func SogEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (r byte, g byte, b byte, a byte) {
 	quats := NormalizeRotationsFloat64(rw, rx, ry, rz)
 

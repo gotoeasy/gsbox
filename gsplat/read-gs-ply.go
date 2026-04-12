@@ -88,10 +88,11 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 				data.ColorG = cmn.EncodeSplatColor(readValue(header, "f_dc_1", rowBytes))
 				data.ColorB = cmn.EncodeSplatColor(readValue(header, "f_dc_2", rowBytes))
 				data.ColorA = cmn.EncodeSplatOpacity(readValue(header, "opacity", rowBytes))
-				data.RotationW = cmn.EncodeSplatRotation(readValue(header, "rot_0", rowBytes))
-				data.RotationX = cmn.EncodeSplatRotation(readValue(header, "rot_1", rowBytes))
-				data.RotationY = cmn.EncodeSplatRotation(readValue(header, "rot_2", rowBytes))
-				data.RotationZ = cmn.EncodeSplatRotation(readValue(header, "rot_3", rowBytes))
+				r0 := readValue(header, "rot_0", rowBytes)
+				r1 := readValue(header, "rot_1", rowBytes)
+				r2 := readValue(header, "rot_2", rowBytes)
+				r3 := readValue(header, "rot_3", rowBytes)
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.NormalizeRotationsFloat32(r0, r1, r2, r3)
 
 				datas[i+j] = data
 
