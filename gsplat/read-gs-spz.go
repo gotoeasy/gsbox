@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func ReadSpz(spzFile string) (*SpzHeader, []*SplatData) {
+func ReadSpz(spzFile string, readHeaderOnly ...bool) (*SpzHeader, []*SplatData) {
 	isNetFile := cmn.IsNetFile(spzFile)
 	if isNetFile {
 		tmpdir, err := cmn.CreateTempDir()
@@ -40,6 +40,12 @@ func ReadSpz(spzFile string) (*SpzHeader, []*SplatData) {
 	cmn.ExitOnConditionError(len(ungzipDatas) < HeaderSizeSpz, errors.New("[SPZ ERROR] Invalid spz header"))
 
 	header := ParseSpzHeader(ungzipDatas[0:HeaderSizeSpz])
+	if len(readHeaderOnly) > 0 && readHeaderOnly[0] {
+		return header, nil
+	}
+	if header.Version < 2 || header.Version > 3 {
+		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: version not supported: " + cmn.Uint32ToString(header.Version)))
+	}
 	datas := readSpzDatas(ungzipDatas[HeaderSizeSpz:], header)
 	OnProgress(PhaseRead, 100, 100)
 	return header, datas

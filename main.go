@@ -261,7 +261,7 @@ func info(args *cmn.OsArgs) {
 		count = int(header.SplatCount)
 		shDegree = header.ShDegree
 	} else if isSpz {
-		header, _ := gsplat.ReadSpz(input)
+		header, _ := gsplat.ReadSpz(input, true)
 		fmt.Println(header.ToString())
 		count = int(header.NumPoints)
 		shDegree = header.ShDegree
