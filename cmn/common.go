@@ -668,13 +668,13 @@ func SpzDecodeRotations(rx uint8, ry uint8, rz uint8) (uint8, uint8, uint8, uint
 	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
 }
 
-func SpzEncodeRotationsV3(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
+func SpzEncodeRotationsV3V4(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
 	r0 := float64(rw)/128.0 - 1.0
 	r1 := float64(rx)/128.0 - 1.0
 	r2 := float64(ry)/128.0 - 1.0
 	r3 := float64(rz)/128.0 - 1.0
 	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
-	rotation := []float64{r0 / qlen, r1 / qlen, r2 / qlen, r3 / qlen}
+	rotation := []float64{r1 / qlen, r2 / qlen, r3 / qlen, r0 / qlen}
 
 	index := 0
 	for i := 1; i < 4; i++ {
@@ -686,24 +686,29 @@ func SpzEncodeRotationsV3(rw uint8, rx uint8, ry uint8, rz uint8) []byte {
 		rotation[0], rotation[1], rotation[2], rotation[3] = -rotation[0], -rotation[1], -rotation[2], -rotation[3]
 	}
 
-	remaining := uint32(index)
-	for i := 0; i < 4; i++ {
-		if i != index {
-			signBit := uint32(0)
-			if rotation[i] < 0 {
-				signBit = 1
-			}
-
-			component := math.Abs(rotation[i]) / SQRT1_2
-			magnitude := uint32(int64(float64(CMask)*component + 0.5))
-			remaining = (remaining << 10) | (signBit << 9) | magnitude
+	var encoded []uint32
+	for k := 3; k >= 0; k-- {
+		if k == index {
+			continue
 		}
+		sign := uint32(0)
+		if rotation[k] < 0 {
+			sign = 1
+		}
+		val := math.Abs(rotation[k]) / SQRT1_2
+		mag := uint32(float64(CMask)*val + 0.5)
+		encoded = append(encoded, (sign<<9)|mag)
 	}
 
-	return Uint32ToBytes(remaining)
+	packed := uint32(index) << 30
+	packed |= encoded[0]
+	packed |= encoded[1] << 10
+	packed |= encoded[2] << 20
+
+	return Uint32ToBytes(packed)
 }
 
-func SpzDecodeRotationsV3(bs []byte) (uint8, uint8, uint8, uint8) {
+func SpzDecodeRotationsV3V4(bs []byte) (uint8, uint8, uint8, uint8) {
 	comp := BytesToUint32(bs)
 	index := int(comp >> 30)
 	remaining := comp
@@ -727,7 +732,7 @@ func SpzDecodeRotationsV3(bs []byte) (uint8, uint8, uint8, uint8) {
 
 	rotation[index] = math.Sqrt(math.Max(1.0-sumSquares, 0))
 
-	r0, r1, r2, r3 := rotation[0], rotation[1], rotation[2], rotation[3]
+	r0, r1, r2, r3 := rotation[3], rotation[0], rotation[1], rotation[2]
 	return ClipUint8(r0*128.0 + 128.0), ClipUint8(r1*128.0 + 128.0), ClipUint8(r2*128.0 + 128.0), ClipUint8(r3*128.0 + 128.0)
 }
 

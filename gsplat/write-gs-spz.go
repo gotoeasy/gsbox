@@ -15,7 +15,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 	outputShDegree := GetArgShDegree()
 	writer := bufio.NewWriter(file)
 	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
-	if ver < 2 || ver > 3 {
+	if ver < 2 || ver > 4 {
 		log.Println("[Warn] Ignore invalid output version:", ver)
 		ver = 2
 	}
@@ -64,7 +64,7 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 	OnProgress(PhaseWrite, 60, 100)
 	for i := range rows {
 		if h.Version >= 3 {
-			bts = append(bts, cmn.SpzEncodeRotationsV3(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
+			bts = append(bts, cmn.SpzEncodeRotationsV3V4(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
 		} else {
 			bts = append(bts, cmn.SpzEncodeRotations(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
 		}

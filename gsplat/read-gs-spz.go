@@ -43,7 +43,7 @@ func ReadSpz(spzFile string, readHeaderOnly ...bool) (*SpzHeader, []*SplatData) 
 	if len(readHeaderOnly) > 0 && readHeaderOnly[0] {
 		return header, nil
 	}
-	if header.Version < 2 || header.Version > 3 {
+	if header.Version < 2 || header.Version > 4 {
 		cmn.ExitOnError(errors.New("[SPZ ERROR] deserializePackedGaussians: version not supported: " + cmn.Uint32ToString(header.Version)))
 	}
 	datas := readSpzDatas(ungzipDatas[HeaderSizeSpz:], header)
@@ -105,7 +105,7 @@ func readSpzDatas(datas []byte, h *SpzHeader) []*SplatData {
 		if h.Version == 2 {
 			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotations(rotations[i*3], rotations[i*3+1], rotations[i*3+2])
 		} else {
-			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotationsV3(rotations[i*4 : i*4+4])
+			data.RotationW, data.RotationX, data.RotationY, data.RotationZ = cmn.SpzDecodeRotationsV3V4(rotations[i*4 : i*4+4])
 		}
 		switch h.ShDegree {
 		case 1:

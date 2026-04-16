@@ -234,7 +234,7 @@ func genSpzVer3Bytes(rows []*SplatData) []byte {
 	}
 	for i := range rows {
 		if h.Version >= 3 {
-			bts = append(bts, cmn.SpzEncodeRotationsV3(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
+			bts = append(bts, cmn.SpzEncodeRotationsV3V4(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
 		} else {
 			bts = append(bts, cmn.SpzEncodeRotations(rows[i].RotationW, rows[i].RotationX, rows[i].RotationY, rows[i].RotationZ)...)
 		}
