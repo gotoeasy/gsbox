@@ -21,7 +21,7 @@ A cross-platform command-line tool for 3D Gaussian Splatting, focusing on format
 - [x] Supports data transformation (Rotation, Scale, Translation)
 - [x] Supports merging multiple model files into one
 - [x] Supports generating LOD (lod-meta.json) format
-- [x] Supports automatically generating hierarchical data and creating LOD (lod-meta.json) format. v4.8.0+ 🌟
+- [x] Supports automatically generating hierarchical data and creating LOD (lod-meta.json) format.  (v4.8.0+ 🌟)
 
 <br>
 
