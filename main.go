@@ -100,6 +100,8 @@ func main() {
 		glb2sog()
 	} else if args.HasCmd("glb2glb") {
 		glb2glb()
+	} else if args.HasCmd("simplify") {
+		simplify()
 	} else if args.HasCmd("ps", "printSplat") {
 		printSplat()
 	} else if args.HasCmd("join") {
@@ -1078,5 +1080,79 @@ func obj2obj() {
 	output := gsplat.CreateOutputDir()
 	gsplat.Obj2Obj(input, output)
 	log.Println("[Info]", input, " --> ", output)
+	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+
+func simplify() {
+	log.Println("[Info] simplify 3DGS model.")
+	startTime := time.Now()
+	inputs := gsplat.GetAndCheckInputFiles()
+	output := gsplat.CreateOutputDir()
+	isOutPly := cmn.Endwiths(output, ".ply", true)
+	isOutSplat := cmn.Endwiths(output, ".splat", true)
+	isOutSpx := cmn.Endwiths(output, ".spx", true)
+	isOutSpz := cmn.Endwiths(output, ".spz", true)
+	isOutSog := cmn.Endwiths(output, ".sog", true) || cmn.FileName(output) == "meta.json"
+
+	ok := isOutPly || isOutSplat || isOutSpx || isOutSpz || isOutSog
+	cmn.ExitOnConditionError(!ok, errors.New("output file must be (ply | splat | spx | spz | sog) format"))
+
+	datas := make([]*gsplat.SplatData, 0)
+	var maxFromShDegree uint8
+	for i, file := range inputs {
+		gsplat.OnProgress(gsplat.PhaseJoin, i, len(inputs))
+		if cmn.Endwiths(file, ".ply", true) {
+			header, ds := gsplat.ReadPly(file)
+			maxFromShDegree = max(uint8(header.MaxShDegree()), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".splat", true) {
+			ds := gsplat.ReadSplat(file)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spx", true) {
+			header, ds := gsplat.ReadSpx(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spz", true) {
+			header, ds := gsplat.ReadSpz(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".ksplat", true) {
+			_, header, ds := gsplat.ReadKsplat(file)
+			maxFromShDegree = max(uint8(header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".glb", true) {
+			dataShDegree, ds := gsplat.ReadGlb(file)
+			maxFromShDegree = max(dataShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" || (cmn.Startwiths(file, "http") && cmn.Endwiths(file, "/meta.json")) {
+			ds, h := gsplat.ReadSog(file)
+			maxFromShDegree = max(h.ShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
+		}
+	}
+	gsplat.OnProgress(gsplat.PhaseJoin, 100, 100)
+	gsplat.SetShDegreeFrom(0) // 既然简化，总是丢弃SH
+	datas = gsplat.ProcessDatas(datas)
+	orgLen := len(datas)
+	datas = gsplat.Simplify(datas)
+	rsLen := len(datas)
+	var fileSize int64
+	if isOutPly {
+		gsplat.WritePly(output, datas)
+	} else if isOutSplat {
+		gsplat.WriteSplat(output, datas)
+	} else if isOutSpx {
+		gsplat.WriteSpx(output, datas)
+	} else if isOutSpz {
+		gsplat.WriteSpz(output, datas)
+	} else if isOutSog {
+		fileSize = gsplat.WriteSog(output, datas)
+	}
+
+	reduction := fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+
+	log.Println("[Info]", inputs, " --> ", output)
+	log.Println("[Info]", "simplification done,", orgLen, "->", rsLen, reduction)
+	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }

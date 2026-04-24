@@ -771,6 +771,10 @@ func DecodeSplatColor(val uint8) float32 {
 	return ClipFloat32((float64(val)/255.0 - 0.5) / SH_C0)
 }
 
+func EncodeSplatOpacityF32(val uint8) float32 {
+	v := DecodeSplatOpacity(val)
+	return 1.0 / (1.0 + float32(math.Exp(-float64(v))))
+}
 func EncodeSplatOpacity(val float64) uint8 {
 	return ClipUint8((1.0 / (1.0 + math.Exp(-val))) * 255.0)
 }
@@ -909,7 +913,17 @@ func NormalizeRotationsFloat64(rw uint8, rx uint8, ry uint8, rz uint8) []float64
 func NormalizeRotationsFloat32(r0 float64, r1 float64, r2 float64, r3 float64) (rw uint8, rx uint8, ry uint8, rz uint8) {
 	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
 	return ClipUint8((r0/qlen)*128.0 + 128.0), ClipUint8((r1/qlen)*128.0 + 128.0), ClipUint8((r2/qlen)*128.0 + 128.0), ClipUint8((r3/qlen)*128.0 + 128.0)
-
+}
+func NormalizeRotationsF32Uint8(r0 float32, r1 float32, r2 float32, r3 float32) (rw uint8, rx uint8, ry uint8, rz uint8) {
+	return NormalizeRotationsFloat32(float64(r0), float64(r1), float64(r2), float64(r3))
+}
+func NormalizeRotationsUint8F32(rw uint8, rx uint8, ry uint8, rz uint8) (float32, float32, float32, float32) {
+	r0 := float64(rw)/128.0 - 1.0
+	r1 := float64(rx)/128.0 - 1.0
+	r2 := float64(ry)/128.0 - 1.0
+	r3 := float64(rz)/128.0 - 1.0
+	qlen := math.Sqrt(r0*r0 + r1*r1 + r2*r2 + r3*r3)
+	return ClipFloat32(r0 / qlen), ClipFloat32(r1 / qlen), ClipFloat32(r2 / qlen), ClipFloat32(r3 / qlen)
 }
 
 func SogEncodeRotations(rw uint8, rx uint8, ry uint8, rz uint8) (r byte, g byte, b byte, a byte) {
