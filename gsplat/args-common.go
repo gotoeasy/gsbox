@@ -49,7 +49,7 @@ func InitArgs() *cmn.OsArgs {
 	oArg.hasKI = Args.HasArgIgnorecase("-ki", "--kmeans-iterations")
 	oArg.hasKN = Args.HasArgIgnorecase("-kn", "--kmeans-nearest-nodes")
 	oArg.isJoin = Args.HasCmd("join")
-	oArg.isCut = Args.HasCmd("cut")
+	oArg.isCut = Args.HasCmd("cut") || Args.HasCmd("autocut")
 	oArg.isOutputLodMeta = cmn.Endwiths(Args.GetArgIgnorecase("-o", "--output"), "lod-meta.json")
 	oArg.CutSize = max(1000, min(cmn.StringToInt(Args.GetArgIgnorecase("-cs", "--cut-size"), 30000), 100000)) // 有效范围 1千~10万
 

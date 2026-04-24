@@ -7,6 +7,7 @@ import (
 	"gsbox/gsplat"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -108,6 +109,8 @@ func main() {
 		join()
 	} else if args.HasCmd("cut") {
 		cut()
+	} else if args.HasCmd("autocut") {
+		autocut()
 	} else if args.HasCmd("info") {
 		info(args)
 	} else if args.HasCmd("obj2obj", "o2o") {
@@ -178,6 +181,7 @@ func usage() {
 	fmt.Println("  glb2glb                            convert glb (3DGS) to glb (3DGS)")
 	fmt.Println("  ps,  printsplat                    print data to text file like splat format layout")
 	fmt.Println("  cut                                cut the input model files into LOD format")
+	fmt.Println("  autocut                            auto cut the input model files into LOD format")
 	fmt.Println("  join                               join the input model files into a single output file")
 	fmt.Println("  info <file>                        display the model file information")
 	fmt.Println("  -i,  --input <file>                specify the input file")
@@ -217,6 +221,7 @@ func usage() {
 	fmt.Println("  gsbox g2x -i /path/to/input.sog -o /path/to/output.spx")
 	fmt.Println("  gsbox g2x -i /path/to/meta.json -o /path/to/output.spx")
 	fmt.Println("  gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o output/lod-meta.json")
+	fmt.Println("  gsbox autocut -i input.ply -o output/lod-meta.json")
 	fmt.Println("  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx")
 	fmt.Println("  gsbox ps -i /path/to/input.spx -o /path/to/output.txt")
 	fmt.Println("  gsbox info -i /path/to/file.spx")
@@ -1067,6 +1072,125 @@ func cut() {
 
 	splatTiles, lodMeta := gsplat.BuildLodMetaSplatTiles(datas)
 	splatTiles.EnvironmentDatas = environmentDatas
+	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
+
+	log.Println("[Info]", inputs, " --> ", output)
+	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
+}
+
+func autocut() {
+	log.Println("[Info] auto cut the input models into tiles")
+	startTime := time.Now()
+	inputs := gsplat.GetAndCheckInputFiles()
+	output := gsplat.CreateOutputDir()
+
+	isOutLodJson := cmn.Endwiths(output, "lod-meta.json", true)
+	ok := isOutLodJson
+	cmn.ExitOnConditionError(!ok, errors.New("output file must be lod-meta.json"))
+
+	datas := make([]*gsplat.SplatData, 0)
+	var maxFromShDegree uint8
+	for i, file := range inputs {
+		gsplat.OnProgress(gsplat.PhaseJoin, i, len(inputs))
+		if cmn.Endwiths(file, ".ply", true) {
+			header, ds := gsplat.ReadPly(file)
+			maxFromShDegree = max(uint8(header.MaxShDegree()), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".splat", true) {
+			ds := gsplat.ReadSplat(file)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spx", true) {
+			header, ds := gsplat.ReadSpx(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spz", true) {
+			header, ds := gsplat.ReadSpz(file)
+			maxFromShDegree = max((header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".ksplat", true) {
+			_, header, ds := gsplat.ReadKsplat(file)
+			maxFromShDegree = max(uint8(header.ShDegree), maxFromShDegree)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".sog", true) || cmn.FileName(file) == "meta.json" {
+			ds, h := gsplat.ReadSog(file)
+			maxFromShDegree = max(h.ShDegree, maxFromShDegree)
+			datas = append(datas, ds...)
+		}
+		gsplat.OnProgress(gsplat.PhaseRead, i, len(inputs))
+	}
+	gsplat.OnProgress(gsplat.PhaseJoin, 100, 100)
+	gsplat.SetShDegreeFrom(maxFromShDegree)
+	datas = gsplat.ProcessDatas(datas)
+
+	tmpdir, err := cmn.CreateTempDir()
+	cmn.ExitOnError(err)
+	defer func() {
+		cmn.RemoveAllFile(tmpdir)
+	}()
+
+	fileLod0 := inputs[0]
+	fileLod1 := filepath.Join(tmpdir, "lod_1.splat")
+	fileLod2 := filepath.Join(tmpdir, "lod_2.splat")
+	fileLod3 := filepath.Join(tmpdir, "lod_3.splat")
+	fileLod4 := filepath.Join(tmpdir, "lod_4.splat")
+	fileLod5 := filepath.Join(tmpdir, "lod_5.splat")
+
+	orgLen := len(datas)
+	if len(inputs) > 1 {
+		fileLod0 = filepath.Join(tmpdir, "lod_0.spz")
+		gsplat.WriteSpz(fileLod0, datas)
+		log.Println("[Info]", "LOD 0 generated:", orgLen, "points")
+	} else {
+		log.Println("[Info]", "LOD 0:", orgLen, "points")
+	}
+
+	datas = gsplat.Simplify(datas)
+	rsLen := len(datas)
+	gsplat.WriteSplat(fileLod1, datas)
+	reduction := fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+	log.Println("[Info]", "LOD 1 generated:", rsLen, "points", reduction)
+
+	datas = gsplat.Simplify(datas)
+	rsLen = len(datas)
+	gsplat.WriteSplat(fileLod2, datas)
+	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+	log.Println("[Info]", "LOD 2 generated:", rsLen, "points", reduction)
+
+	datas = gsplat.Simplify(datas)
+	rsLen = len(datas)
+	gsplat.WriteSplat(fileLod3, datas)
+	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+	log.Println("[Info]", "LOD 3 generated:", rsLen, "points", reduction)
+
+	datas = gsplat.Simplify(datas)
+	rsLen = len(datas)
+	gsplat.WriteSplat(fileLod4, datas)
+	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+	log.Println("[Info]", "LOD 4 generated:", rsLen, "points", reduction)
+
+	datas = gsplat.Simplify(datas)
+	rsLen = len(datas)
+	gsplat.WriteSplat(fileLod5, datas)
+	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+	log.Println("[Info]", "LOD 5 generated:", rsLen, "points", reduction)
+
+	datas = make([]*gsplat.SplatData, 0)
+	lodFiles := []string{fileLod0, fileLod1, fileLod2, fileLod3, fileLod4, fileLod5}
+	lods := []uint16{0, 1, 2, 3, 4, 5}
+	for i, file := range lodFiles {
+		if cmn.Endwiths(file, ".splat", true) {
+			ds := gsplat.ReadSplat(file)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		} else if cmn.Endwiths(file, ".spz", true) {
+			_, ds := gsplat.ReadSpz(file)
+			ds = gsplat.SetLod(ds, lods, i)
+			datas = append(datas, ds...)
+		}
+		gsplat.OnProgress(gsplat.PhaseRead, i, len(inputs))
+	}
+
+	splatTiles, lodMeta := gsplat.BuildLodMetaSplatTiles(datas)
 	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
 
 	log.Println("[Info]", inputs, " --> ", output)
