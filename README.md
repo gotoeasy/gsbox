@@ -102,6 +102,7 @@ Options:
   glb2glb                            convert glb (3DGS) to glb (3DGS)
   ps,  printsplat                    print data to text file like splat format layout
   cut                                cut the input model files into LOD format
+  autocut                            auto cut the input model files into LOD format
   join                               join the input model files into a single output file
   info <file>                        display the model file information
   -i,  --input <file>                specify the input file
@@ -141,6 +142,7 @@ Examples:
   gsbox g2x -i /path/to/input.sog -o /path/to/output.spx
   gsbox g2x -i /path/to/meta.json -o /path/to/output.spx
   gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o output/lod-meta.json
+  gsbox autocut -i input.ply -o output/lod-meta.json
   gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx
   gsbox ps -i /path/to/input.spx -o /path/to/output.txt
   gsbox info -i /path/to/file.spx
