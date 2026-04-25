@@ -132,43 +132,79 @@ Options:
   -e,  --environment <file>          specify the environment file for LOD
   -v,  --version                     display version information
   -h,  --help                        display help information
-
-Examples:
-  gsbox ply2sog -i /path/to/input.ply -o /path/to/output.sog
-  gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -bs 10240 -ct xz
-  gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1 -to TRS
-  gsbox z2p -i /path/to/input.spz -o /path/to/output.ply -c "your comment"
-  gsbox k2z -i /path/to/input.ksplat -o /path/to/output.spz -ov 3
-  gsbox g2x -i /path/to/input.sog -o /path/to/output.spx
-  gsbox g2x -i /path/to/meta.json -o /path/to/output.spx
-  gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o output/lod-meta.json
-  gsbox autocut -i input.ply -o output/lod-meta.json
-  gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx
-  gsbox ps -i /path/to/input.spx -o /path/to/output.txt
-  gsbox info -i /path/to/file.spx
+```
 
 
+## Examples
+```shell
 # Convert the ply to spx without saving SH coefficients and add custom comments.
-gsbox p2x -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
+gsbox ply2spx -i /path/to/input.ply -o /path/to/output.spx -c "your comment here" -sh 0
+```
 
+```shell
 # Convert the ply to spz version 3.
 gsbox p2z -i /path/to/input.ply -o /path/to/output.spz -ov 3
+```
 
+```shell
+# Convert the ksplat to spz version 4.
+gsbox k2z -i /path/to/input.ksplat -o /path/to/output.spz -ov 4
+```
+
+```shell
+# Convert the splat to spx with options.
+gsbox s2x -i /path/to/input.splat -o /path/to/output.spx -c "your comment" -bs 10240 -ct xz
+```
+
+```shell
+# Convert the spx to spz with options.
+gsbox x2z -i /path/to/input.spx -o /path/to/output.spz -sh 0 -rz 90 -s 0.9 -tx 0.1 -to TRS
+```
+
+```shell
 # Convert the ply to sog.
 gsbox p2g -i /path/to/input.ply -o /path/to/output.sog
+```
 
+```shell
+# Convert the sog to spx.
+gsbox g2x -i /path/to/input.sog -o /path/to/output.spx
+gsbox g2x -i /path/to/meta.json -o /path/to/output.spx
+```
+
+```shell
 # Convert the ply to glb with KHR_gaussian_splatting extension.
 gsbox ply2glb -i /path/to/input.ply -o /path/to/output.glb
 
 # Convert the ply to glb with KHR_gaussian_splatting_compression_spz_2 extension.
 gsbox ply2glb -i /path/to/input.ply -o /path/to/output.glb -of spz
+```
 
+```shell
+# join the input model files into a single output file
+gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx
+```
+
+```shell
 # Generating LOD format.
 gsbox cut -i lod0.ply -l 0 -i lod1.ply -l 1 -i lod2.ply -l 2 -o /path/to/lod-meta.json
+```
 
+```shell
+# automatically generating hierarchical data and creating LOD (lod-meta.json) format.
+gsbox autocut -i input.ply -o /path/to/lod-meta.json
+```
+
+```shell
+# print data to text file like splat format layout
+gsbox ps -i /path/to/input.spx -o /path/to/output.txt
+```
+
+```shell
 # Inspect the header information of the spx file
 gsbox info -i /path/to/file.spx
 ```
+
 
 ## Update History & binary files
 https://github.com/gotoeasy/gsbox/releases
