@@ -32,9 +32,11 @@ type SplatData struct {
 	Lod         uint16
 
 	// 临时字段
-	TempSi float32
-	TempPi float32
-	TempMi uint32
+	Temp1Float32 float32
+	Temp2Float32 float32
+	Temp3Float32 float32
+	Temp4Float32 float32
+	TempMi       uint32
 }
 
 func TransformDatas(datas []*SplatData) []*SplatData {
@@ -211,10 +213,10 @@ func Sort(rows []*SplatData) {
 func SortSplat(rows []*SplatData) {
 	// from https://github.com/antimatter15/splat/blob/main/convert.py
 	for _, row := range rows {
-		row.TempSi = float32(math.Exp(float64(cmn.EncodeSplatScale(row.ScaleX)+cmn.EncodeSplatScale(row.ScaleY)+cmn.EncodeSplatScale(row.ScaleZ))) / (1.0 + math.Exp(float64(row.ColorA))))
+		row.Temp1Float32 = float32(math.Exp(float64(cmn.EncodeSplatScale(row.ScaleX)+cmn.EncodeSplatScale(row.ScaleY)+cmn.EncodeSplatScale(row.ScaleZ))) / (1.0 + math.Exp(float64(row.ColorA))))
 	}
 	sort.Slice(rows, func(i, j int) bool {
-		return rows[i].TempSi < rows[j].TempSi
+		return rows[i].Temp1Float32 < rows[j].Temp1Float32
 	})
 }
 

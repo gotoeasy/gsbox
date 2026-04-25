@@ -1136,13 +1136,9 @@ func autocut() {
 	fileLod5 := filepath.Join(tmpdir, "lod_5.splat")
 
 	orgLen := len(datas)
-	if len(inputs) > 1 {
-		fileLod0 = filepath.Join(tmpdir, "lod_0.spz")
-		gsplat.WriteSpz(fileLod0, datas)
-		log.Println("[Info]", "LOD 0 generated:", orgLen, "points")
-	} else {
-		log.Println("[Info]", "LOD 0:", orgLen, "points")
-	}
+	fileLod0 = filepath.Join(tmpdir, "lod_0.spz")
+	gsplat.WriteSpz(fileLod0, datas)
+	log.Println("[Info]", "LOD 0 generated:", orgLen, "points")
 
 	datas = gsplat.Simplify(datas)
 	rsLen := len(datas)
@@ -1275,8 +1271,8 @@ func simplify() {
 
 	reduction := fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
 
-	log.Println("[Info]", inputs, " --> ", output)
 	log.Println("[Info]", "simplification done,", orgLen, "->", rsLen, reduction)
+	log.Println("[Info]", inputs, " --> ", output)
 	log.Println("[Info]", gsplat.CompressionInfo(output, len(datas), fileSize))
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }

@@ -19,8 +19,10 @@ func WriteSpz(spzFile string, rows []*SplatData) {
 		log.Println("[Warn] Ignore invalid output version:", ver)
 		ver = 2
 	}
-	log.Println("[Info] output spz version:", ver)
-	log.Println("[Info] output shDegree:", outputShDegree)
+	if !oArg.isCut {
+		log.Println("[Info] output spz version:", ver)
+		log.Println("[Info] output shDegree:", outputShDegree)
+	}
 
 	h := &SpzHeader{
 		Magic:          SPZ_MAGIC,
