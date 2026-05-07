@@ -50,11 +50,11 @@ func readGlb_KHR_gaussian_splatting_compression_spz_2(file *os.File, strJson str
 
 	ungzipDatas, err := cmn.DecompressGzip(bs)
 	cmn.ExitOnConditionError(err != nil, errors.New("[SPZ ERROR] UnGzip failed"))
-	cmn.ExitOnConditionError(len(ungzipDatas) < HeaderSizeSpz, errors.New("[SPZ ERROR] Invalid spz header"))
+	cmn.ExitOnConditionError(len(ungzipDatas) < HeaderSizeSpzV3, errors.New("[SPZ ERROR] Invalid spz header"))
 
-	header := ParseSpzHeader(ungzipDatas[0:HeaderSizeSpz])
+	header := ParseSpzHeader(ungzipDatas[0:HeaderSizeSpzV3])
 	shDegree = header.ShDegree
-	datas = readSpzDatas(ungzipDatas[HeaderSizeSpz:], header)
+	datas = readSpzDatasV2V3(ungzipDatas[HeaderSizeSpzV3:], header)
 	return
 }
 

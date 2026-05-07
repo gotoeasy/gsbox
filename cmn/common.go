@@ -517,6 +517,12 @@ func Uint32ToBytes(intNum uint32) []byte {
 	return bytebuf.Bytes()
 }
 
+func Uint64ToBytes(intNum uint64) []byte {
+	b := make([]byte, 8)
+	binary.LittleEndian.PutUint64(b, intNum)
+	return b
+}
+
 // Convert a float16 stored as a uint16 number back to a float32
 func DecodeFloat16(encoded uint16) float32 {
 	signBit := (encoded >> 15) & 1
