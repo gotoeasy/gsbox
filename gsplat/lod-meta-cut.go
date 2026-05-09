@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-const FileSizeThreshold = 400000 // 合并阈值
+const FileSplatCountThreshold = 409600 // 文件高斯点数阈值
 
 type SplatTiles struct {
 	Version          uint                  `json:"version"`
@@ -396,7 +396,7 @@ func buildBTreeFile(root *BTreeNode, lodLevels uint16) []*SplatFile {
 		// 收集待合并节点
 		var mergeNodes []*BTreeNode
 		traveBTree(root, func(node *BTreeNode) bool {
-			if node.lodCounts[i] > 0 && node.lodCounts[i] <= FileSizeThreshold {
+			if node.lodCounts[i] > 0 && node.lodCounts[i] <= FileSplatCountThreshold {
 				mergeNodes = append(mergeNodes, node)
 				return false
 			}
