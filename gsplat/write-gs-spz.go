@@ -6,10 +6,10 @@ import (
 )
 
 func WriteSpz(spzFile string, rows []*SplatData) {
-	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 2)
+	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 4)
 	if ver < 2 || ver > 4 {
-		log.Println("[Warn] Ignore invalid output version:", ver)
-		ver = 2
+		log.Println("[Warn] ignore invalid output version:", ver)
+		ver = 4
 	}
 
 	if ver < 4 {
