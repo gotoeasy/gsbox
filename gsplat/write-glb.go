@@ -9,6 +9,7 @@ import (
 
 const KHR_gaussian_splatting = "KHR_gaussian_splatting"                                     // 可被降级渲染，当前为候选阶段
 const KHR_gaussian_splatting_compression_spz_2 = "KHR_gaussian_splatting_compression_spz_2" // 内嵌spz，当前为提案阶段
+const com_github_gotoeasy_gsbox_webp_rgb_ply = "com_github_gotoeasy_gsbox_webp_rgb_ply"     // 内嵌webp压缩的彩色点云，仅限于自定义使用
 
 func WriteGlb(glbFile string, rows []*SplatData) int64 {
 	fmt := Args.GetArgIgnorecase("-of", "--output-format")
@@ -16,17 +17,27 @@ func WriteGlb(glbFile string, rows []*SplatData) int64 {
 		fmt = KHR_gaussian_splatting
 	} else if cmn.Contains(fmt, "spz") {
 		fmt = KHR_gaussian_splatting_compression_spz_2
+	} else if cmn.Contains(fmt, "ply") {
+		fmt = com_github_gotoeasy_gsbox_webp_rgb_ply
 	} else {
 		fmt = KHR_gaussian_splatting
 	}
 
-	log.Println("[Info] (parameter) of:", fmt, "(glTF extension)")
-
-	if fmt == KHR_gaussian_splatting_compression_spz_2 {
-		return writeGlb_genGlbJson_KHR_gaussian_splatting_compression_spz_2(glbFile, rows)
+	if isRgbPly2Glb {
+		fmt = com_github_gotoeasy_gsbox_webp_rgb_ply // 彩色点云转glb时固定为自定义格式
 	}
 
-	return writeGlb_KHR_gaussian_splatting(glbFile, rows)
+	log.Println("[Info] (parameter) of:", fmt, "(glTF extension)")
+
+	switch fmt {
+	case KHR_gaussian_splatting_compression_spz_2:
+		return writeGlb_genGlbJson_KHR_gaussian_splatting_compression_spz_2(glbFile, rows)
+	case com_github_gotoeasy_gsbox_webp_rgb_ply:
+		return writeGlb_genGlbJson_com_github_gotoeasy_gsbox_webp_rgb_ply(glbFile, rows)
+	default:
+		return writeGlb_KHR_gaussian_splatting(glbFile, rows)
+	}
+
 }
 
 func writeGlb_KHR_gaussian_splatting(glbFile string, rows []*SplatData) int64 {
@@ -156,6 +167,47 @@ func writeGlb_genGlbJson_KHR_gaussian_splatting_compression_spz_2(glbFile string
 	writer := bufio.NewWriter(file)
 	bts := genSpzVer3Bytes(rows)
 	strJson := genJson_KHR_gaussian_splatting_compression_spz_2(len(bts))
+
+	jsonLength := len(strJson)
+	binLength := len(bts)
+	jsonLength4 := (len(strJson) + 3) &^ 3               // 4字节对齐
+	binLength4 := (binLength + 3) &^ 3                   // 4字节对齐
+	totalLength := 12 + 8 + jsonLength4 + 8 + binLength4 // 文件总长
+
+	// Header
+	writer.WriteString("glTF")                           // Magic
+	writer.Write(cmn.Uint32ToBytes(2))                   // Version
+	writer.Write(cmn.Uint32ToBytes(uint32(totalLength))) // Length
+
+	// JSON Chunk
+	writer.Write(cmn.Uint32ToBytes(uint32(jsonLength4))) // Length（对齐长度）
+	writer.WriteString("JSON")                           // Type: 0x4E4F534A ("JSON")
+	writer.Write(cmn.StringToBytes(strJson))             // JSON Data
+	for range jsonLength4 - jsonLength {
+		writer.WriteByte(' ') // 填充
+	}
+
+	// BIN Chunk
+	writer.Write(cmn.Uint32ToBytes(uint32(binLength))) // Length（非对齐长度）
+	writer.Write([]byte{'B', 'I', 'N', 0})             // Type: 0x004E4942 ("BIN")
+	writer.Write(bts)                                  // BIN Data
+	for range binLength4 - binLength {
+		writer.WriteByte(0) // 填充
+	}
+
+	err = writer.Flush()
+	cmn.ExitOnError(err)
+	return int64(totalLength)
+}
+
+func writeGlb_genGlbJson_com_github_gotoeasy_gsbox_webp_rgb_ply(glbFile string, rows []*SplatData) int64 {
+	file, err := os.Create(glbFile)
+	cmn.ExitOnError(err)
+	defer file.Close()
+
+	writer := bufio.NewWriter(file)
+	bts := genRgbPlyWebpBytes(rows)
+	strJson := genJson_com_github_gotoeasy_gsbox_webp_rgb_ply(len(bts))
 
 	jsonLength := len(strJson)
 	binLength := len(bts)
@@ -571,5 +623,104 @@ func genJson_KHR_gaussian_splatting(count int, mm *V3MinMax) string {
 	}
 	tmpl = cmn.ReplaceAll(tmpl, "$byteLengthTotal", cmn.IntToString(offset))
 
+	return cmn.JsonStringify(tmpl)
+}
+
+// 颜色点云webp编码压缩
+func genRgbPlyWebpBytes(rows []*SplatData) []byte {
+
+	SortMorton(rows)
+
+	bts := make([]byte, 0)
+
+	bs1 := make([]byte, 0)
+	bs2 := make([]byte, 0)
+	bs3 := make([]byte, 0)
+	bs4 := make([]byte, 0)
+	for _, d := range rows {
+		b3x := cmn.EncodeSpxPositionUint24(d.PositionX)
+		b3y := cmn.EncodeSpxPositionUint24(d.PositionY)
+		b3z := cmn.EncodeSpxPositionUint24(d.PositionZ)
+		bs1 = append(bs1, b3x[0], b3y[0], b3z[0], 255)
+		bs2 = append(bs2, b3x[1], b3y[1], b3z[1], 255)
+		bs3 = append(bs3, b3x[2], b3y[2], b3z[2], 255)
+		bs4 = append(bs4, d.ColorR, d.ColorG, d.ColorB, 255)
+	}
+
+	bts = append(bts, cmn.Int32ToBytes(int32(len(rows)))...) // 点数
+	bts[3] = 255                                             // 高8位无视，最大 16777215点
+	bts = append(bts, bs1...)
+	bts = append(bts, bs2...)
+	bts = append(bts, bs3...)
+	bts = append(bts, bs4...)
+
+	gzipDatas, err := cmn.CompressWebp(bts)
+	cmn.ExitOnError(err)
+	return gzipDatas
+}
+
+// 压缩的颜色点云
+func genJson_com_github_gotoeasy_gsbox_webp_rgb_ply(binLenght int) string {
+	tmpl := `{
+		"asset": {
+			"generator": "gsbox $version",
+			"version": "2.0"
+		},
+		"bufferViews": [
+			{
+			"buffer": 0,
+			"byteLength": $byteLength
+			}
+		],
+		"buffers": [
+			{
+			"byteLength": $byteLength
+			}
+		],
+		"extensions": {},
+		"extensionsRequired": [
+			"com_github_gotoeasy_gsbox",
+			"com_github_gotoeasy_gsbox_webp_rgb_ply"
+		],
+		"extensionsUsed": [
+			"com_github_gotoeasy_gsbox",
+			"com_github_gotoeasy_gsbox_webp_rgb_ply"
+		],
+		"meshes": [
+			{
+			"primitives": [
+				{
+				"attributes": {},
+				"extensions": {
+					"com_github_gotoeasy_gsbox": {
+					"extensions": {
+						"com_github_gotoeasy_gsbox_webp_rgb_ply": {
+						"bufferView": 0
+						}
+					}
+					}
+				},
+				"mode": 0
+				}
+			]
+			}
+		],
+		"nodes": [
+			{
+			"mesh": 0
+			}
+		],
+		"scene": 0,
+		"scenes": [
+			{
+			"nodes": [
+				0
+			]
+			}
+		]
+	}`
+
+	tmpl = cmn.ReplaceAll(tmpl, "$version", cmn.VER)
+	tmpl = cmn.ReplaceAll(tmpl, "$byteLength", cmn.IntToString(binLenght))
 	return cmn.JsonStringify(tmpl)
 }

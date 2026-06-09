@@ -15,6 +15,8 @@ import (
 
 const SH_C0 float64 = 0.28209479177387814
 
+var isRgbPly2Glb = false
+
 func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 	file, err := os.Open(plyFile)
 	cmn.ExitOnError(err)
@@ -48,12 +50,19 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 	header, err := getPlyHeader(file, 2048)
 	cmn.ExitOnError(err)
 
-	if !header.IsOfficialPly() && !header.IsCompressedPly() {
+	if !header.IsOfficialPly() && !header.IsCompressedPly() && !header.IsRgbPly() {
 		cmn.ExitOnError(errors.New("unsupported ply file: " + plyFile))
+	}
+	if header.IsRgbPly() {
+		if Args.HasCmd("ply2glb") {
+			isRgbPly2Glb = true
+		} else {
+			cmn.ExitOnError(errors.New("unsupported rgb ply file: " + plyFile))
+		}
 	}
 
 	datas := make([]*SplatData, header.VertexCount)
-	if header.ChunkCount == 0 {
+	if header.IsOfficialPly() {
 		// 标准3dgs的ply
 		_, err = file.Seek(int64(header.HeaderLength), 0)     // 定位到数据开始位置
 		cmn.ExitOnError(err)                                  // 可能出错
@@ -125,6 +134,42 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 			OnProgress(PhaseRead, i, header.VertexCount)
 		}
 
+	} else if header.IsRgbPly() {
+		// 彩色点云
+		_, err = file.Seek(int64(header.HeaderLength), 0)     // 定位到数据开始位置
+		cmn.ExitOnError(err)                                  // 可能出错
+		reader := bufio.NewReaderSize(file, 2*1024*1024)      // 2MB 缓冲区
+		const batchSize = 4096                                // 每次读取的最大点数
+		dataBytes := make([]byte, batchSize*header.RowLength) // 预分配缓冲区
+
+		for i := 0; i < header.VertexCount; i += batchSize {
+			// 计算本次读取的点数
+			batchCount := batchSize
+			if i+batchCount > header.VertexCount {
+				batchCount = header.VertexCount - i
+			}
+
+			// 一次性读取一批数据到预分配缓冲区
+			readSize := batchCount * header.RowLength
+			_, err := io.ReadFull(reader, dataBytes[:readSize])
+			cmn.ExitOnError(err)
+
+			// 按点处理这批数据
+			for j := 0; j < batchCount; j++ {
+				offset := j * header.RowLength
+				data := &SplatData{}
+				rowBytes := dataBytes[offset:]
+				data.PositionX = float32(readValue(header, "x", rowBytes))
+				data.PositionY = float32(readValue(header, "y", rowBytes))
+				data.PositionZ = float32(readValue(header, "z", rowBytes))
+				data.ColorR = uint8(readValue(header, "red", rowBytes))
+				data.ColorG = uint8(readValue(header, "green", rowBytes))
+				data.ColorB = uint8(readValue(header, "blue", rowBytes))
+
+				datas[i+j] = data
+			}
+			OnProgress(PhaseRead, i, header.VertexCount)
+		}
 	} else {
 		// 压缩的 .compressed.ply
 		readCompressedPlyDatas(file, header, datas)

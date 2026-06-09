@@ -195,3 +195,12 @@ func (p *PlyHeader) IsCompressedPly() bool {
 		p.mapType["max_r"] != "" && p.mapType["max_g"] != "" && p.mapType["max_b"] != "" &&
 		p.mapType["packed_position"] != "" && p.mapType["packed_rotation"] != "" && p.mapType["packed_scale"] != "" && p.mapType["packed_color"] != ""
 }
+
+// 是否彩色点云ply
+func (p *PlyHeader) IsRgbPly() bool {
+	return p.Declare == "ply" &&
+		p.Format == "binary_little_endian 1.0" &&
+		p.VertexCount > 0 &&
+		p.mapType["x"] != "" && p.mapType["y"] != "" && p.mapType["z"] != "" &&
+		p.mapType["red"] != "" && p.mapType["green"] != "" && p.mapType["blue"] != ""
+}
