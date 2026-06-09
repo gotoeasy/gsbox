@@ -142,43 +142,43 @@ func usage() {
 	fmt.Println("  p2z, ply2spz                       convert ply to spz")
 	fmt.Println("  p2g, ply2sog                       convert ply to sog")
 	fmt.Println("  p2p, ply2ply                       convert ply to ply")
-	fmt.Println("  ply2glb                            convert ply to glb (3DGS)")
+	fmt.Println("  ply2glb                            convert ply to glb")
 	fmt.Println("  s2p, splat2ply                     convert splat to ply")
 	fmt.Println("  s2x, splat2spx                     convert splat to spx")
 	fmt.Println("  s2z, splat2spz                     convert splat to spz")
 	fmt.Println("  s2g, splat2sog                     convert splat to sog")
 	fmt.Println("  s2s, splat2splat                   convert splat to splat")
-	fmt.Println("  splat2glb                          convert splat to glb (3DGS)")
+	fmt.Println("  splat2glb                          convert splat to glb")
 	fmt.Println("  x2p, spx2ply                       convert spx to ply")
 	fmt.Println("  x2s, spx2splat                     convert spx to splat")
 	fmt.Println("  x2z, spx2spz                       convert spx to spz")
 	fmt.Println("  x2g, spx2sog                       convert spx to sog")
 	fmt.Println("  x2x, spx2spx                       convert spx to spx")
-	fmt.Println("  spx2glb                            convert spx to glb (3DGS)")
+	fmt.Println("  spx2glb                            convert spx to glb")
 	fmt.Println("  z2p, spz2ply                       convert spz to ply")
 	fmt.Println("  z2s, spz2splat                     convert spz to splat")
 	fmt.Println("  z2x, spz2spx                       convert spz to spx")
 	fmt.Println("  z2g, spz2sog                       convert spz to sog")
 	fmt.Println("  z2z, spz2spz                       convert spz to spz")
-	fmt.Println("  spz2glb                            convert spz to glb (3DGS)")
+	fmt.Println("  spz2glb                            convert spz to glb")
 	fmt.Println("  k2p, ksplat2ply                    convert ksplat to ply")
 	fmt.Println("  k2s, ksplat2splat                  convert ksplat to splat")
 	fmt.Println("  k2x, ksplat2spx                    convert ksplat to spx")
 	fmt.Println("  k2z, ksplat2spx                    convert ksplat to spz")
 	fmt.Println("  k2g, ksplat2sog                    convert ksplat to sog")
-	fmt.Println("  ksplat2glb                         convert ksplat to glb (3DGS)")
+	fmt.Println("  ksplat2glb                         convert ksplat to glb")
 	fmt.Println("  g2p, sog2ply                       convert sog to ply")
 	fmt.Println("  g2s, sog2splat                     convert sog to splat")
 	fmt.Println("  g2x, sog2spx                       convert sog to spx")
 	fmt.Println("  g2z, sog2spz                       convert sog to spz")
 	fmt.Println("  g2g, sog2sog                       convert sog to sog")
-	fmt.Println("  sog2glb                            convert sog to glb (3DGS)")
-	fmt.Println("  glb2ply                            convert glb (3DGS) to ply")
-	fmt.Println("  glb2splat                          convert glb (3DGS) to splat")
-	fmt.Println("  glb2spx                            convert glb (3DGS) to spx")
-	fmt.Println("  glb2spz                            convert glb (3DGS) to spz")
-	fmt.Println("  glb2sog                            convert glb (3DGS) to sog")
-	fmt.Println("  glb2glb                            convert glb (3DGS) to glb (3DGS)")
+	fmt.Println("  sog2glb                            convert sog to glb")
+	fmt.Println("  glb2ply                            convert glb to ply")
+	fmt.Println("  glb2splat                          convert glb to splat")
+	fmt.Println("  glb2spx                            convert glb to spx")
+	fmt.Println("  glb2spz                            convert glb to spz")
+	fmt.Println("  glb2sog                            convert glb to sog")
+	fmt.Println("  glb2glb                            convert glb to glb")
 	fmt.Println("  ps,  printsplat                    print data to text file like splat format layout")
 	fmt.Println("  cut                                cut the input model files into LOD format")
 	fmt.Println("  autocut                            auto cut the input model files into LOD format")
@@ -482,7 +482,7 @@ func ply2sog() {
 }
 
 func ply2glb() {
-	log.Println("[Info] convert from ply to glb (3DGS).")
+	log.Println("[Info] convert from ply to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -566,7 +566,7 @@ func splat2sog() {
 }
 
 func splat2glb() {
-	log.Println("[Info] convert from splat to glb (3DGS).")
+	log.Println("[Info] convert from splat to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -650,7 +650,7 @@ func spx2sog() {
 }
 
 func spx2glb() {
-	log.Println("[Info] convert from spx to glb (3DGS).")
+	log.Println("[Info] convert from spx to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -734,7 +734,7 @@ func spz2sog() {
 }
 
 func spz2glb() {
-	log.Println("[Info] convert from spz to glb (3DGS).")
+	log.Println("[Info] convert from spz to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -832,7 +832,7 @@ func ksplat2sog() {
 }
 
 func ksplat2glb() {
-	log.Println("[Info] convert from ksplat to glb (3DGS).")
+	log.Println("[Info] convert from ksplat to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -902,7 +902,7 @@ func sog2spz() {
 }
 
 func sog2glb() {
-	log.Println("[Info] convert from sog to glb (3DGS).")
+	log.Println("[Info] convert from sog to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -930,7 +930,7 @@ func sog2sog() {
 }
 
 func glb2ply() {
-	log.Println("[Info] convert from glb (3DGS) to ply.")
+	log.Println("[Info] convert from glb to ply.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -944,7 +944,7 @@ func glb2ply() {
 }
 
 func glb2splat() {
-	log.Println("[Info] convert from glb (3DGS) to splat.")
+	log.Println("[Info] convert from glb to splat.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -958,7 +958,7 @@ func glb2splat() {
 }
 
 func glb2spx() {
-	log.Println("[Info] convert from glb (3DGS) to spx.")
+	log.Println("[Info] convert from glb to spx.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -972,7 +972,7 @@ func glb2spx() {
 }
 
 func glb2spz() {
-	log.Println("[Info] convert from glb (3DGS) to spz.")
+	log.Println("[Info] convert from glb to spz.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -986,7 +986,7 @@ func glb2spz() {
 }
 
 func glb2sog() {
-	log.Println("[Info] convert from glb (3DGS) to sog.")
+	log.Println("[Info] convert from glb to sog.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
@@ -1000,7 +1000,7 @@ func glb2sog() {
 }
 
 func glb2glb() {
-	log.Println("[Info] convert from glb (3DGS) to glb (3DGS).")
+	log.Println("[Info] convert from glb to glb.")
 	startTime := time.Now()
 	input := gsplat.GetAndCheckInputFile()
 	output := gsplat.CreateOutputDir()
