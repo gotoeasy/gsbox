@@ -56,6 +56,8 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 	if header.IsRgbPly() {
 		if Args.HasCmd("ply2glb") {
 			isRgbPly2Glb = true
+		} else if Args.HasCmd("ply2splat") || Args.HasCmd("p2s") {
+			// 支持转彩色点成云状splat，但不支持直接转其他高斯格式以免混淆
 		} else {
 			cmn.ExitOnError(errors.New("unsupported rgb ply file: " + plyFile))
 		}
@@ -165,6 +167,11 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 				data.ColorR = uint8(readValue(header, "red", rowBytes))
 				data.ColorG = uint8(readValue(header, "green", rowBytes))
 				data.ColorB = uint8(readValue(header, "blue", rowBytes))
+
+				// 固定球形点状模拟彩色点云
+				data.ColorA = 255
+				data.ScaleX, data.ScaleY, data.ScaleZ = -4.6, -4.6, -4.6 // log(0.01)
+				data.RotationW, data.RotationX, data.RotationY, data.RotationZ = 255, 128, 128, 128
 
 				datas[i+j] = data
 			}
