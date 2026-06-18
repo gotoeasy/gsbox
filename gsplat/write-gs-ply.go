@@ -15,13 +15,27 @@ func WritePly(plyFile string, datas []*SplatData) {
 	comment := Args.GetArgIgnorecase("-c", "--comment")
 	shDegree := GetArgShDegree()
 	log.Println("[Info] output shDegree:", shDegree)
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
+
 	writer := bufio.NewWriter(file)
-	_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
-	cmn.ExitOnError(err)
-	for i := range datas {
-		OnProgress(PhaseWrite, i, len(datas))
-		_, err = writer.Write(genPlyDataBin(datas[i], shDegree))
+	if hasRgbPointCloudData {
+		_, err = writer.WriteString(genRgbPlyHeader(len(datas), comment))
 		cmn.ExitOnError(err)
+		for i := range datas {
+			OnProgress(PhaseWrite, i, len(datas))
+			_, err = writer.Write(genRgbPlyDataBin(datas[i]))
+			cmn.ExitOnError(err)
+		}
+	} else {
+		_, err = writer.WriteString(genPlyHeader(len(datas), comment, shDegree))
+		cmn.ExitOnError(err)
+		for i := range datas {
+			OnProgress(PhaseWrite, i, len(datas))
+			_, err = writer.Write(genPlyDataBin(datas[i], shDegree))
+			cmn.ExitOnError(err)
+		}
 	}
 	err = writer.Flush()
 	cmn.ExitOnError(err)
@@ -104,6 +118,36 @@ func genPlyHeader(count int, comment string, shDegree uint8) string {
 	lines = append(lines, "property float rot_1")
 	lines = append(lines, "property float rot_2")
 	lines = append(lines, "property float rot_3")
+	lines = append(lines, "end_header")
+	return cmn.Join(lines, "\n") + "\n"
+}
+
+func genRgbPlyDataBin(splatData *SplatData) []byte {
+	bts := []byte{}
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionX)...) // x
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionY)...) // y
+	bts = append(bts, cmn.Float32ToBytes(splatData.PositionZ)...) // z
+	bts = append(bts, splatData.ColorR)                           // r
+	bts = append(bts, splatData.ColorG)                           // g
+	bts = append(bts, splatData.ColorB)                           // b
+	return bts
+}
+
+func genRgbPlyHeader(count int, comment string) string {
+	lines := []string{}
+	lines = append(lines, "ply")
+	lines = append(lines, "format binary_little_endian 1.0")
+	lines = append(lines, "element vertex "+cmn.IntToString(count))
+	if comment != "" {
+		_, comment = cmn.RemoveNonASCII(comment)
+		lines = append(lines, "comment "+comment)
+	}
+	lines = append(lines, "property float x")
+	lines = append(lines, "property float y")
+	lines = append(lines, "property float z")
+	lines = append(lines, "property uchar red")
+	lines = append(lines, "property uchar green")
+	lines = append(lines, "property uchar blue")
 	lines = append(lines, "end_header")
 	return cmn.Join(lines, "\n") + "\n"
 }

@@ -17,6 +17,9 @@ func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	log.Println("[Info] output sog version: 2")
 	log.Println("[Info] output shDegree:", outputShDegree)
 	log.Println("[Info] quality level:", oArg.Quality, "(range 1~9)")
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	dir := cmn.Dir(sogOrJsonFile)
 	isSog := !cmn.Endwiths(sogOrJsonFile, "meta.json", true)

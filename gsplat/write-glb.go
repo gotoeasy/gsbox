@@ -17,17 +17,20 @@ func WriteGlb(glbFile string, rows []*SplatData) int64 {
 		fmt = KHR_gaussian_splatting
 	} else if cmn.Contains(fmt, "spz") {
 		fmt = KHR_gaussian_splatting_compression_spz_2
-	} else if cmn.Contains(fmt, "ply") {
+	} else if cmn.Contains(fmt, "rgb") || cmn.Contains(fmt, "ply") {
 		fmt = com_github_gotoeasy_gsbox_webp_rgb_ply
 	} else {
 		fmt = KHR_gaussian_splatting
 	}
 
-	if isRgbPly2Glb {
+	if hasRgbPointCloudData {
 		fmt = com_github_gotoeasy_gsbox_webp_rgb_ply // 彩色点云转glb时固定为自定义格式
 	}
 
 	log.Println("[Info] (parameter) of:", fmt, "(glTF extension)")
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	switch fmt {
 	case KHR_gaussian_splatting_compression_spz_2:
@@ -654,9 +657,54 @@ func genRgbPlyWebpBytes(rows []*SplatData) []byte {
 	bts = append(bts, bs3...)
 	bts = append(bts, bs4...)
 
-	gzipDatas, err := cmn.CompressWebp(bts)
+	webpDatas, err := cmn.CompressWebp(bts)
 	cmn.ExitOnError(err)
-	return gzipDatas
+	return webpDatas
+}
+
+// 颜色点云webp编码压缩
+func parseRgbPlyWebpBytes(webpDatas []byte) []*SplatData {
+
+	rgbas, _, _, err := cmn.DecompressWebp(webpDatas)
+	cmn.ExitOnError(err)
+
+	// 读取点数，注意第4字节（索引3）被设为255，仅取低3字节
+	cntBts := rgbas[0:4]
+	cnt := int(uint32(cntBts[0]) | uint32(cntBts[1])<<8 | uint32(cntBts[2])<<16)
+
+	splats := make([]*SplatData, cnt)
+	rgbas = rgbas[4:]
+	for i := range cnt {
+		idx1 := i * 4
+		idx2 := cnt*4 + i*4
+		idx3 := cnt*8 + i*4
+		idx4 := cnt*12 + i*4
+
+		x0, y0, z0 := rgbas[idx1], rgbas[idx1+1], rgbas[idx1+2]
+		x1, y1, z1 := rgbas[idx2], rgbas[idx2+1], rgbas[idx2+2]
+		x2, y2, z2 := rgbas[idx3], rgbas[idx3+1], rgbas[idx3+2]
+		r, g, b := rgbas[idx4], rgbas[idx4+1], rgbas[idx4+2]
+
+		// 固定球形点状模拟彩色点云
+		splats[i] = &SplatData{
+			PositionX: cmn.DecodeSpxPositionUint24(x0, x1, x2),
+			PositionY: cmn.DecodeSpxPositionUint24(y0, y1, y2),
+			PositionZ: cmn.DecodeSpxPositionUint24(z0, z1, z2),
+			ColorR:    r,
+			ColorG:    g,
+			ColorB:    b,
+			ColorA:    255,
+			ScaleX:    -4.6,
+			ScaleY:    -4.6,
+			ScaleZ:    -4.6,
+			RotationW: 255,
+			RotationX: 128,
+			RotationY: 128,
+			RotationZ: 128,
+		}
+	}
+
+	return splats
 }
 
 // 压缩的颜色点云

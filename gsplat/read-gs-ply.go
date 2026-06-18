@@ -15,7 +15,7 @@ import (
 
 const SH_C0 float64 = 0.28209479177387814
 
-var isRgbPly2Glb = false
+var hasRgbPointCloudData = false
 
 func ReadPlyHeader(plyFile string) (*PlyHeader, error) {
 	file, err := os.Open(plyFile)
@@ -54,13 +54,7 @@ func ReadPly(plyFile string) (*PlyHeader, []*SplatData) {
 		cmn.ExitOnError(errors.New("unsupported ply file: " + plyFile))
 	}
 	if header.IsRgbPly() {
-		if Args.HasCmd("ply2glb") {
-			isRgbPly2Glb = true
-		} else if Args.HasCmd("ply2splat") || Args.HasCmd("p2s") {
-			// 支持转彩色点成云状splat，但不支持直接转其他高斯格式以免混淆
-		} else {
-			cmn.ExitOnError(errors.New("unsupported rgb ply file: " + plyFile))
-		}
+		hasRgbPointCloudData = true
 	}
 
 	datas := make([]*SplatData, header.VertexCount)

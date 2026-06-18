@@ -18,6 +18,9 @@ func writeSpzV2V3(spzFile string, rows []*SplatData, ver int) {
 		log.Println("[Info] output spz version:", ver)
 		log.Println("[Info] output shDegree:", outputShDegree)
 	}
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	h := &SpzHeader{
 		Magic:          SPZ_MAGIC,

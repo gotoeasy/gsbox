@@ -66,6 +66,9 @@ func WriteSpxOpenV3(spxFile string, rows []*SplatData, comment string, outputShD
 			log.Println("[Info] (parameter) ct:", "gzip", "(compress type, gzip|xz)")
 		}
 	}
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	// 分块
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"gsbox/cmn"
+	"log"
 	"os"
 )
 
@@ -11,6 +12,10 @@ func WriteSplat(splatFile string, rows []*SplatData) {
 	file, err := os.Create(splatFile)
 	cmn.ExitOnError(err)
 	defer file.Close()
+
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	writer := bufio.NewWriter(file)
 

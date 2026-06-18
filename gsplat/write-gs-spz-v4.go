@@ -18,6 +18,9 @@ func writeSpzV4(spzFile string, rows []*SplatData) {
 		log.Println("[Info] output spz version:", 4)
 		log.Println("[Info] output shDegree:", outputShDegree)
 	}
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	numStreams := uint8(5)
 	if outputShDegree > 0 {

@@ -31,6 +31,9 @@ func WriteSpxOpenV1(spxFile string, rows []*SplatData, comment string, shDegree 
 
 	log.Println("[Info] (parameter) bf:", BF_SPLAT20, BlockFormatDesc(BF_SPLAT20))
 	log.Println("[Info] (parameter) bs:", blockSize, "(block size)")
+	if hasRgbPointCloudData {
+		log.Println("[Info] NOTICE: Output contains color point cloud data")
+	}
 
 	var blockDatasList [][]*SplatData
 	blockCnt := (int(header.SplatCount) + blockSize - 1) / blockSize

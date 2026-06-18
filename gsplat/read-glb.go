@@ -24,14 +24,34 @@ func ReadGlb(glbFile string) (shDegree uint8, datas []*SplatData) {
 	cmn.ExitOnError(err)
 
 	strJson := cmn.BytesToString(bs)
-	if !cmn.Contains(strJson, KHR_gaussian_splatting) {
-		cmn.ExitOnError(errors.New("GLB without KHR_gaussian_splatting extension is not supported"))
+	if !cmn.Contains(strJson, KHR_gaussian_splatting) && !cmn.Contains(strJson, com_github_gotoeasy_gsbox_webp_rgb_ply) {
+		cmn.ExitOnError(errors.New("unsupported glb extension"))
 	}
 
 	if cmn.Contains(strJson, KHR_gaussian_splatting_compression_spz_2) {
 		return readGlb_KHR_gaussian_splatting_compression_spz_2(file, strJson)
+	} else if cmn.Contains(strJson, com_github_gotoeasy_gsbox_webp_rgb_ply) {
+		return readGlb_com_github_gotoeasy_gsbox_webp_rgb_ply(file, strJson)
 	}
 	return readGlb_KHR_gaussian_splatting(file, strJson)
+}
+
+func readGlb_com_github_gotoeasy_gsbox_webp_rgb_ply(file *os.File, strJson string) (shDegree uint8, datas []*SplatData) {
+	hasRgbPointCloudData = true
+	var oJson any
+	cmn.ExitOnError(json.Unmarshal([]byte(strJson), &oJson))
+
+	bs := make([]byte, 8)
+	_, err := file.Read(bs)
+	cmn.ExitOnError(err)
+
+	byteLength := getGsBufferViewsByteLength(oJson)
+
+	bs = make([]byte, byteLength)
+	_, err = file.Read(bs)
+	cmn.ExitOnError(err)
+
+	return 0, parseRgbPlyWebpBytes(bs)
 }
 
 func readGlb_KHR_gaussian_splatting_compression_spz_2(file *os.File, strJson string) (shDegree uint8, datas []*SplatData) {
