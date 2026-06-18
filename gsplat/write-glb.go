@@ -17,7 +17,7 @@ func WriteGlb(glbFile string, rows []*SplatData) int64 {
 		fmt = KHR_gaussian_splatting
 	} else if cmn.Contains(fmt, "spz") {
 		fmt = KHR_gaussian_splatting_compression_spz_2
-	} else if cmn.Contains(fmt, "rgb") || cmn.Contains(fmt, "ply") {
+	} else if cmn.Contains(fmt, "rgb") {
 		fmt = com_github_gotoeasy_gsbox_webp_rgb_ply
 	} else {
 		fmt = KHR_gaussian_splatting

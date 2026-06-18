@@ -15,6 +15,11 @@ func WritePly(plyFile string, datas []*SplatData) {
 	comment := Args.GetArgIgnorecase("-c", "--comment")
 	shDegree := GetArgShDegree()
 	log.Println("[Info] output shDegree:", shDegree)
+
+	fmt := Args.GetArgIgnorecase("-of", "--output-format")
+	if cmn.Contains(fmt, "rgb") {
+		hasRgbPointCloudData = true
+	}
 	if hasRgbPointCloudData {
 		log.Println("[Info] NOTICE: Output contains color point cloud data")
 	}

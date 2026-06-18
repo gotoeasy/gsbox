@@ -181,6 +181,11 @@ gsbox ply2glb -i /path/to/input.ply -o /path/to/output.glb -of spz
 ```
 
 ```shell
+# Convert the sog to RGB point cloud.
+gsbox sog2ply -i input.sog -o output.ply -of rgb
+```
+
+```shell
 # join the input model files into a single output file
 gsbox join -i a.ply -i b.splat -i c.spx -i d.spz -i e.ksplat -i f.sog -i meta.json -o output.spx
 ```
