@@ -55,6 +55,8 @@ func ReadSog(fileSogMeta string) ([]*SplatData, *SogHeader) {
 		return ReadSogV1(meta, dir)
 	case 2:
 		return ReadSogV2(meta, dir)
+	case 3:
+		return ReadSogV3(meta, dir)
 	default:
 		cmn.ExitOnError(errors.New("unsupported sog version"))
 	}
@@ -196,6 +198,8 @@ func readHttpSog(urlMetaJson string) ([]*SplatData, *SogHeader) {
 		return ReadSogV1(meta, dir)
 	case 2:
 		return ReadSogV2(meta, dir)
+	case 3:
+		return ReadSogV3(meta, dir)
 	default:
 		cmn.ExitOnError(errors.New("unsupported sog version"))
 	}

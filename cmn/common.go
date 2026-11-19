@@ -31,6 +31,7 @@ var SQRT1_2 float64 = 0.7071067811865476 // Math.SQRT1_2
 var CMask uint32 = uint32((1 << 9) - 1)
 
 const SQRT2 = float64(1.4142135623730951) // math.Sqrt(2.0)
+const HALF_PI = float64(math.Pi / 2.0)
 
 var checkVersionStartTime time.Time
 var checkVersionDone bool = false
@@ -977,6 +978,65 @@ func SogDecodeRotations(R0 uint8, R1 uint8, R2 uint8, Ri uint8) (rw byte, rx byt
 	case 3:
 		rw, rx, ry, rz = EncodeSplatRotations4(r0, r1, r2, ri)
 	}
+	return
+}
+
+func rotationToUint8(v float64) uint8 {
+	return ClipUint8(math.Round(v*127.0 + 128.0))
+}
+
+func EncodeRotationsExpMapSogV3(w, x, y, z uint8) (rx, ry, rz, a uint8) {
+	// 中间变量解码
+	fw := float64(w)/128.0 - 1.0
+	fx := float64(x)/128.0 - 1.0
+	fy := float64(y)/128.0 - 1.0
+	fz := float64(z)/128.0 - 1.0
+
+	qlen := math.Sqrt(fw*fw + fx*fx + fy*fy + fz*fz)
+	if qlen <= 0 {
+		return 128, 128, 128, 255
+	}
+
+	s := 1.0 / qlen
+	if fw < 0 {
+		s = -s
+	}
+	fw *= s
+	fx *= s
+	fy *= s
+	fz *= s
+
+	sv := math.Sqrt(fx*fx + fy*fy + fz*fz)
+	var k float64
+	if sv > 1e-12 {
+		k = math.Atan2(sv, fw) / sv / HALF_PI
+	} else {
+		k = 1.0 / HALF_PI
+	}
+
+	// 编码为 sog v3
+	return rotationToUint8(fx * k), rotationToUint8(fy * k), rotationToUint8(fz * k), 255
+}
+
+func DecodeRotationsExpMapSogV3(a, b, c uint8) (rw, rx, ry, rz uint8) {
+	// sog v3 解码
+	px := (float64(a) - 128.0) / 127.0
+	py := (float64(b) - 128.0) / 127.0
+	pz := (float64(c) - 128.0) / 127.0
+	r := math.Sqrt(px*px + py*py + pz*pz)
+	t := HALF_PI * r
+	k := HALF_PI
+	if r > 1e-12 {
+		k = math.Sin(t) / r
+	}
+
+	k *= 128.0
+
+	// 编码为中间变量
+	rw = ClipUint8(math.Cos(t)*128.0 + 128.0)
+	rx = ClipUint8(px*k + 128.0)
+	ry = ClipUint8(py*k + 128.0)
+	rz = ClipUint8(pz*k + 128.0)
 	return
 }
 

@@ -9,9 +9,9 @@ import (
 )
 
 // 支持输出zip压缩单个sog文件，或压缩前的多个文件
-func WriteSog(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
+func WriteSogV2(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 	ver := Args.GetArgIgnorecase("-ov", "--output-version")
-	cmn.ExitOnConditionError(ver != "" && ver != "2", errors.New("support sog version 2 only"))
+	cmn.ExitOnConditionError(ver != "" && ver != "2" && ver != "3", errors.New("support sog version 2|3 only"))
 
 	outputShDegree := GetArgShDegree()
 	log.Println("[Info] output sog version: 2")
