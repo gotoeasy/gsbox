@@ -7,7 +7,7 @@ import (
 	"sort"
 )
 
-func WriteSogLodMeta(output string, splatTiles *SplatTiles, lodMeta *LodMeta) {
+func writeLodMetaSogV2(output string, splatTiles *SplatTiles, lodMeta *LodMeta) {
 	defer OnProgress(PhaseWrite, 100, 100)
 
 	outputShDegree := GetArgShDegree()

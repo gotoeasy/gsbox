@@ -1072,7 +1072,7 @@ func cut() {
 
 	splatTiles, lodMeta := gsplat.BuildLodMetaSplatTiles(datas)
 	splatTiles.EnvironmentDatas = environmentDatas
-	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
+	gsplat.WriteLodMetaSog(output, splatTiles, lodMeta)
 
 	log.Println("[Info]", inputs, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
@@ -1187,7 +1187,7 @@ func autocut() {
 	}
 
 	splatTiles, lodMeta := gsplat.BuildLodMetaSplatTiles(datas)
-	gsplat.WriteSogLodMeta(output, splatTiles, lodMeta)
+	gsplat.WriteLodMetaSog(output, splatTiles, lodMeta)
 
 	log.Println("[Info]", inputs, " --> ", output)
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
