@@ -5,6 +5,7 @@ import (
 	"gsbox/cmn"
 	"log"
 	"path/filepath"
+	"sync"
 )
 
 // 支持输出zip压缩单个sog文件，或压缩前的多个文件
@@ -31,33 +32,33 @@ func WriteSogV3(sogOrJsonFile string, rows []*SplatData) (fileSize int64) {
 		}()
 	}
 
-	files, mm := writeMeans(dir, rows)
-	OnProgress(PhaseWrite, 15, 100)
-	files = append(files, writeScales(dir, rows)...)
-	OnProgress(PhaseWrite, 30, 100)
-	files = append(files, writeQuatsV3(dir, rows)...)
-	OnProgress(PhaseWrite, 35, 100)
-	files = append(files, writeSh0(dir, rows)...)
-	OnProgress(PhaseWrite, 45, 100)
+	var wg sync.WaitGroup
+	mm := &V3MinMax{}
 	var paletteSize int
+
+	wg.Add(5)
+	go asyncWriteMeans(&wg, dir, rows, mm, true)
+	go asyncWriteScales(&wg, dir, rows, true)
+	go asyncWriteQuats(&wg, dir, rows, true)
+	go asyncWriteSh0(&wg, dir, rows, true)
+	go asyncWriteShN(&wg, dir, rows, &paletteSize, true)
+	wg.Wait()
+
+	fileMeansL := filepath.Join(dir, "means_l.webp")
+	fileMeansU := filepath.Join(dir, "means_u.webp")
+	fileScales := filepath.Join(dir, "scales.webp")
+	fileQuats := filepath.Join(dir, "quats.webp")
+	fileSh0 := filepath.Join(dir, "sh0.webp")
+	files := []string{fileMeansL, fileMeansU, fileScales, fileQuats, fileSh0}
 	if outputShDegree > 0 {
-		var shN_centroids []uint8
-		var shN_labels []uint8
-		shN_centroids, shN_labels, paletteSize = ReWriteShByKmeans(rows)
-		widths := []int{0, 96, 512, 960}
-		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, widths[outputShDegree], 1024, oArg.webpQuality)
-		cmn.ExitOnError(err)
-		bytsLabels, err := cmn.CompressWebp(shN_labels, oArg.webpQuality)
-		cmn.ExitOnError(err)
-		OnProgress(PhaseWrite, 60, 100)
-
-		files = append(files, writeShN(dir, bytsCentroids, bytsLabels)...)
-		OnProgress(PhaseWrite, 75, 100)
-		log.Println("[Info] sh palette size", paletteSize)
+		fileCentroids := filepath.Join(dir, "shN_centroids.webp")
+		fileLabels := filepath.Join(dir, "shN_labels.webp")
+		files = append(files, fileCentroids, fileLabels)
 	}
+	fileMeta := filepath.Join(dir, "meta.json")
+	files = append(files, fileMeta)
 
-	files = append(files, writeMetaV3(dir, mm, paletteSize, len(rows))...)
-	OnProgress(PhaseWrite, 90, 100)
+	writeMetaV3(dir, mm, paletteSize, len(rows))
 	cmn.PrintLibwebpInfo(true)
 
 	if isSog {
@@ -148,4 +149,54 @@ func writeMetaV3(dir string, mm *V3MinMax, paletteSize int, count int, printLogs
 	err = cmn.WriteFileBytes(fileMeta, bytsJson)
 	cmn.ExitOnError(err)
 	return []string{fileMeta}
+}
+
+func asyncWriteMeans(wg *sync.WaitGroup, dir string, rows []*SplatData, mm *V3MinMax, printLog bool) {
+	defer wg.Done()
+	_, MM := writeMeans(dir, rows, printLog)
+	mm.CenterX = MM.CenterX
+	mm.CenterY = MM.CenterY
+	mm.CenterZ = MM.CenterZ
+	mm.LenX = MM.LenX
+	mm.LenY = MM.LenY
+	mm.LenZ = MM.LenZ
+	mm.MaxX = MM.MaxX
+	mm.MaxY = MM.MaxY
+	mm.MaxZ = MM.MaxZ
+	mm.MinX = MM.MinX
+	mm.MinY = MM.MinY
+	mm.MinZ = MM.MinZ
+}
+
+func asyncWriteScales(wg *sync.WaitGroup, dir string, rows []*SplatData, printLog bool) {
+	defer wg.Done()
+	writeScales(dir, rows, printLog)
+}
+
+func asyncWriteQuats(wg *sync.WaitGroup, dir string, rows []*SplatData, printLog bool) {
+	defer wg.Done()
+	writeQuatsV3(dir, rows, printLog)
+}
+
+func asyncWriteSh0(wg *sync.WaitGroup, dir string, rows []*SplatData, printLog bool) {
+	defer wg.Done()
+	writeSh0(dir, rows, printLog)
+}
+
+func asyncWriteShN(wg *sync.WaitGroup, dir string, rows []*SplatData, paletteSize *int, printLog bool) {
+	defer wg.Done()
+	outputShDegree := GetArgShDegree()
+	if outputShDegree > 0 {
+		var shN_centroids []uint8
+		var shN_labels []uint8
+		shN_centroids, shN_labels, *paletteSize = ReWriteShByKmeans(rows)
+		widths := []int{0, 96, 512, 960}
+		bytsCentroids, err := cmn.CompressWebpByWidthHeight(shN_centroids, widths[outputShDegree], 1024, oArg.webpQuality)
+		cmn.ExitOnError(err)
+		bytsLabels, err := cmn.CompressWebp(shN_labels, oArg.webpQuality)
+		cmn.ExitOnError(err)
+
+		writeShN(dir, bytsCentroids, bytsLabels, printLog)
+		log.Println("[Info] sh palette size", *paletteSize)
+	}
 }

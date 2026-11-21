@@ -5,6 +5,7 @@ import (
 	"log"
 	"path/filepath"
 	"sort"
+	"sync"
 )
 
 func writeLodMetaSogV3(output string, splatTiles *SplatTiles, lodMeta *LodMeta) {
@@ -77,21 +78,62 @@ func writeLodMetaDataSogV3(sogFile string, splatFile *SplatFile, splatTiles *Spl
 		cmn.RemoveAllFile(tmpdir)
 	}()
 
-	files, mm := writeMeans(dir, splatFile.Datas, false)
-	files = append(files, writeScales(dir, splatFile.Datas, false)...)
-	files = append(files, writeQuatsV3(dir, splatFile.Datas, false)...)
-	files = append(files, writeSh0(dir, splatFile.Datas, false)...)
-	files = append(files, writeMetaV3(dir, mm, splatTiles.PaletteSize, len(splatFile.Datas), false)...)
+	// files, mm := writeMeans(dir, splatFile.Datas, false)
+	// files = append(files, writeScales(dir, splatFile.Datas, false)...)
+	// files = append(files, writeQuatsV3(dir, splatFile.Datas, false)...)
+	// files = append(files, writeSh0(dir, splatFile.Datas, false)...)
+	// files = append(files, writeMetaV3(dir, mm, splatTiles.PaletteSize, len(splatFile.Datas), false)...)
+	// if outputShDegree > 0 {
+	// 	widths := []int{0, 96, 512, 960}
+	// 	bytsCentroids, err := cmn.CompressWebpByWidthHeight(splatTiles.ShCentroids, widths[outputShDegree], 1024, oArg.webpQuality)
+	// 	cmn.ExitOnError(err)
+	// 	bytsLabels, err := cmn.CompressWebp(GetShnLablesByPaletteIdx(splatFile.Datas), oArg.webpQuality)
+	// 	cmn.ExitOnError(err)
+	// 	files = append(files, writeShN(dir, bytsCentroids, bytsLabels, false)...)
+	// }
+
+	// cmn.ZipSogFiles(sogFile, files, false)
+
+	var wg sync.WaitGroup
+	mm := &V3MinMax{}
+
+	wg.Add(5)
+	go asyncWriteMeans(&wg, dir, splatFile.Datas, mm, false)
+	go asyncWriteScales(&wg, dir, splatFile.Datas, false)
+	go asyncWriteQuats(&wg, dir, splatFile.Datas, false)
+	go asyncWriteSh0(&wg, dir, splatFile.Datas, false)
+	go asyncWriteShNLod(&wg, dir, splatFile, splatTiles, outputShDegree)
+	wg.Wait()
+
+	fileMeansL := filepath.Join(dir, "means_l.webp")
+	fileMeansU := filepath.Join(dir, "means_u.webp")
+	fileScales := filepath.Join(dir, "scales.webp")
+	fileQuats := filepath.Join(dir, "quats.webp")
+	fileSh0 := filepath.Join(dir, "sh0.webp")
+	files := []string{fileMeansL, fileMeansU, fileScales, fileQuats, fileSh0}
+	if outputShDegree > 0 {
+		fileCentroids := filepath.Join(dir, "shN_centroids.webp")
+		fileLabels := filepath.Join(dir, "shN_labels.webp")
+		files = append(files, fileCentroids, fileLabels)
+	}
+	fileMeta := filepath.Join(dir, "meta.json")
+	files = append(files, fileMeta)
+
+	writeMetaV3(dir, mm, splatTiles.PaletteSize, len(splatFile.Datas), false)
+
+	cmn.ZipSogFiles(sogFile, files, false)
+}
+
+func asyncWriteShNLod(wg *sync.WaitGroup, dir string, splatFile *SplatFile, splatTiles *SplatTiles, outputShDegree uint8) {
+	defer wg.Done()
 	if outputShDegree > 0 {
 		widths := []int{0, 96, 512, 960}
 		bytsCentroids, err := cmn.CompressWebpByWidthHeight(splatTiles.ShCentroids, widths[outputShDegree], 1024, oArg.webpQuality)
 		cmn.ExitOnError(err)
 		bytsLabels, err := cmn.CompressWebp(GetShnLablesByPaletteIdx(splatFile.Datas), oArg.webpQuality)
 		cmn.ExitOnError(err)
-		files = append(files, writeShN(dir, bytsCentroids, bytsLabels, false)...)
+		writeShN(dir, bytsCentroids, bytsLabels, false)
 	}
-
-	cmn.ZipSogFiles(sogFile, files, false)
 }
 
 func writeLodMetaDataMetaJsonV3(dir string, splatFile *SplatFile, splatTiles *SplatTiles, outputShDegree uint8) {
