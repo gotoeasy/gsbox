@@ -994,14 +994,10 @@ func EncodeRotationsExpMap(w, x, y, z uint8) (rx, ry, rz uint8) {
 		return 128, 128, 128
 	}
 
-	s := 1.0 / qlen
+	fw, fx, fy, fz = fw/qlen, fx/qlen, fy/qlen, fz/qlen
 	if fw < 0 {
-		s = -s
+		fw, fx, fy, fz = -fw, -fx, -fy, -fz
 	}
-	fw *= s
-	fx *= s
-	fy *= s
-	fz *= s
 
 	sv := math.Sqrt(fx*fx + fy*fy + fz*fz)
 	var k float64
@@ -1042,14 +1038,10 @@ func EncodeRotationsExpMapSogV3(w, x, y, z uint8) (rx, ry, rz, a uint8) {
 		return 128, 128, 128, 255
 	}
 
-	s := 1.0 / qlen
+	fw, fx, fy, fz = fw/qlen, fx/qlen, fy/qlen, fz/qlen
 	if fw < 0 {
-		s = -s
+		fw, fx, fy, fz = -fw, -fx, -fy, -fz
 	}
-	fw *= s
-	fx *= s
-	fy *= s
-	fz *= s
 
 	sv := math.Sqrt(fx*fx + fy*fy + fz*fz)
 	var k float64
