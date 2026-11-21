@@ -110,7 +110,7 @@ func main() {
 	} else if args.HasCmd("cut") {
 		cut()
 	} else if args.HasCmd("autocut") {
-		autocut()
+		autocut(args)
 	} else if args.HasCmd("info") {
 		info(args)
 	} else if args.HasCmd("obj2obj", "o2o") {
@@ -206,6 +206,7 @@ func usage() {
 	fmt.Println("  -ki, --kmeans-iterations <num>     specify the kmeans iterations (5~50), default is set by quality level")
 	fmt.Println("  -kn, --kmeans-nearest-nodes <num>  specify the kmeans nearest nodes (10~200), default is set by quality level")
 	fmt.Println("  -l,  --lod <num>                   specify the LOD level of the input file")
+	fmt.Println("  -ll, --lod-levels <num>            specify the LOD levels(3~7) for autocut, default is 5")
 	fmt.Println("  -cs, --cut-size <num>              specify the cut size(1000~100000) of each node, default is 30000")
 	fmt.Println("  -of, --output-format <string>      specify the output format(sog|meta.json) for LOD, default is sog")
 	fmt.Println("  -e,  --environment <file>          specify the environment file for LOD")
@@ -1078,7 +1079,7 @@ func cut() {
 	log.Println("[Info] processing time:", cmn.GetTimeInfo(time.Since(startTime).Milliseconds()))
 }
 
-func autocut() {
+func autocut(args *cmn.OsArgs) {
 	log.Println("[Info] auto cut the input models into tiles")
 	startTime := time.Now()
 	inputs := gsplat.GetAndCheckInputFiles()
@@ -1128,12 +1129,16 @@ func autocut() {
 		cmn.RemoveAllFile(tmpdir)
 	}()
 
+	lodLevels := max(3, min(cmn.StringToInt(args.GetArgIgnorecase("-ll", "--lod-levels"), 5), 7))
+	log.Println("[Info] (parameter) ll:", lodLevels, "(lodLevels, range 3~7)")
+
 	fileLod0 := inputs[0]
 	fileLod1 := filepath.Join(tmpdir, "lod_1.splat")
 	fileLod2 := filepath.Join(tmpdir, "lod_2.splat")
 	fileLod3 := filepath.Join(tmpdir, "lod_3.splat")
 	fileLod4 := filepath.Join(tmpdir, "lod_4.splat")
 	fileLod5 := filepath.Join(tmpdir, "lod_5.splat")
+	fileLod6 := filepath.Join(tmpdir, "lod_6.splat")
 
 	orgLen := len(datas)
 	fileLod0 = filepath.Join(tmpdir, "lod_0.spz")
@@ -1152,26 +1157,42 @@ func autocut() {
 	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
 	log.Println("[Info]", "LOD 2 generated:", rsLen, "points", reduction)
 
-	datas = gsplat.Simplify(datas)
-	rsLen = len(datas)
-	gsplat.WriteSplat(fileLod3, datas)
-	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
-	log.Println("[Info]", "LOD 3 generated:", rsLen, "points", reduction)
+	if lodLevels > 3 {
+		datas = gsplat.Simplify(datas)
+		rsLen = len(datas)
+		gsplat.WriteSplat(fileLod3, datas)
+		reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+		log.Println("[Info]", "LOD 3 generated:", rsLen, "points", reduction)
+	}
 
-	datas = gsplat.Simplify(datas)
-	rsLen = len(datas)
-	gsplat.WriteSplat(fileLod4, datas)
-	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
-	log.Println("[Info]", "LOD 4 generated:", rsLen, "points", reduction)
+	if lodLevels > 4 {
+		datas = gsplat.Simplify(datas)
+		rsLen = len(datas)
+		gsplat.WriteSplat(fileLod4, datas)
+		reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+		log.Println("[Info]", "LOD 4 generated:", rsLen, "points", reduction)
+	}
 
-	datas = gsplat.Simplify(datas)
-	rsLen = len(datas)
-	gsplat.WriteSplat(fileLod5, datas)
-	reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
-	log.Println("[Info]", "LOD 5 generated:", rsLen, "points", reduction)
+	if lodLevels > 5 {
+		datas = gsplat.Simplify(datas)
+		rsLen = len(datas)
+		gsplat.WriteSplat(fileLod5, datas)
+		reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+		log.Println("[Info]", "LOD 5 generated:", rsLen, "points", reduction)
+	}
+
+	if lodLevels > 6 {
+		datas = gsplat.Simplify(datas)
+		rsLen = len(datas)
+		gsplat.WriteSplat(fileLod6, datas)
+		reduction = fmt.Sprintf("(%.2f%% reduction)", (1-float64(rsLen)/float64(orgLen))*100)
+		log.Println("[Info]", "LOD 6 generated:", rsLen, "points", reduction)
+	}
 
 	datas = make([]*gsplat.SplatData, 0)
-	lodFiles := []string{fileLod0, fileLod1, fileLod2, fileLod3, fileLod4, fileLod5}
+	lodFiles := []string{fileLod0, fileLod1, fileLod2, fileLod3, fileLod4, fileLod5, fileLod6}
+	lodFiles = lodFiles[0:lodLevels]
+
 	lods := []uint16{0, 1, 2, 3, 4, 5}
 	for i, file := range lodFiles {
 		if cmn.Endwiths(file, ".splat", true) {
