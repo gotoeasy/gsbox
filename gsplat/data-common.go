@@ -6,10 +6,10 @@ import (
 	"log"
 )
 
-const NewestSpxVersion = int(3)
+const NewestSpxVersion = int(4)
 
 func OutputSpxVersion() int {
-	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), 3)
+	ver := cmn.StringToInt(Args.GetArgIgnorecase("-ov", "--output-version"), NewestSpxVersion)
 	return max(1, min(ver, NewestSpxVersion))
 }
 

@@ -38,6 +38,8 @@ func ReadSpx(spxFile string) (*SpxHeader, []*SplatData) {
 		header, datas = ReadSpxV2(spxFile, header)
 	case 3:
 		header, datas = ReadSpxV3(spxFile, header)
+	case 4:
+		header, datas = ReadSpxV4(spxFile, header)
 	default:
 		cmn.ExitOnError(errors.New("unsupport spx version: " + cmn.IntToString(int(header.Version))))
 		return nil, nil

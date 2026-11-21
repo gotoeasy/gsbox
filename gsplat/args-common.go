@@ -33,8 +33,8 @@ func InitArgs() *cmn.OsArgs {
 
 	oArg = &ArgValues{}
 	oArg.Quality = max(1, min(cmn.StringToInt(Args.GetArgIgnorecase("-q", "--quality"), 5), 9))
-	oArg.KI = max(5, min(cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 10), 50))
-	oArg.KN = max(10, min(cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), 15), 200))
+	oArg.KI = max(5, min(cmn.StringToInt(Args.GetArgIgnorecase("-ki", "--kmeans-iterations"), 5), 50))
+	oArg.KN = max(10, min(cmn.StringToInt(Args.GetArgIgnorecase("-kn", "--kmeans-nearest-nodes"), 20), 200))
 
 	inputBlockSize := Args.GetArgIgnorecase("-bs", "--block-size")
 	blockSize := cmn.StringToInt(inputBlockSize, DefaultBlockSize)

@@ -145,8 +145,16 @@ func WriteSpxV3(spxFile string, rows []*SplatData, comment string, shDegree uint
 	WriteSpxOpenV3(spxFile, rows, comment, shDegree)
 }
 
+func WriteSpxV4(spxFile string, rows []*SplatData, comment string, shDegree uint8) {
+	WriteSpxOpenV4(spxFile, rows, comment, shDegree)
+}
+
 func ReadSpxV3(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
 	return ReadSpxOpenV3(spxFile, header)
+}
+
+func ReadSpxV4(spxFile string, header *SpxHeader) (*SpxHeader, []*SplatData) {
+	return ReadSpxOpenV4(spxFile, header)
 }
 
 func DefaultSpxComment() string {

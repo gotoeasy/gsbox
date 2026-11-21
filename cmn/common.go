@@ -353,7 +353,7 @@ func Clip(f float64, min float64, max float64) float64 {
 
 // 限制范围
 func ClipUint8(f float64) uint8 {
-	if f < 0 {
+	if !(f > 0) {
 		return 0
 	} else if f > 255 {
 		return 255
@@ -363,7 +363,7 @@ func ClipUint8(f float64) uint8 {
 
 // 限制范围
 func ClipUint16(f float32) uint16 {
-	if f < 0 {
+	if !(f > 0) {
 		return 0
 	} else if f > 65535 {
 		return 65535
@@ -983,6 +983,51 @@ func SogDecodeRotations(R0 uint8, R1 uint8, R2 uint8, Ri uint8) (rw byte, rx byt
 
 func rotationToUint8(v float64) uint8 {
 	return ClipUint8(math.Round(v*127.0 + 128.0))
+}
+
+func EncodeRotationsExpMap(w, x, y, z uint8) (rx, ry, rz uint8) {
+	// 中间变量解码
+	fw, fx, fy, fz := float64(w)/128.0-1.0, float64(x)/128.0-1.0, float64(y)/128.0-1.0, float64(z)/128.0-1.0
+
+	qlen := math.Sqrt(fw*fw + fx*fx + fy*fy + fz*fz)
+	if qlen <= 0 {
+		return 128, 128, 128
+	}
+
+	s := 1.0 / qlen
+	if fw < 0 {
+		s = -s
+	}
+	fw *= s
+	fx *= s
+	fy *= s
+	fz *= s
+
+	sv := math.Sqrt(fx*fx + fy*fy + fz*fz)
+	var k float64
+	if sv > 1e-12 {
+		k = math.Atan2(sv, fw) / sv / HALF_PI
+	} else {
+		k = 1.0 / HALF_PI
+	}
+
+	// 编码为中间变量
+	return EncodeSplatRotation(fx * k), EncodeSplatRotation(fy * k), EncodeSplatRotation(fz * k)
+}
+
+func DecodeRotationsExpMap(x, y, z uint8) (rw, rx, ry, rz uint8) {
+	// 中间变量解码
+	px, py, pz := float64(x)/128.0-1.0, float64(y)/128.0-1.0, float64(z)/128.0-1.0
+
+	r := math.Sqrt(px*px + py*py + pz*pz)
+	t := HALF_PI * r
+	k := HALF_PI
+	if r > 1e-12 {
+		k = math.Sin(t) / r
+	}
+
+	// 编码为中间变量
+	return ClipUint8(math.Cos(t)*128.0 + 128.0), ClipUint8(px*k*128.0 + 128.0), ClipUint8(py*k*128.0 + 128.0), ClipUint8(pz*k*128.0 + 128.0)
 }
 
 func EncodeRotationsExpMapSogV3(w, x, y, z uint8) (rx, ry, rz, a uint8) {
