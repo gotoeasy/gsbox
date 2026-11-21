@@ -106,10 +106,10 @@ func WriteSpxOpenV4(spxFile string, rows []*SplatData, comment string, outputShD
 		if !palettesDone && writeCnt >= DefaultBlockSize*4 && len(shCentroids) > 0 {
 			// 调色板插在较前处写入，避免中断下载后无法读取
 			if bf == BF_SPLAT210_WEBP || compressType == CT_XZ {
-				writePalettesWebp_V4(writer, shCentroids)
+				writePalettesWebp(writer, shCentroids)
 				hasWebp = true
 			} else {
-				writePalettes_V4(writer, shCentroids, compressType)
+				writePalettes(writer, shCentroids, compressType)
 			}
 			palettesDone = true
 		}
@@ -118,10 +118,10 @@ func WriteSpxOpenV4(spxFile string, rows []*SplatData, comment string, outputShD
 	if !palettesDone && len(shCentroids) > 0 {
 		// 确保调色板存在时会写入
 		if bf == BF_SPLAT210_WEBP || compressType == CT_XZ {
-			writePalettesWebp_V4(writer, shCentroids)
+			writePalettesWebp(writer, shCentroids)
 			hasWebp = true
 		} else {
-			writePalettes_V4(writer, shCentroids, compressType)
+			writePalettes(writer, shCentroids, compressType)
 		}
 	}
 
@@ -395,46 +395,6 @@ func writeSpxWebpV4(writer *bufio.Writer, blockDatas []*SplatData, outputShDegre
 	}
 
 	cmn.CheckBlockDataLength(len(bts))
-	blockByteLength := int32(len(bts))
-	_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
-	cmn.ExitOnError(err)
-	_, err = writer.Write(bts)
-	cmn.ExitOnError(err)
-}
-
-func writePalettes_V4(writer *bufio.Writer, shCentroids []byte, compressType uint8) {
-	log.Println("[Info] palettes block format:", BF_SH_PALETTES, BlockFormatDesc(BF_SH_PALETTES))
-
-	bts := make([]byte, 0)
-	bts = append(bts, cmn.Uint32ToBytes(0)...)              // 占位
-	bts = append(bts, cmn.Uint32ToBytes(BF_SH_PALETTES)...) // 球谐系数调色板
-	bts = append(bts, shCentroids...)                       // 数据
-
-	var err error
-	if compressType == CT_XZ {
-		bts, err = cmn.CompressXZ(bts)
-	} else {
-		bts, err = cmn.CompressGzip(bts)
-	}
-	cmn.ExitOnError(err)
-	blockByteLength := -((int32(compressType) << 28) | int32(len(bts)))
-	_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
-	cmn.ExitOnError(err)
-	_, err = writer.Write(bts)
-	cmn.ExitOnError(err)
-}
-
-func writePalettesWebp_V4(writer *bufio.Writer, shCentroids []byte) {
-	log.Println("[Info] palettes block format:", BF_SH_PALETTES_WEBP, BlockFormatDesc(BF_SH_PALETTES_WEBP))
-
-	webpBytes, err := cmn.CompressWebpByWidthHeight(shCentroids, 960, 1024, oArg.webpQuality)
-	cmn.ExitOnError(err)
-
-	bts := make([]byte, 0)
-	bts = append(bts, cmn.Uint32ToBytes(0)...)                   // 占位
-	bts = append(bts, cmn.Uint32ToBytes(BF_SH_PALETTES_WEBP)...) // 球谐系数调色板, WEBP压缩
-	bts = append(bts, webpBytes...)                              // 数据
-
 	blockByteLength := int32(len(bts))
 	_, err = writer.Write(cmn.Int32ToBytes(blockByteLength))
 	cmn.ExitOnError(err)
