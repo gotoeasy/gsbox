@@ -622,10 +622,60 @@ func checkLastVersion() {
 		return
 	}
 
-	if data.Ver > VER {
+	if versionLess(VER, data.Ver) {
 		newVersionMessage = "\nNotice: the latest version (" + data.Ver + ") is now available.\n"
 	}
 	checkVersionDone = true
+}
+
+func versionLess(ver1, ver2 string) bool {
+	s1 := strings.TrimPrefix(ver1, "v")
+	s2 := strings.TrimPrefix(ver2, "v")
+
+	seg1 := strings.Split(s1, ".")
+	seg2 := strings.Split(s2, ".")
+	if len(seg1) != 3 || len(seg2) != 3 {
+		return false
+	}
+
+	parse := func(ss []string) (int, int, int, error) {
+		a, err := strconv.Atoi(ss[0])
+		if err != nil {
+			return 0, 0, 0, err
+		}
+		b, err := strconv.Atoi(ss[1])
+		if err != nil {
+			return 0, 0, 0, err
+		}
+		c, err := strconv.Atoi(ss[2])
+		if err != nil {
+			return 0, 0, 0, err
+		}
+		return a, b, c, nil
+	}
+
+	major1, minor1, patch1, err := parse(seg1)
+	if err != nil {
+		return false
+	}
+	major2, minor2, patch2, err := parse(seg2)
+	if err != nil {
+		return false
+	}
+
+	if major1 < major2 {
+		return true
+	}
+	if major1 > major2 {
+		return false
+	}
+	if minor1 < minor2 {
+		return true
+	}
+	if minor1 > minor2 {
+		return false
+	}
+	return patch1 < patch2
 }
 
 func ClipUint8Round(x float64) uint8 {
