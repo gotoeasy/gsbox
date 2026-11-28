@@ -196,10 +196,14 @@ func (h *SpxHeader) ToStringSpx() string {
 		// v3
 		return fmt.Sprintf("3DGS model format spx\nSpx version  : %v\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsInverted   : %v\nIsLargeScene : %v\nLOD          : %v\nComment      : %v\nHash         : %v (%v)",
 			h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsInverted(), h.IsLargeScene(), h.Lod, h.Comment, h.Hash, h.checkHash)
+	case 4:
+		// v4
+		return fmt.Sprintf("3DGS model format spx\nSpx version  : %v\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsInverted   : %v\nComment      : %v\nHash         : %v (%v)",
+			h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsInverted(), h.Comment, h.Hash, h.checkHash)
 	default:
-		// v3
-		return fmt.Sprintf("3DGS model format spx\nSpx version  : %v\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsInverted   : %v\nIsLargeScene : %v\nLOD          : %v\nComment      : %v\nHash         : %v (%v)",
-			h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsInverted(), h.IsLargeScene(), h.Lod, h.Comment, h.Hash, h.checkHash)
+		// v4
+		return fmt.Sprintf("3DGS model format spx\nSpx version  : %v\nSplatCount   : %v\nMinX, MaxX   : %v, %v\nMinY, MaxY   : %v, %v\nMinZ, MaxZ   : %v, %v\nMinTopY      : %v\nMaxTopY      : %v\nCreateDate   : %v\nCreaterId    : %v\nExclusiveId  : %v\nShDegree     : %v\nIsInverted   : %v\nComment      : %v\nHash         : %v (%v)",
+			h.Version, h.SplatCount, h.MinX, h.MaxX, h.MinY, h.MaxY, h.MinZ, h.MaxZ, h.MinTopY, h.MaxTopY, h.CreateDate, h.CreaterId, h.ExclusiveId, h.ShDegree, h.IsInverted(), h.Comment, h.Hash, h.checkHash)
 	}
 
 }
